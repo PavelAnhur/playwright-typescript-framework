@@ -1,0 +1,22 @@
+{
+  "name": "playwright-typescript-framework",
+  "version": "1.0.0",
+  "description": "Playwright + TypeScript QA automation - a companion framework tested against the Maison Application Under Test (AUT)",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:api": "npx playwright test --project=api",
+    "test:ui": "npx playwright test --project=ui",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:report": "npx playwright show-report",
+    "codegen": "npx playwright codegen http://localhost:4000"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.3.0",
+    "typescript": "^7.0.2"
+  }
+}

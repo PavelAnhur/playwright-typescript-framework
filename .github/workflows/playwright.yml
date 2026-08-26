@@ -1,0 +1,75 @@
+name: Playwright Tests - Maison AUT
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+
+jobs:
+  test:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    services:
+      maison:
+        image: ghcr.io/ak-tb/maison:latest
+        ports:
+        - 4000:4000
+        options: >-
+          --health-cmd "curl -f http://localhost:4000/api/v1/health || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [ 1, 2, 3, 4 ]
+        browser: [ chromium ] # Default to chromium
+        include:
+        - shard: 1
+          browser: firefox
+        - shard: 2
+          browser: webkit
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install ${{ matrix.browser }} --with-deps
+
+    - name: Wait for Maison
+      run: |
+        echo "Waiting for Maison on port 4000..."
+        for i in {1..30}; do
+          curl -s -f http://localhost:4000/api/v1/health && \
+            echo "✅ Maison ready!" && exit 0
+          echo "⏳ Waiting... (${i}/30)"
+          sleep 2
+        done
+        echo "❌ Maison failed to start"
+        exit 1
+
+    - name: Run tests
+      run: |
+        npx playwright test \
+          --shard=${{ matrix.shard }}/4 \
+          --project=${{ matrix.browser }}
+
+    - name: Upload report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: report-shard-${{ matrix.shard }}-${{ matrix.browser }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 7
