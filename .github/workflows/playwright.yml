@@ -2,74 +2,164 @@ name: Playwright Tests - Maison AUT
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, dev ]
   workflow_dispatch:
 
 
 jobs:
-  test:
-    timeout-minutes: 20
+  lint:
     runs-on: ubuntu-latest
-
-    services:
-      maison:
-        image: ghcr.io/ak-tb/maison:latest
-        ports:
-        - 4000:4000
-        options: >-
-          --health-cmd "curl -f http://localhost:4000/api/v1/health || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
-
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [ 1, 2, 3, 4 ]
-        browser: [ chromium ] # Default to chromium
-        include:
-        - shard: 1
-          browser: firefox
-        - shard: 2
-          browser: webkit
-
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4
-
     - uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '24'
         cache: 'npm'
+    - run: npm ci
+    - run: npm run typecheck
+    - run: npm run lint
 
+  test-ui:
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
     - name: Install dependencies
       run: npm ci
-
     - name: Install Playwright browsers
-      run: npx playwright install ${{ matrix.browser }} --with-deps
-
-    - name: Wait for Maison
+      run: npx playwright install --with-deps chromium
+    - name: Start app
+      run: npm start &
+    - name: Wait for app to be ready
       run: |
-        echo "Waiting for Maison on port 4000..."
-        for i in {1..30}; do
-          curl -s -f http://localhost:4000/api/v1/health && \
-            echo "✅ Maison ready!" && exit 0
-          echo "⏳ Waiting... (${i}/30)"
-          sleep 2
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:4000/api/v1/health > /dev/null; then
+            echo "App is up (attempt $i)"; exit 0
+          fi
+          echo "  attempt $i/30 — retrying in 1s"; sleep 1
         done
-        echo "❌ Maison failed to start"
-        exit 1
-
-    - name: Run tests
-      run: |
-        npx playwright test \
-          --shard=${{ matrix.shard }}/4 \
-          --project=${{ matrix.browser }}
-
-    - name: Upload report
-      if: always()
+        echo "App never came up after 30s"; exit 1
+    - name: Run UI tests
+      run: npm run test:ui
+    - name: Upload test report
       uses: actions/upload-artifact@v4
+      if: always()
       with:
-        name: report-shard-${{ matrix.shard }}-${{ matrix.browser }}
-        path: |
-          playwright-report/
-          test-results/
-        retention-days: 7
+        name: playwright-report-ui
+        path: playwright-report/
+        retention-days: 10
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-ui
+        path: test-results/
+        retention-days: 10
+        if-no-files-found: ignore
+    - name: Stop app
+      if: always()
+      run: pkill -f "server/dist/index.js" || true
+
+  test-mobile:
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps chromium
+    - name: Start app
+      run: npm start &
+    - name: Wait for app to be ready
+      run: |
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:4000/api/v1/health > /dev/null; then
+            echo "App is up (attempt $i)"; exit 0
+          fi
+          echo "  attempt $i/30 — retrying in 1s"; sleep 1
+        done
+        echo "App never came up after 30s"; exit 1
+    - name: Run mobile tests
+      run: npm run test:mobile
+    - name: Upload test report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-mobile
+        path: playwright-report/
+        retention-days: 10
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-mobile
+        path: test-results/
+        retention-days: 10
+        if-no-files-found: ignore
+    - name: Stop app
+      if: always()
+      run: pkill -f "server/dist/index.js" || true
+
+  test-api:
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Start app
+      run: npm start &
+    - name: Wait for app to be ready
+      run: |
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:4000/api/v1/health > /dev/null; then
+            echo "App is up (attempt $i)"; exit 0
+          fi
+          echo "  attempt $i/30 — retrying in 1s"; sleep 1
+        done
+        echo "App never came up after 30s"; exit 1
+    - name: Run API tests
+      run: npm run test:api
+    - name: Upload test report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-api
+        path: playwright-report/
+        retention-days: 10
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-api
+        path: test-results/
+        retention-days: 10
+        if-no-files-found: ignore
+    - name: Stop app
+      if: always()
+      run: pkill -f "server/dist/index.js" || true
