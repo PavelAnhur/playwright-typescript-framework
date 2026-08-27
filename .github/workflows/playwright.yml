@@ -16,21 +16,15 @@ jobs:
     - name: Checkout test framework
       uses: actions/checkout@v4
 
-    - name: Checkout Maison
-      uses: actions/checkout@v4
-      with:
-        repository: youvegotnigel/maison
-        path: maison
-        ref: main
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '24'
         cache: 'npm'
 
-    - name: Install test framework dependencies
-      run: npm ci --legacy-peer-deps
+    - run: npm ci --legacy-peer-deps
+    - run: npm run typecheck
+    - run: npm run lint
 
     - name: Build Maison server
       run: |
