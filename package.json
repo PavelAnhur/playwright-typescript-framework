@@ -8,7 +8,7 @@
     "lint:fix": "eslint . --fix",
     "test": "npx playwright test",
     "test:api": "npx playwright test --project=api",
-    "test:ui": "npx playwright test --project='ui chrome' --project='ui firefox' --project='ui webkit'",
+    "test:ui": "npx playwright test --project='ui'",
     "test:mobile": "npx playwright test --project='ui mobile-*'",
     "test:ci": "npx playwright test --project='ui chrome' --project='ui firefox' --project='ui webkit' --project='ui mobile-iphone'",
     "start": "node maison/server/dist/index.js",
