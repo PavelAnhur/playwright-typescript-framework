@@ -28,9 +28,14 @@ jobs:
 
     - name: Build Maison server
       run: |
-        cd maison/server
-        npm ci
-        npm run build
+        if [ -d "maison/server" ]; then
+          cd maison/server
+          npm ci
+          npm run build
+        else
+          echo "❌ Maison not found in repository"
+          exit 1
+        fi
 
     - name: Install Playwright browsers
       run: npx playwright install --with-deps chromium
