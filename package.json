@@ -19,6 +19,7 @@
   "type": "module",
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.3.0",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
@@ -26,6 +27,6 @@
     "dotenv": "^17.4.2",
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.8.3"
   }
 }
