@@ -22,3 +22,5 @@ docs/.vitepress/cache/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+maison/
