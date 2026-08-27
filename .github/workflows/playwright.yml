@@ -38,6 +38,11 @@ jobs:
       run: npm ci
     - name: Install Playwright browsers
       run: npx playwright install --with-deps chromium
+    - name: Build Maison server
+      run: |
+        cd maison/server
+        npm ci
+        npm run build
     - name: Start app
       run: npm start &
     - name: Wait for app to be ready
