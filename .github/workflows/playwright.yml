@@ -26,6 +26,16 @@ jobs:
     - run: npm run typecheck
     - run: npm run lint
 
+    - name: Clone Maison
+      run: |
+        # Try different possible URLs
+        if git clone https://github.com/PavelAnhur/maison.git maison; then
+          echo "✅ Maison cloned successfully"
+        else
+          echo "❌ Failed to clone Maison"
+          exit 1
+        fi
+
     - name: Build Maison server
       run: |
         if [ -d "maison/server" ]; then
