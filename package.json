@@ -11,7 +11,9 @@
     "test:ui": "npx playwright test --project='ui chrome' --project='ui firefox' --project='ui webkit'",
     "test:mobile": "npx playwright test --project='ui mobile-*'",
     "test:ci": "npx playwright test --project='ui chrome' --project='ui firefox' --project='ui webkit' --project='ui mobile-iphone'",
-    "start": "node server/dist/index.js",
+    "start": "node maison/server/dist/index.js",
+    "start:dev": "cd maison/server && npm start",
+    "build:server": "cd maison/server && npm run build",
     "codegen": "npx playwright codegen http://localhost:4000"
   },
   "keywords": [],
