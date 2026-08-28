@@ -2,7 +2,7 @@ import { expect, test } from '@fixtures';
 
 
 test.beforeEach(async ({ homePage }) => {
-  await homePage.goto();
+  await homePage.open();
 });
 
 test.describe('Product Cards', () => {

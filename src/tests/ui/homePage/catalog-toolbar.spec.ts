@@ -2,7 +2,7 @@ import { expect, test } from '@fixtures';
 
 
 test.beforeEach(async ({ homePage }) => {
-  await homePage.goto();
+  await homePage.open();
 });
 
 test.describe('Catalogue Toolbar', () => {
@@ -29,25 +29,23 @@ test.describe('Catalogue Toolbar', () => {
 
   test('sort options are correct', async ({ homePage }) => {
     await expect(homePage.sortSelect).toBeVisible();
-    const options = await homePage.sortOptions.allTextContents();
+    const options = await homePage.getSortOptions();
     const expectedOpts = [
       'Newest',
       'Price: Low to High',
       'Price: High to Low',
       'Name',
     ];
-    options.forEach(opt => expect(opt in expectedOpts).toBeTruthy());
+    expect(options).toEqual(expectedOpts);
   });
 
   test('search submit button works', async ({ homePage }) => {
-    await homePage.searchInput.fill('watch');
-    await homePage.searchSubmit.click();
+    await homePage.searchFor('watch');
     await expect(homePage.catalogue).toBeVisible();
   });
 
   test('filter by category works', async ({ homePage }) => {
-    await homePage.categorySelect.selectOption('Watches');
-    await homePage.productCards.first().waitFor({ state: 'attached' });
+    await homePage.filterByCategory('Watches');
     const productNames = await homePage.getProductNames();
     for (const name of productNames) {
       expect(name).toMatch(/Watch$/);

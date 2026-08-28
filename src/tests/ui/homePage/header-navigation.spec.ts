@@ -2,14 +2,13 @@ import { test, expect } from '@fixtures';
 
 
 test.beforeEach(async ({ homePage }) => {
-  await homePage.goto();
+  await homePage.open();
 });
 
 test.describe('Header and Navigation', () => {
   test('brand logo is visible and links to home', async ({ homePage }) => {
     await expect(homePage.brandContainer).toContainText('MAISON');
-    await homePage.brandContainer.click();
-    await homePage.expectAtHomePage();
+    await homePage.clickBrand();
   });
 
   test('skip link works correctly', async ({ homePage }) => {
@@ -20,7 +19,7 @@ test.describe('Header and Navigation', () => {
 
   test('nav toggle works on mobile', async ({ homePage }) => {
     await homePage.setMobileViewport();
-    await homePage.goto(); // Re-navigate after viewport change
+    await homePage.open(); // Re-navigate after viewport change
     await expect(homePage.navToggle).toBeVisible();
     await homePage.navToggle.click();
     await homePage.expectMobileMenuVisible();
@@ -29,15 +28,14 @@ test.describe('Header and Navigation', () => {
 
   test('nav toggle closes mobile menu on second click', async ({ homePage }) => {
     await homePage.setMobileViewport();
-    await homePage.goto();
+    await homePage.open();
     await homePage.openMobileMenu();
     await homePage.closeMobileMenu();
   });
 
   test('login link navigates to login page', async ({ homePage }) => {
     await expect(homePage.loginLink).toBeVisible();
-    await homePage.loginLink.click();
-    await homePage.expectAtLoginPage();
+    await homePage.goToLogin();
   });
 
   test('shop link is visible and clickable', async ({ homePage }) => {

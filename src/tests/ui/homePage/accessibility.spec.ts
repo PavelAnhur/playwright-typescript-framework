@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@fixtures';
 
+
 test.describe('Accessibility', () => {
   test('home page has no serious violations', async ({ page }) => {
     await page.goto('/');
@@ -15,7 +16,7 @@ test.describe('Accessibility', () => {
   });
 
   test('images have alt attributes', async ({ homePage }) => {
-    await homePage.goto();
+    await homePage.open();
     const images = homePage.images;
     const count = await images.count();
     for (let i = 0; i < count; i++) {
@@ -26,7 +27,7 @@ test.describe('Accessibility', () => {
   });
 
   test('aria-live regions are present', async ({ homePage }) => {
-    await homePage.goto();
+    await homePage.open();
     await expect(homePage.flash).toHaveAttribute('aria-live', 'polite');
     await expect(homePage.catalogue).toHaveAttribute('aria-live', 'polite');
   });
