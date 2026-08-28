@@ -1,7 +1,8 @@
 import { type Locator, type Page, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
 
-export class HomePage {
+export class HomePage extends BasePage{
   // Navigation
   readonly brandContainer: Locator;
   readonly skipLink: Locator;
@@ -10,18 +11,15 @@ export class HomePage {
   readonly shopLink: Locator;
   readonly loginLink: Locator;
   readonly flash: Locator;
-
   // Hero Section
   readonly eyebrow: Locator;
   readonly heroHeader: Locator;
   readonly heroParagraph: Locator;
-
   // Catalog Toolbar
   readonly searchInput: Locator;
   readonly searchSubmit: Locator;
   readonly categorySelect: Locator;
   readonly sortSelect: Locator;
-
   // Catalogue
   readonly catalogue: Locator;
   readonly productCards: Locator;
@@ -29,7 +27,8 @@ export class HomePage {
   readonly saleBadges: Locator;
   readonly soldoutBadge: Locator;
 
-  constructor(private readonly page: Page) {
+  constructor(readonly page: Page) {
+    super(page);
     // Navigation
     this.brandContainer = page.getByTestId('brand');
     this.skipLink = page.getByTestId('skip-link');
@@ -56,12 +55,14 @@ export class HomePage {
   }
 
   async open(): Promise<void> {
-    await this.page.goto('/');
+    await super.goto('/');
     await this.waitForLoad();
   }
 
   async waitForLoad(): Promise<void> {
+    await super.waitForLoad();
     await expect(this.brandContainer).toBeVisible();
+    await expect(this.catalogue).toBeVisible();
   }
 
   async clickBrand(): Promise<void> {
@@ -78,6 +79,7 @@ export class HomePage {
     await this.page.keyboard.press('Tab');
   }
 
+  // Mobile Navigation
   async expectNavToggleAriaExpanded(expected: string): Promise<void> {
     await expect(this.navToggle).toHaveAttribute('aria-expanded', expected);
   }
@@ -112,6 +114,7 @@ export class HomePage {
     await expect(this.page).toHaveURL('#/');
   }
 
+  // Product Methods
   async getProductNames(): Promise<string[]> {
     return await this.productCards.evaluateAll(element =>
       element.map(el => el.getAttribute('data-name') || ''));
@@ -125,6 +128,7 @@ export class HomePage {
     await expect(this.productCards.first()).toBeVisible();
   }
 
+  // Toolbar Actions
   async searchFor(productName: string): Promise<void> {
     await this.searchInput.fill(productName);
     await this.searchSubmit.click();
