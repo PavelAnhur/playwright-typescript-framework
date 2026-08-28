@@ -10,32 +10,20 @@ test.describe('Catalogue Toolbar', () => {
     await expect(homePage.searchInput).toBeVisible();
   });
 
-  test('category filter options are correct', async ({ homePage }) => {
+  test('category filter options are correct', async ({ homePage, csvData }) => {
+    const categories = csvData<{ category: string }>('categories.csv');
     await expect(homePage.categorySelect).toBeVisible();
     const options = await homePage.categorySelect.locator('option')
       .allTextContents();
-    const expectedOpts = [
-      'All categories',
-      'Accessories',
-      'Apparel',
-      'Bags',
-      'Footwear',
-      'Fragrance',
-      'Jewellery',
-      'Watches',
-    ];
+    const expectedOpts = categories.map(row => row.category);
     expect(options).toEqual(expectedOpts);
   });
 
-  test('sort options are correct', async ({ homePage }) => {
+  test('sort options are correct', async ({ homePage, csvData }) => {
+    const sortOptions = csvData<{ sortOption: string }>('sort-options.csv');
     await expect(homePage.sortSelect).toBeVisible();
     const options = await homePage.getSortOptions();
-    const expectedOpts = [
-      'Newest',
-      'Price: Low to High',
-      'Price: High to Low',
-      'Name',
-    ];
+    const expectedOpts = sortOptions.map(row => row.sortOption);
     expect(options).toEqual(expectedOpts);
   });
 
