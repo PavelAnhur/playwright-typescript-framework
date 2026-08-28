@@ -1,3 +1,4 @@
+/* eslint-disable no-empty-pattern */
 import { test as base } from '@playwright/test';
 import { getCsvData } from "@utils/csv-reader";
 import { detectSpecPath } from '@utils/stack-trace';
@@ -8,7 +9,7 @@ type CsvFixtures = {
 }
 
 export const test = base.extend<CsvFixtures>({
-  csvData: async (_, use) => {
+  csvData: async ({ }, use) => {
     const useCsv = <T extends Record<string, string>>(fileName: string): T[] => {
       const specPath = detectSpecPath();
       return getCsvData<T>(fileName, specPath);
@@ -17,3 +18,4 @@ export const test = base.extend<CsvFixtures>({
     await use(useCsv);
   }
 });
+/* eslint-enable no-empty-pattern */
