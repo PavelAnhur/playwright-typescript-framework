@@ -53,7 +53,7 @@
       ],
       "@config/*": [
         "./src/config/*"
-      ]
+      ],
     }
   },
   "include": [
