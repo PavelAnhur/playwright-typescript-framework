@@ -50,6 +50,9 @@
       ],
       "@data/*": [
         "./src/test-data/*"
+      ],
+      "@config/*": [
+        "./src/config/*"
       ]
     }
   },
