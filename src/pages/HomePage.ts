@@ -2,25 +2,30 @@ import { type Locator, type Page, expect } from '@playwright/test';
 
 
 export class HomePage {
+  // Navigation
   readonly brandContainer: Locator;
   readonly skipLink: Locator;
   readonly navToggle: Locator;
   readonly navMobileMenu: Locator;
   readonly shopLink: Locator;
   readonly loginLink: Locator;
+  readonly flash: Locator;
+
+  // Hero Section
   readonly eyebrow: Locator;
   readonly heroHeader: Locator;
   readonly heroParagraph: Locator;
+
+  // Catalog Toolbar
   readonly searchInput: Locator;
   readonly searchSubmit: Locator;
   readonly categorySelect: Locator;
-  readonly categoryOptions: Locator;
   readonly sortSelect: Locator;
-  readonly sortOptions: Locator;
+
+  // Catalogue
   readonly catalogue: Locator;
   readonly productCards: Locator;
   readonly images: Locator;
-  readonly flash: Locator;
   readonly saleBadges: Locator;
   readonly soldoutBadge: Locator;
 
@@ -41,9 +46,8 @@ export class HomePage {
     this.searchInput = page.getByPlaceholder('Search the collection…');
     this.searchSubmit = page.getByTestId('search-submit');
     this.categorySelect = page.getByTestId('filter-category');
-    this.categoryOptions = page.getByText('All categories', { exact: true });
     this.sortSelect = page.getByTestId('sort-select');
-    this.sortOptions = this.sortSelect.locator('options');
+    // Catalogue
     this.catalogue = page.getByTestId('catalogue');
     this.productCards = page.getByTestId('product-card');
     this.images = page.locator('.card__media img');
@@ -51,13 +55,23 @@ export class HomePage {
     this.soldoutBadge = page.getByTestId('soldout-badge');
   }
 
-  async goto(): Promise<void> {
+  async open(): Promise<void> {
     await this.page.goto('/');
     await this.waitForLoad();
   }
 
   async waitForLoad(): Promise<void> {
     await expect(this.brandContainer).toBeVisible();
+  }
+
+  async clickBrand(): Promise<void> {
+    await this.brandContainer.click();
+    await this.expectAtHomePage();
+  }
+
+  async goToLogin(): Promise<void> {
+    await this.loginLink.click();
+    await expect(this.page).toHaveURL('#/login');
   }
 
   async focusSkipLink(): Promise<void> {
@@ -98,12 +112,44 @@ export class HomePage {
     await expect(this.page).toHaveURL('#/');
   }
 
-  async expectAtLoginPage(): Promise<void> {
-    await expect(this.page).toHaveURL('#/login');
-  }
-
   async getProductNames(): Promise<string[]> {
     return await this.productCards.evaluateAll(element =>
       element.map(el => el.getAttribute('data-name') || ''));
+  }
+
+  async waitForCatalogue(): Promise<void> {
+    await expect(this.catalogue).toBeVisible();
+  }
+
+  async waitForProducts(): Promise<void> {
+    await expect(this.productCards.first()).toBeVisible();
+  }
+
+  async searchFor(productName: string): Promise<void> {
+    await this.searchInput.fill(productName);
+    await this.searchSubmit.click();
+    await this.waitForProducts();
+  }
+
+  async filterByCategory(category: string): Promise<void> {
+    await this.categorySelect.selectOption(category);
+    await this.waitForProducts();
+  }
+
+  async sortBy(sortOption: string): Promise<void> {
+    await this.sortSelect.selectOption(sortOption);
+    await this.waitForProducts();
+  }
+
+  async clearSearch(): Promise<void> {
+    await this.searchInput.clear();
+    await this.searchSubmit.click();
+    await this.waitForProducts();
+  }
+
+  async getSortOptions(): Promise<string[]> {
+    return await this.sortSelect.locator('option').evaluateAll(
+      (elements) => elements.map((el) => el.textContent?.trim() || '')
+    );
   }
 }
