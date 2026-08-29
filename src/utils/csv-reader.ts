@@ -1,75 +1,72 @@
-import { extractDataFolder } from '@utils/path-utils';
-import { parse } from 'csv-parse/sync';
-import fs from 'fs';
-import path from 'path';
+import { readCsvFile } from '@utils/file-utils';
+import { buildCsvFilePath } from '@utils/path-utils';
+
 
 /**
- * Reads CSV data from a file and returns it as an array of objects.
+ * Reads CSV data from a file with automatic type conversion.
  * 
- * Usage:
- *   const data = getCsvData<{ id: string; name: string }>('categories.csv');
+ * @param fileName - The CSV file name (e.g., 'products.csv')
+ * @param specFilePath - The path of the calling spec file
+ * @returns Array of typed objects with automatic type conversion
  * 
- * Convention:
- *   - Files are located in src/test-data/{spec-path}/ (derived from specFilePath)
- *   - Supports environment-specific files: categories-local.csv, categories-ci.csv
- *   - Column headers become object keys
- * 
- * @param fileName - The CSV file name (e.g., 'categories.csv')
- * @param specFilePath -The path of the calling spec file (should be passed in)
- * @returns Array of typed objects with column headers as keys
- * @throws {Error} If the CSV file cannot be found or is empty
+ * @example
+ * ```ts
+ * const categories = getCsvData('categories.csv', __filename);
+ * // data[0].category === 'All categories' (string)
+ * // data[0].id === 1 (number)
+ * // data[0].active === true (boolean)
+ * // data[0].tags === ['tag1', 'tag2'] (array)
+ * ```
  */
-export function getCsvData<T extends Record<string, string> = Record<string, string>>(
+export function getCsvData<T extends Record<string, unknown> = Record<string, unknown>>(
   fileName: string,
   specFilePath: string
 ): T[] {
-  const dataFolder = extractDataFolder(specFilePath);
-  if (!dataFolder) {
-    throw new Error(`Could not extract data folder from spec file: ${specFilePath}`);
-  }
-  const testDataDir = 'src/test-data';
-  const baseDir = path.join(testDataDir, dataFolder);
-  // Check for environment-specific file first
-  const env = process.env['TEST_ENV'] || 'local';
-  const envFileName = fileName.replace('.csv', `-${env}.csv`);
-  const envFilePath = path.join(baseDir, envFileName);
-
-  try {
-    return readCsvFile<T>(envFilePath);
-  } catch {
-    // Fallback to default file
-    const defaultPath = path.join(baseDir, fileName);
-    return readCsvFile<T>(defaultPath);
-  }
+  // Build the file path
+  const filePath = buildCsvFilePath(fileName, specFilePath);
+  // Read and parse the CSV file
+  const rawData = readCsvFile(filePath);
+  // Transform each row with automatic type conversion
+  const transformedData = rawData.map((row) => {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(row)) {
+      result[key] = parseFieldValue(value);
+    }
+    return result as T;
+  });
+  return transformedData;
 }
 
-/**
- * Reads and parses a CSV file from the given path.
- * 
- * @param filePath - The path to the CSV file
- * @returns Array of objects with column headers as keys
- * @throws {Error} If the file doesn't exist or is empty
- */
-function readCsvFile<T extends Record<string, string> = Record<string, string>>(
-  filePath: string
-): T[] {
-  const absolutePath = path.resolve(process.cwd(), filePath);
-  if (!fs.existsSync(absolutePath)) {
-    throw new Error(`CSV file not found: ${absolutePath}`);
-  }
+type ParsedValue = string | number | boolean | null | unknown[] | Record<string, unknown>;
 
-  const fileContent = fs.readFileSync(absolutePath, 'utf-8');
-  if (!fileContent.trim()) {
-    throw new Error(`CSV file is empty: ${absolutePath}`);
+/**
+ * Parse a field value with automatic type detection
+ * Supports: strings, numbers, booleans, arrays, and JSON objects
+ */
+function parseFieldValue(value: string): ParsedValue {
+  const trimmed = value.trim();
+  // Empty string
+  if (!trimmed) return '';
+  // Boolean
+  if (trimmed.toLowerCase() === 'true') return true;
+  if (trimmed.toLowerCase() === 'false') return false;
+  // Number
+  if (!isNaN(Number(trimmed)) && trimmed !== '') {
+    return Number(trimmed);
   }
-  try {
-    const result = parse(fileContent, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-    });
-    return result as T[];
-  } catch (error) {
-    throw new Error(`Failed to parse CSV file ${absolutePath}`, { cause: error });
+  // JSON (objects and arrays)
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+    (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      // Not valid JSON, continue
+    }
   }
+  // Array (comma-separated)
+  if (trimmed.includes(',')) {
+    return trimmed.split(',').map(item => item.trim());
+  }
+  // Default: string
+  return trimmed;
 }
