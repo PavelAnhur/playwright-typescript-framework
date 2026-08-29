@@ -1,5 +1,6 @@
+import { ENV } from '@config/env';
+import { TIMEOUTS } from "@config/timeouts";
 import { defineConfig, devices } from '@playwright/test';
-import { ENV, TIMEOUTS } from "@config";
 
 /**
  * Read environment variables from file.

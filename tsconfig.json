@@ -51,9 +51,9 @@
       "@data/*": [
         "./src/test-data/*"
       ],
-      "@config": [
-        "./src/config/index.ts"
-      ]
+      "@config/*": [
+        "./src/config/*"
+      ],
     }
   },
   "include": [

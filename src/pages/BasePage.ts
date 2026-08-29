@@ -1,5 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
-import { T } from '@config';
+import { T } from '@config/timeouts';
 
 /**
  * Abstract base class for all Page Objects.

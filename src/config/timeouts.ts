@@ -1,4 +1,4 @@
-import { ENV } from "@config";
+import { ENV } from "@config/env";
 
 /**
  * Centralized timeout configuration for the test framework.
