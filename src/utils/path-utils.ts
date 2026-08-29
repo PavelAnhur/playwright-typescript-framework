@@ -75,3 +75,14 @@ export function extractDataFolder(specFilePath: string): string | undefined {
   // Last resort: use the directory name
   return path.basename(path.dirname(specFilePath));
 }
+
+/**
+ * Get the absolute path for a file
+ */
+export function getAbsolutePath(filePath: string): string {
+  const absolutePath = path.resolve(process.cwd(), filePath);
+  if (!fs.existsSync(absolutePath)) {
+    throw new Error(`File not found: ${absolutePath}`);
+  }
+  return absolutePath;
+}
