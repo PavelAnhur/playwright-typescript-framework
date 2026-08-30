@@ -11,6 +11,9 @@
     "test:ui": "npx playwright test --project='ui'",
     "test:mobile": "npx playwright test --project='ui mobile-*'",
     "test:ci": "npx playwright test --project='ui chrome' --project='ui firefox' --project='ui webkit' --project='ui mobile-iphone'",
+    "test:unit": "vitest",
+    "test:unit:run": "vitest run",
+    "test:unit:coverage": "vitest run --coverage",
     "start": "node maison/server/dist/index.js",
     "start:dev": "cd maison/server && npm start",
     "build:server": "cd maison/server && npm run build",
@@ -26,10 +29,12 @@
     "@types/node": "^26.4.0",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "csv-parse": "^7.0.2",
     "dotenv": "^17.4.2",
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.11"
   }
 }
