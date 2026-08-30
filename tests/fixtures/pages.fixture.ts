@@ -1,4 +1,4 @@
-import { HomePage } from "@pages/HomePage";
+import { HomePage } from "../pages/HomePage";
 import { test as base } from "@playwright/test";
 
 export interface PageFixtures {

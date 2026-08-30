@@ -21,7 +21,7 @@ export function buildCsvFilePath(fileName: string, specFilePath: string): string
     throw new Error(`Could not extract data folder from spec file: ${specFilePath}`);
   }
   // Build the base path
-  const baseDir = path.join('src/test-data', dataFolder);
+  const baseDir = path.join('tests/test-data/specs', dataFolder);
   // Check for environment-specific file first
   const env = process.env['TEST_ENV'] || 'local';
   const envFileName = fileName.replace('.csv', `-${env}.csv`);
@@ -62,11 +62,11 @@ export function extractDataFolder(specFilePath: string): string | undefined {
   // Remove the file extension
   const withoutExt = specFilePath.replace(/\.spec\.ts$/, '');
   // Find the part after 'src/tests/'
-  const match = withoutExt.match(/src\/tests\/(.+)/);
+  const match = withoutExt.match(/tests\/specs\/(.+)/);
   if (match) return match[1];
   // Fallback: try to extract from directory structure
   const parts = specFilePath.split('/');
-  const testsIndex = parts.indexOf('tests');
+  const testsIndex = parts.indexOf('tests/specs');
   if (testsIndex !== -1 && testsIndex + 1 < parts.length) {
     // Get everything after 'tests/' up to the file name
     const folderPath = parts.slice(testsIndex + 1, parts.length - 1).join('/');

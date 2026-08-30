@@ -40,13 +40,13 @@
     "skipLibCheck": true,
     "paths": {
       "@fixtures": [
-        "./src/fixtures/index.ts"
+        "./tests/fixtures/index.ts"
       ],
       "@pages/*": [
-        "./src/pages/*"
+        "./tests/pages/*"
       ],
       "@utils/*": [
-        "./src/utils/*"
+        "./tests/utils/*"
       ],
       "@data/*": [
         "./src/test-data/*"
@@ -58,6 +58,7 @@
   },
   "include": [
     "src",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "tests"
   ]
 }

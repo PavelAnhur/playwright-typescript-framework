@@ -1,8 +1,8 @@
 /* eslint-disable no-empty-pattern */
 import { test as base } from '@playwright/test';
-import { getCsvData } from "@utils/csv-reader";
-import { detectSpecPath } from '@utils/stack-trace';
-import { type CsvRow } from '../types/csv';
+import { getCsvData } from "../utils/csv-reader";
+import { detectSpecPath } from '../utils/stack-trace';
+import { type CsvRow } from '../../src/types/csv';
 
 
 type CsvFixtures = {

@@ -1,5 +1,5 @@
-import { readFile } from '@utils/file-utils';
-import { buildCsvFilePath } from '@utils/path-utils';
+import { readFile } from './file-utils';
+import { buildCsvFilePath } from './path-utils';
 
 
 /**
