@@ -14,6 +14,7 @@
     "types": [
       "node"
     ],
+    "typeRoots": ["./node_modules/@types"],
     // and npm install -D @types/node
     "sourceMap": true,
     "declaration": true,
@@ -54,11 +55,19 @@
       "@config/*": [
         "./src/config/*"
       ],
+      "@src/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
-    "src",
+    "src/**/*.ts",
     "playwright.config.ts",
-    "tests"
+    "tests/**/*.ts",
+    "*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.d.ts",
   ]
 }

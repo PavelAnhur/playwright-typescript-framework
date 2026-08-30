@@ -10,10 +10,26 @@ export const ENV = {
   name: process.env['ENV_NAME'] || 'local',
   webURL: process.env['MAISON_URL'] || 'http://localhost:4000',
   apiURL: process.env['MAISON_API_URL'] || 'http://localhost:4000/api/v1',
-  testUser: {
-    email: process.env['TEST_USER_EMAIL'] || 'buyer@maison.test',
-    password: process.env['TEST_USER_PASSWORD'] || 'Password123!',
-  },
+  testUsers: [
+    {
+      testBuyer: {
+        email: process.env['TEST_BUYER_EMAIL'] || 'buyer@maison.test',
+        password: process.env['TEST_BUYER_PASSWORD'] || 'Password123!',
+      }
+    },
+    {
+      testSeller1: {
+        email: process.env['TEST_SELLER_EMAIL'] || 'seller@maison.test',
+        password: process.env['TEST_SELLER_PASSWORD'] || 'Password123!',
+      },
+    },
+    {
+      testSeller2: {
+        email: process.env['TEST_SELLER2_EMAIL'] || 'seller2@maison.test',
+        password: process.env['TEST_SELLER2_PASSWORD'] || 'Password123!',
+      }
+    }
+  ],
   nodeEnv: process.env['NODE_ENV'] || 'development',
   isCI: !!process.env['CI'],
   isStaging: process.env['ENV_NAME'] === 'staging',

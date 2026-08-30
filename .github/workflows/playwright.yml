@@ -3,13 +3,11 @@ name: Playwright Tests - Maison AUT
 on:
   push:
     branches: [ main, dev ]
-  pull_request:
-    branches: [ main, dev ]
   workflow_dispatch:
 
 
 jobs:
-  test-ui:
+  tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -65,3 +63,5 @@ jobs:
 
     - name: Run UI tests
       run: npm run test:ui
+    - name: Run API tests
+      run: npm run test:api
