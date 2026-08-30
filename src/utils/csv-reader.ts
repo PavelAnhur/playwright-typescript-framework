@@ -1,4 +1,4 @@
-import { readCsvFile } from '@utils/file-utils';
+import { readFile } from '@utils/file-utils';
 import { buildCsvFilePath } from '@utils/path-utils';
 
 
@@ -25,7 +25,7 @@ export function getCsvData<T extends Record<string, unknown> = Record<string, un
   // Build the file path
   const filePath = buildCsvFilePath(fileName, specFilePath);
   // Read and parse the CSV file
-  const rawData = readCsvFile(filePath);
+  const rawData = readFile(filePath) as Record<string, string>[];
   // Transform each row with automatic type conversion
   const transformedData = rawData.map((row) => {
     const result: Record<string, unknown> = {};
