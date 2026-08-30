@@ -62,7 +62,7 @@ export function readFileAs<T>(filePath: string): T {
  * const data = readCsvFile('src/test-data/home-page/categories.csv');
  * // Returns: [{ category: 'All categories', product: 'Cloth' }, ...]
  */
-function readCsvFile(filePath: string): Record<string, string>[] {
+export function readCsvFile(filePath: string): Record<string, string>[] {
   const absolutePath = getAbsolutePath(filePath);
   const fileContent = fs.readFileSync(absolutePath, 'utf-8');
   if (!fileContent.trim()) {
@@ -93,7 +93,7 @@ function readCsvFile(filePath: string): Record<string, string>[] {
  * @example
  * const data = readJsonFile('src/test-data/config.json');
  */
-function readJsonFile<T = unknown>(filePath: string): T {
+export function readJsonFile<T = unknown>(filePath: string): T {
   const absolutePath = getAbsolutePath(filePath);
   const fileContent = fs.readFileSync(absolutePath, 'utf-8');
   if (!fileContent.trim()) {
@@ -119,7 +119,7 @@ function readJsonFile<T = unknown>(filePath: string): T {
  * @example
  * const content = readTextFile('src/test-data/readme.txt');
  */
-function readTextFile(filePath: string): string {
+export function readTextFile(filePath: string): string {
   const absolutePath = getAbsolutePath(filePath);
   return fs.readFileSync(absolutePath, 'utf-8');
 }
