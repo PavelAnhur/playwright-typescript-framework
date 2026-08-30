@@ -201,7 +201,7 @@ describe('getCsvData', () => {
     it('should handle null and undefined values', () => {
       const mockCsvData = [
         { id: '1', name: 'null', description: 'undefined' },
-        { id: '2', name: '', description: null as any },
+        { id: '2', name: '', description: null },
       ];
 
       vi.mocked(readFile).mockReturnValue(mockCsvData);
