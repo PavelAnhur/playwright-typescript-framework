@@ -1,15 +1,30 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
 
 
-dotenv.config({
-  path: path.resolve(process.cwd(), '.env')
-});
+let isEnvLoaded = false;
+export function loadEnv(): void {
+  if (isEnvLoaded) return;
+  const envName = process.env['ENV_NAME'] || 'local';
+  const envFile = `.env.${envName}`;
+  const envPath = path.resolve(process.cwd(), envFile);
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+  }
+  isEnvLoaded = true;
+}
+
+loadEnv();
 
 export const ENV = {
   name: process.env['ENV_NAME'] || 'local',
   webURL: process.env['MAISON_URL'] || 'http://localhost:4000',
   apiURL: process.env['MAISON_API_URL'] || 'http://localhost:4000/api/v1',
+  nodeEnv: process.env['NODE_ENV'] || 'development',
+  isCI: !!process.env['CI'],
+  isStaging: process.env['ENV_NAME'] === 'staging',
+  isProduction: process.env['ENV_NAME'] === 'production',
   testUsers: [
     {
       testBuyer: {
@@ -19,8 +34,8 @@ export const ENV = {
     },
     {
       testSeller1: {
-        email: process.env['TEST_SELLER_EMAIL'] || 'seller@maison.test',
-        password: process.env['TEST_SELLER_PASSWORD'] || 'Password123!',
+        email: process.env['TEST_SELLER1_EMAIL'] || 'seller@maison.test',
+        password: process.env['TEST_SELLER1_PASSWORD'] || 'Password123!',
       },
     },
     {
@@ -30,12 +45,13 @@ export const ENV = {
       }
     }
   ],
-  nodeEnv: process.env['NODE_ENV'] || 'development',
-  isCI: !!process.env['CI'],
-  isStaging: process.env['ENV_NAME'] === 'staging',
-  isProduction: process.env['ENV_NAME'] === 'production',
 } as const;
 
-export function isEnvironment(env: 'local' | 'staging' | 'production' | 'ci'): boolean {
-  return ENV.name === env;
+export function getTestUser(role: 'buyer' | 'seller1' | 'seller2') {
+  const userMap = {
+    buyer: ENV.testUsers[0].testBuyer,
+    seller1: ENV.testUsers[1].testSeller1,
+    seller2: ENV.testUsers[2].testSeller2,
+  };
+  return userMap[role];
 }

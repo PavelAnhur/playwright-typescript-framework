@@ -1,4 +1,4 @@
-import { ENV } from '@config/env';
+import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 import type { Account } from '@src/types/account';
 import type { Certificate } from '@src/types/certificate';
@@ -30,15 +30,17 @@ test.describe('Home Page API - Public Endpoints', () => {
       expect(data.accounts).toHaveLength(3); // seller, seller2, buyer
 
       const accounts = data.accounts;
-      const sellerEmail = accounts.find((a: Account) => a.email === ENV.testUsers[1].testSeller1.email);
-      const buyerEmail = accounts.find((a: Account) => a.email === ENV.testUsers[0].testBuyer.email);
+      const seller = getTestUser('seller1');
+      const sellerEmail = accounts.find((a: Account) => a.email === seller.email);
+      const buyer = getTestUser('buyer');
+      const buyerEmail = accounts.find((a: Account) => a.email === buyer.email);
 
       expect(sellerEmail).toBeDefined();
       expect(sellerEmail?.role).toBe('seller');
       expect(buyerEmail).toBeDefined();
       expect(buyerEmail?.role).toBe('buyer');
 
-      expect(data).toHaveProperty('password', ENV.testUsers[0].testBuyer.password);
+      expect(data).toHaveProperty('password', buyer.password);
     });
   });
 
