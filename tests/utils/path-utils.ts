@@ -59,8 +59,9 @@ export function buildCsvFilePath(fileName: string, specFilePath: string): string
 * // Returns: 'api'
 */
 export function extractDataFolder(specFilePath: string): string | undefined {
+  const normalizedPath = specFilePath.replace(/\\/g, '/');
   // Remove the file extension
-  const withoutExt = specFilePath.replace(/\.spec\.ts$/, '');
+  const withoutExt = normalizedPath.replace(/\.spec\.ts$/, '').replace(/\.ts$/, '');
   // Find the part after 'src/tests/'
   const match = withoutExt.match(/tests\/specs\/(.+)/);
   if (match) return match[1];
