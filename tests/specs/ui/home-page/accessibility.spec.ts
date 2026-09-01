@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '../../../fixtures';
+import { expect, test } from '@fixtures';
 
 
 test.describe('Accessibility', () => {
