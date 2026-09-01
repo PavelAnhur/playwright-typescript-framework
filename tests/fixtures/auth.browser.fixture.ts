@@ -2,6 +2,7 @@ import { getTestUser } from '@config/env';
 import { HomePage } from '@pages/HomePage';
 import { LoginPage } from '@pages/LoginPage';
 import { test as base, type Browser, type BrowserContext } from '@playwright/test';
+import { error } from 'console';
 import fs from 'fs';
 import path from 'path';
 
@@ -77,14 +78,14 @@ async function createAuthenticatedContext(
       await homePage.waitForLoad();
       const isLoggedIn = await homePage.isUserLoggedIn();
       if (!isLoggedIn) {
-        throw new Error(`Login verification failed for ${email}`);
+        throw new Error(`Login verification failed for ${email}`, { cause: error });
       }
       // Save storage state for future use
       await context.storageState({ path: storagePath });
       await page.close();
     } catch (error) {
       await context.close();
-      throw new Error(`Failed to authenticate ${email}: ${error}`);
+      throw new Error(`Failed to authenticate ${email}`, { cause: error });
     }
   }
   return context;
@@ -94,7 +95,12 @@ async function createAuthenticatedContext(
  * Ensures the storage directory exists
  */
 function ensureStorageDir(): void {
-  if (!fs.existsSync(STORAGE_DIR)) {
-    fs.mkdirSync(STORAGE_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(STORAGE_DIR)) {
+      fs.mkdirSync(STORAGE_DIR, { recursive: true });
+    }
+  } catch (error) {
+    throw new Error(
+      `Failed to create storage directory at ${STORAGE_DIR}`, { cause: error });
   }
 }
