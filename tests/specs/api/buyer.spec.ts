@@ -3,13 +3,13 @@ import { expect, test } from '@fixtures';
 import type { User } from '@src/types/account';
 import type { Cart, Order, Product } from '@src/types/product';
 
-test.describe.serial('Buyer API - Authenticated Scenarios', () => {
+test.describe('Buyer API - Authenticated Scenarios', () => {
   test.beforeEach(async ({ api }) => {
     // Reset the database to a clean state before each test
     await api.post('_reset');
   });
 
-  test.describe('Cart Operations', () => {
+  test.describe.serial('Cart Operations', () => {
     test('should get empty cart for new user', async ({ authedBuyer }) => {
       const response = await authedBuyer.get('cart');
       expect(response.ok()).toBeTruthy();

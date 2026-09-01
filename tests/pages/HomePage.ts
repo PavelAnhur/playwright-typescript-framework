@@ -1,5 +1,6 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { LoginPage } from './LoginPage';
 
 
 export class HomePage extends BasePage {
@@ -10,6 +11,11 @@ export class HomePage extends BasePage {
   readonly navMobileMenu: Locator;
   readonly shopLink: Locator;
   readonly loginLink: Locator;
+  readonly currentUser: Locator;
+  readonly cartLink: Locator;
+  readonly cartCount: Locator;
+  readonly ordersLink: Locator;
+  readonly logoutLink: Locator;
   readonly flash: Locator;
   // Hero Section
   readonly eyebrow: Locator;
@@ -23,6 +29,8 @@ export class HomePage extends BasePage {
   // Catalogue
   readonly catalogue: Locator;
   readonly productCards: Locator;
+  readonly productName: Locator;
+  readonly priceList: Locator;
   readonly images: Locator;
   readonly saleBadges: Locator;
   readonly soldoutBadge: Locator;
@@ -36,6 +44,11 @@ export class HomePage extends BasePage {
     this.navMobileMenu = page.getByTestId('nav-mobile-menu');
     this.shopLink = page.getByTestId('nav-shop');
     this.loginLink = page.getByTestId('nav-login');
+    this.currentUser = page.getByTestId('current-user');
+    this.cartLink = page.getByTestId('nav-cart');
+    this.cartCount = page.getByTestId('cart-count');
+    this.ordersLink = page.getByTestId('nav-orders');
+    this.logoutLink = page.getByTestId('logout-link');
     this.flash = page.locator('#flash');
     // Hero Section
     this.eyebrow = page.locator('.eyebrow');
@@ -49,6 +62,8 @@ export class HomePage extends BasePage {
     // Catalogue
     this.catalogue = page.getByTestId('catalogue');
     this.productCards = page.getByTestId('product-card');
+    this.productName = page.getByTestId('product-name');
+    this.priceList = page.getByTestId('price');
     this.images = page.locator('.card__media img');
     this.saleBadges = page.getByTestId('sale-badge');
     this.soldoutBadge = page.getByTestId('soldout-badge');
@@ -70,9 +85,11 @@ export class HomePage extends BasePage {
     await this.expectAtHomePage();
   }
 
-  async goToLogin(): Promise<void> {
+  async goToLogin(): Promise<LoginPage> {
     await this.loginLink.click();
-    await expect(this.page).toHaveURL('#/login');
+    const loginPage = new LoginPage(this.page);
+    await loginPage.waitForLoad();
+    return loginPage;
   }
 
   async focusSkipLink(): Promise<void> {
@@ -115,6 +132,10 @@ export class HomePage extends BasePage {
   }
 
   // Product Methods
+  getProductById(productId: number | string): Locator {
+    return this.page.locator(`[data-testid="product-card"][data-product-id="${productId}"]`);
+  }
+
   async getProductNames(): Promise<string[]> {
     return await this.productCards.evaluateAll(element =>
       element.map(el => el.getAttribute('data-name') || ''));
@@ -155,5 +176,21 @@ export class HomePage extends BasePage {
     return await this.sortSelect.locator('option').evaluateAll(
       (elements) => elements.map((el) => el.textContent?.trim() || '')
     );
+  }
+
+  async isUserLoggedIn(): Promise<boolean> {
+    try {
+      return await this.currentUser.isVisible();
+    } catch {
+      return false;
+    }
+  }
+
+  async logout(): Promise<void> {
+    if (await this.isUserLoggedIn()) {
+      await this.logoutLink.click();
+      await this.currentUser.waitFor({ state: 'detached' });
+      await this.flashMessage.waitFor({ state: 'visible' });
+    }
   }
 }

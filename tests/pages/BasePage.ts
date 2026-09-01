@@ -13,7 +13,7 @@ export abstract class BasePage {
   readonly cookieAcceptButton: Locator;
 
   constructor(protected readonly page: Page) {
-    this.flashMessage = page.locator('#flash, .flash, .alert, [role="alert"]');
+    this.flashMessage = page.locator('.flash, .alert, [role="alert"]');
     this.loadingIndicator = page.locator('.loading, .spinner, [data-testid="loading"]');
     this.cookieBanner = page.locator('.cookie-banner, .cookie-consent, [data-testid="cookie-banner"]');
     this.cookieAcceptButton = page.locator('button:has-text("Accept"), button:has-text("Allow"), [data-testid="accept-cookies"]');
