@@ -39,7 +39,7 @@ test.describe('Authenticated Buyer - Home Page', () => {
     });
   });
 
-  test.describe('Cart & Orders Access', () => {
+  test.describe.serial('Cart & Orders Access', () => {
     test('should show correct cart count when items are added', async ({ buyerHomePage, api, authedBuyer }) => {
       await api.post('_reset');
       const productsResponse = await api.get('products');
@@ -61,9 +61,9 @@ test.describe('Authenticated Buyer - Home Page', () => {
         data: { productId: product.id, quantity: 1 },
       });
       await buyerHomePage.cartLink.click();
-      await expect(buyerHomePage.page.getByTestId('cart-line')).toBeVisible();
-      await expect(buyerHomePage.page.getByTestId('line-name')).toHaveText(product.name);
-      await expect(buyerHomePage.page.getByTestId('line-qty')).toHaveText('Qty 1');
+      await expect(buyerHomePage.getElement('[data-testId="cart-line"]')).toBeVisible();
+      await expect(buyerHomePage.getElement('[data-testId="line-name"]')).toHaveText(product.name);
+      await expect(buyerHomePage.getElement('[data-testId="line-qty"]')).toHaveText('Qty 1');
     });
   });
 
@@ -121,7 +121,7 @@ test.describe('Authenticated Buyer - Home Page', () => {
     test('should filter products by category', async ({ buyerHomePage }) => {
       await buyerHomePage.filterByCategory('Bags');
       await expect(buyerHomePage.productCards).toHaveCount(3);
-      const categories = await buyerHomePage.page.locator('.card__cat').allTextContents();
+      const categories = await buyerHomePage.getElement('.card__cat').allTextContents();
       expect(categories.every(cat => cat === 'Bags')).toBe(true);
     });
 

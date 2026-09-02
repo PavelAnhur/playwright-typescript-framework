@@ -52,7 +52,7 @@ async function createAuthenticatedContext(
   }
   return await request.newContext({
     baseURL: `${ENV.apiURL}/`,
-    extraHTTPHeaders: { 
+    extraHTTPHeaders: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },

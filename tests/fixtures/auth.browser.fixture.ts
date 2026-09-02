@@ -1,7 +1,8 @@
 import { getTestUser } from '@config/env';
 import { HomePage } from '@pages/HomePage';
 import { LoginPage } from '@pages/LoginPage';
-import { test as base, type Browser, type BrowserContext } from '@playwright/test';
+import { test as base, type Browser } from '@playwright/test';
+import type { Account } from '@src/types/account';
 import { error } from 'console';
 import fs from 'fs';
 import path from 'path';
@@ -20,75 +21,65 @@ const SELLER_STORAGE = path.join(STORAGE_DIR, 'seller.json');
 
 export const test = base.extend<AuthBrowserFixtures>({
   buyerHomePage: async ({ browser }, use) => {
-    const buyerContext = await createAuthenticatedContext(
-      browser,
-      buyer.email,
-      buyer.password,
-      BUYER_STORAGE
-    );
-    const buyerPage = await buyerContext.newPage();
-    const homePage = new HomePage(buyerPage);
+    await createStorageState(browser, buyer, BUYER_STORAGE);
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+      storageState: BUYER_STORAGE,
+    });
+    const page = await context.newPage();
+    const homePage = new HomePage(page);
     await homePage.open();
-    await homePage.waitForLoad();
     await use(homePage);
-    await buyerContext.close();
+    await context.close();
   },
 
   sellerHomePage: async ({ browser }, use) => {
-    const sellerContext = await createAuthenticatedContext(
-      browser,
-      seller1.email,
-      seller1.password,
-      SELLER_STORAGE
-    );
-    const sellerPage = await sellerContext.newPage();
-    const homePage = new HomePage(sellerPage);
+    await createStorageState(browser, seller1, SELLER_STORAGE);
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+      storageState: SELLER_STORAGE,
+    });
+    const page = await context.newPage();
+    const homePage = new HomePage(page);
     await homePage.open();
-    await homePage.waitForLoad();
     await use(homePage);
-    await sellerContext.close();
+    await context.close();
   },
 });
 
-/**
- * Creates an authenticated browser context for a user using storage state
- */
-async function createAuthenticatedContext(
+let storageStateCreated = false;
+
+async function createStorageState(
   browser: Browser,
-  email: string,
-  password: string,
-  storagePath: string
-): Promise<BrowserContext> {
+  account: Account,
+  storagePath: string,
+): Promise<void> {
+  if (storageStateCreated) return;
   ensureStorageDir();
-  const hasStorage = fs.existsSync(storagePath);
+  cleanupStorageFile(storagePath);
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
-    storageState: hasStorage ? storagePath : undefined,
   });
-  if (!hasStorage) {
-    const page = await context.newPage();
-    try {
-      const loginPage = new LoginPage(page);
-      await loginPage.open();
-      await loginPage.waitForLoad();
-      await loginPage.login(email, password);
-      await loginPage.waitForLoginSuccess();
-
-      const homePage = new HomePage(page);
-      await homePage.waitForLoad();
-      const isLoggedIn = await homePage.isUserLoggedIn();
-      if (!isLoggedIn) {
-        throw new Error(`Login verification failed for ${email}`, { cause: error });
-      }
-      // Save storage state for future use
-      await context.storageState({ path: storagePath });
-      await page.close();
-    } catch (error) {
-      await context.close();
-      throw new Error(`Failed to authenticate ${email}`, { cause: error });
+  const page = await context.newPage();
+  try {
+    const loginPage = new LoginPage(page);
+    await loginPage.open();
+    await loginPage.login(account.email, account.password);
+    await loginPage.waitForLoginSuccess();
+    const homePage = new HomePage(page);
+    await homePage.waitForLoad();
+    const isLoggedIn = await homePage.isUserLoggedIn();
+    if (!isLoggedIn) {
+      throw new Error(`Login verification failed for ${account.email}`, { cause: error });
     }
+    await context.storageState({ path: storagePath });
+    await page.close();
+  } catch (error) {
+    await context.close();
+    throw new Error(`Failed to create storage state for ${account.email}`, { cause: error });
   }
-  return context;
+  await context.close();
+  storageStateCreated = true;
 }
 
 /**
@@ -100,7 +91,16 @@ function ensureStorageDir(): void {
       fs.mkdirSync(STORAGE_DIR, { recursive: true });
     }
   } catch (error) {
-    throw new Error(
-      `Failed to create storage directory at ${STORAGE_DIR}`, { cause: error });
+    throw new Error(`Failed to create storage directory at ${STORAGE_DIR}`, { cause: error });
+  }
+}
+
+function cleanupStorageFile(file: string): void {
+  if (fs.existsSync(file)) {
+    try {
+      fs.unlinkSync(file);
+    } catch (error) {
+      console.warn(`⚠️ Failed to remove ${path.basename(file)}: `, { cause: error });
+    }
   }
 }

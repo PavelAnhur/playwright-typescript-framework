@@ -1,11 +1,11 @@
 import { expect, test } from '@fixtures';
 
 
-test.beforeEach(async ({ homePage }) => {
-  await homePage.open();
-});
-
 test.describe('Catalogue Toolbar', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.open();
+  });
+  
   test('search input is visible', async ({ homePage }) => {
     await expect(homePage.searchInput).toBeVisible();
   });

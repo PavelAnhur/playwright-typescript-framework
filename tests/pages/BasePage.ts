@@ -1,5 +1,5 @@
-import { type Locator, type Page, expect } from '@playwright/test';
 import { T } from '@config/timeouts';
+import { type Locator, type Page, expect } from '@playwright/test';
 
 /**
  * Abstract base class for all Page Objects.
@@ -120,6 +120,37 @@ export abstract class BasePage {
    */
   async screenshot(options?: { path?: string; fullPage?: boolean }): Promise<Buffer> {
     return await this.page.screenshot(options);
+  }
+
+  /**
+   * Get a Locator for an element by selector or testId
+   * This is the preferred method for finding elements in tests
+   * 
+   * @param selector - CSS selector, testId, or attribute selector
+   * @param options - Optional configuration
+   * @returns Locator for the element
+   * 
+   * @example
+   * // By CSS selector
+   * const title = page.getElement('h1');
+   * 
+   * // By testId
+   * const submit = page.getElement('[data-testid="submit"]');
+   * 
+   * // By text content
+   * const button = page.getElement('button:has-text("Submit")');
+   * 
+   * // With options
+   * const list = page.getElement('ul.items', { has: page.locator('li.active') });
+   */
+  getElement(
+    selector: string,
+    options?: {
+      has?: Locator;
+      hasText?: string | RegExp;
+    }
+  ): Locator {
+    return this.page.locator(selector, options);
   }
 
   /**
