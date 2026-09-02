@@ -1,11 +1,11 @@
-import { expect, test } from '../../../fixtures';
+import { expect, test } from '@fixtures';
 
-
-test.beforeEach(async ({ homePage }) => {
-  await homePage.open();
-});
 
 test.describe('Product Cards', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.open();
+  });
+
   test('product cards are displayed', async ({ homePage }) => {
     await expect(homePage.productCards).toHaveCount(22);
   });
@@ -18,13 +18,12 @@ test.describe('Product Cards', () => {
     await expect(firstCard.locator('.card__media img')).toBeVisible();
   });
 
-  test('product card links to product detail', async ({ homePage, page }) => {
+  test('product card links to product detail', async ({ homePage }) => {
     const firstCard = homePage.productCards.first();
     const productName = await firstCard.getByTestId('product-name').textContent();
     await firstCard.locator('.card__media').click();
-    await expect(page).toHaveURL(/\/product\/\d+/);
-    // Verify product name on detail page
-    await expect(page.locator('h1')).toContainText(productName || '');
+    expect(await homePage.getCurrentUrl()).toMatch(/\/product\/\d+/);
+    await expect(homePage.getElement('h1')).toContainText(productName || '');
   });
 
   test('sale badge appears on sale items', async ({ homePage }) => {

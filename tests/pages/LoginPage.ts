@@ -29,6 +29,7 @@ export class LoginPage extends BasePage {
    */
   async open(): Promise<void> {
     await super.goto('/#/login');
+    await this.waitForLoad();
   }
 
   /**

@@ -21,11 +21,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     });
 
     test('should add item to cart', async ({ authedBuyer, api }) => {
-      // Get a product first
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product: Product = productsData.products[0];
-      // Add to cart
       const response = await authedBuyer.post('cart/items', {
         data: {
           productId: product.id,
@@ -46,11 +44,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product: Product = productsData.products[0];
-      // Add to cart
       await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 1 },
       });
-      // Update quantity
       const response = await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 5 },
       });
@@ -65,16 +61,13 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product: Product = productsData.products[0];
-      // Add to cart
       await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 1 },
       });
-      // Get cart to get item ID
       const getCartResponse = await authedBuyer.get('cart');
       const cart: Cart = await getCartResponse.json()
         .then(resData => resData.cart);
       const itemId = cart.items[0]?.itemId;
-      // Remove item
       const response = await authedBuyer.delete(`cart/items/${itemId}`);
       expect(response.ok()).toBeTruthy();
       const updatedCart: Cart = await response.json()
@@ -87,11 +80,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product = productsData.products[0];
-      // Add to cart
       await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 1 }
       });
-      // Clear cart
       const response = await authedBuyer.delete('cart');
       expect(response.ok()).toBeTruthy();
       const cart: Cart = await response.json()
@@ -104,7 +95,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product = productsData.products[0];
-
       const response = await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 0 },
       });
@@ -127,7 +117,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const response = await api.get('products/1');
       const product: Product = await response.json()
         .then(resData => resData.product);
-      // Add to cart
       const cartResponse = await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 1 },
       });
@@ -141,15 +130,12 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
 
   test.describe('Order Operations', () => {
     test.fixme('should create order from cart', async ({ api, authedBuyer }) => {
-      // Get a product
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product = productsData.products[0];
-      // Add to cart
       await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 2 },
       });
-      // Create order
       const response = await authedBuyer.post('orders');
       expect(response.ok()).toBeTruthy();
       const order: Order = await response.json()
@@ -160,7 +146,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(order.totalCents).toBe(product.effectiveCents * 2 || product.priceCents * 2);
       expect(order.status).toBe('confirmed');
       expect(order.reference).toBeDefined();
-      // Verify cart is cleared after order
       const cartResponse = await authedBuyer.get('cart');
       const cart: Cart = await cartResponse.json()
         .then(resData => resData.cart);
@@ -168,7 +153,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     });
 
     test.fixme('should get order history', async ({ api, authedBuyer }) => {
-      // Create an order first
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product = productsData.products[0];
@@ -176,7 +160,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
         data: { productId: product.id, quantity: 1 },
       });
       await authedBuyer.post('orders');
-      // Get order history
       const response = await authedBuyer.get('orders');
       expect(response.ok()).toBeTruthy();
       const { orders } = await response.json();
@@ -191,7 +174,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     });
 
     test.fixme('should get single order by reference', async ({ api, authedBuyer }) => {
-      // Create an order
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product = productsData.products[0];
@@ -201,7 +183,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const orderResponse = await authedBuyer.post('orders');
       const createdOrder = await orderResponse.json();
       const reference = createdOrder.reference;
-      // Get specific order
       const response = await authedBuyer.get(`orders/${reference}`);
       expect(response.ok()).toBeTruthy();
       const order: Order = await response.json()
@@ -219,7 +200,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     });
 
     test.fixme('should return 403 when accessing another buyers order', async ({ api, authedBuyer, authedSeller1 }) => {
-      // Create an order as buyer
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
       const product = productsData.products[0];
@@ -242,18 +222,14 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     });
 
     test.fixme('should decrement stock when order is created', async ({ api, authedBuyer }) => {
-      // Get a product and check initial stock
       const productResponse = await api.get('products/1');
       const product: Product = await productResponse.json()
         .then(resData => resData.product);
       const initialStock = product.stock || 0;
-      // Add to cart
       await authedBuyer.post('cart/items', {
         data: { productId: 1, quantity: 2 },
       });
-      // Create order
       await authedBuyer.post('orders');
-      // Verify stock decreased
       const updatedProductResponse = await api.get('products/1');
       const updatedProduct: Product = await updatedProductResponse.json()
         .then(resData => resData.product);
@@ -261,11 +237,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     });
 
     test('should not allow order if stock is insufficient', async ({ api, authedBuyer }) => {
-      // Get a product with limited stock
       const productResponse = await api.get('products/1');
       const stock = await productResponse.json()
         .then(resData => resData.product.stock);
-      // Try to add more than available stock
       const response = await authedBuyer.post('cart/items', {
         data: { productId: 1, quantity: stock + 1 },
       });
@@ -286,7 +260,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     test('should return 401 when accessing orders without token', async ({ api }) => {
       const response = await api.get('orders');
       expect(response.status()).toBe(401);
-
       const error = await response.json();
       expect(error.error.code).toBe('UNAUTHENTICATED');
     });
@@ -313,7 +286,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
     test.fixme('should logout successfully', async ({ authedBuyer }) => {
       const response = await authedBuyer.post('auth/logout');
       expect(response.ok()).toBeTruthy();
-      // Verify token is invalidated
       const meResponse = await authedBuyer.get('auth/me');
       expect(meResponse.status()).toBe(401);
     });

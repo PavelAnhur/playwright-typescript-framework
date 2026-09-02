@@ -1,11 +1,11 @@
-import { test, expect } from '../../../fixtures';
+import { test, expect } from '@fixtures';
 
-
-test.beforeEach(async ({ homePage }) => {
-  await homePage.open();
-});
 
 test.describe('Header and Navigation', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.open();
+  });
+  
   test('brand logo is visible and links to home', async ({ homePage }) => {
     await expect(homePage.brandContainer).toContainText('MAISON');
     await homePage.clickBrand();
