@@ -1,7 +1,8 @@
-import { ENV } from '@config/env';
-import { expect, test } from '@fixtures';
+import { ENV, expect, test } from '@fixtures';
 import type { User } from '@src/types/account';
-import type { Cart, Order, Product } from '@src/types/product';
+import type { Cart } from '@src/types/cart';
+import type { Order } from '@src/types/order';
+import type { Product } from '@src/types/product';
 
 test.describe('Buyer API - Authenticated Scenarios', () => {
   test.beforeEach(async ({ api }) => {
@@ -37,7 +38,7 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(cart.items[0]?.productId).toBe(product.id);
       expect(cart.items[0]?.quantity).toBe(2);
       expect(cart.items[0]?.unitCents).toBe(product.effectiveCents || product.priceCents);
-      expect(cart.subtotalCents).toBe(product.priceCents * 2);
+      expect(cart.subtotalCents).toBe(product.priceCents! * 2);
     });
 
     test('should update item quantity in cart', async ({ api, authedBuyer }) => {
@@ -54,7 +55,7 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const responseData = await response.json();
       const cart: Cart = responseData.cart;
       expect(cart.items[0]?.quantity).toBe(5);
-      expect(cart.subtotalCents).toBe(product.priceCents * 5);
+      expect(cart.subtotalCents).toBe(product.priceCents! * 5);
     });
 
     test('should remove item from cart', async ({ api, authedBuyer }) => {

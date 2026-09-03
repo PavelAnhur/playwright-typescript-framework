@@ -1,11 +1,14 @@
+import type { CsvValue } from "./csv";
+
+
 export interface Product {
   id: number;
-  sellerId: number;
+  sellerId?: number;
   sellerName: string;
   name: string;
-  description: string;
+  description?: string;
   category?: string;
-  priceCents: number;
+  priceCents?: number;
   effectiveCents?: number;
   onSale?: boolean;
   discount: Discount | null;
@@ -13,7 +16,7 @@ export interface Product {
   inStock?: boolean;
   published?: boolean;
   images?: string[];
-  image: string;
+  image?: string;
 }
 
 export interface Discount {
@@ -21,33 +24,11 @@ export interface Discount {
   value: number;
 }
 
-export interface CartItem {
-  itemId: number;
-  productId: number;
-  productName: string;
-  quantity: number;
-  unitCents: number;
-  totalCents: number;
-}
-
-export interface Cart {
-  items: CartItem[];
-  subtotalCents: number;
-  count: number;
-}
-
-export interface OrderItem {
-  productId: number;
-  productName: string;
-  quantity: number;
-  unitPriceCents: number;
-  totalCents: number;
-}
-
-export interface Order {
-  reference: string;
-  items: OrderItem[];
-  totalCents: number;
-  status: 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  createdAt: string;
-}
+export type ProductCsvRow = {
+  id: number;
+  name: string;
+  sellerName: string;
+  category: string;
+  discount: Discount | null;
+  effectiveCents: number;
+} & Record<string, CsvValue>;
