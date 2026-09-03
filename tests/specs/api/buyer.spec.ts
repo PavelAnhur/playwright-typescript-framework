@@ -1,7 +1,9 @@
 import { ENV } from '@config/env';
 import { expect, test } from '@fixtures';
 import type { User } from '@src/types/account';
-import type { Cart, Order, Product } from '@src/types/product';
+import type { Cart } from '@src/types/cart';
+import type { Order } from '@src/types/order';
+import type { Product } from '@src/types/product';
 
 test.describe('Buyer API - Authenticated Scenarios', () => {
   test.beforeEach(async ({ api }) => {

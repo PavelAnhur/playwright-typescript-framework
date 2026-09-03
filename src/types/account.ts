@@ -9,8 +9,3 @@ export interface User {
   role: 'buyer' | 'seller';
   name?: string;
 }
-
-export interface LoginResponse {
-  token: string;
-  user: User;
-}
