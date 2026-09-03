@@ -126,8 +126,7 @@ async function createStorageState(
     await page.close();
   } catch (error) {
     await context.close();
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to create storage state for ${account.email}: ${errorMessage}`);
+    throw new Error(`Failed to create storage state for ${account.email}: `, { cause: error });
   }
   await context.close();
 }
