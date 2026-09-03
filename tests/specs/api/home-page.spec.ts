@@ -2,7 +2,7 @@ import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 import type { Account } from '@src/types/account';
 import type { Certificate } from '@src/types/certificate';
-import type { Product } from '@src/types/product';
+import type { Product, ProductCsvRow } from '@src/types/product';
 
 
 test.describe('Home Page API - Public Endpoints', () => {
@@ -40,7 +40,8 @@ test.describe('Home Page API - Public Endpoints', () => {
   });
 
   test.describe('GET /api/v1/products - Catalogue', () => {
-    test('should return all products with correct shape', async ({ api }) => {
+    test('should return all products with correct shape - parameterized', async ({ api, csvData }) => {
+      const productData = csvData<ProductCsvRow>('products.csv');
       const response = await api.get('products');
       expect(response.ok()).toBeTruthy();
       const data = await response.json();
@@ -49,14 +50,23 @@ test.describe('Home Page API - Public Endpoints', () => {
       const { products, count } = data;
       expect(count).toBe(22);
       expect(products).toHaveLength(22);
-      const firstProduct: Product = products.find((p: Product) => p.id === 1);
-      expect(firstProduct.name).toBe('Noir Saffiano Tote');
-      expect(firstProduct.sellerName).toBe('Atelier Maison');
-      expect(firstProduct.category).toBe('Bags');
-      expect(firstProduct.discount).toBeDefined();
-      expect(firstProduct.discount?.type).toBe('percentage');
-      expect(firstProduct.discount?.value).toBe(15);
-      expect(firstProduct.effectiveCents).toBe(242250); // 285000 * 0.85
+      for (const expected of productData) {
+        const product: Product = products.find((p: Product) => p.id === expected.id);
+        if (!product) {
+          throw new Error(`Product with ID ${expected.id} not found in response`);
+        }
+        expect(product.name).toBe(expected.name);
+        expect(product.sellerName).toBe(expected.sellerName);
+        expect(product.category).toBe(expected.category);
+        if (expected.discount) {
+          expect(product.discount).toBeDefined();
+          expect(product.discount?.type).toBe(expected.discount.type);
+          expect(product.discount?.value).toBe(expected.discount.value);
+          expect(product.effectiveCents).toBe(expected.effectiveCents);
+        } else {
+          expect(product.discount).toBeNull();
+        }
+      }
     });
 
     test('should filter products by category', async ({ api }) => {
@@ -105,7 +115,7 @@ test.describe('Home Page API - Public Endpoints', () => {
       expect(response.ok()).toBeTruthy();
       const data = await response.json();
       const products = data.products;
-      expect(products.every((p: Product) => p.priceCents >= minPrice)).toBeTruthy();
+      expect(products.every((p: Product) => p.priceCents! >= minPrice)).toBeTruthy();
     });
 
     test('should filter by maxPrice', async ({ api }) => {
@@ -114,7 +124,7 @@ test.describe('Home Page API - Public Endpoints', () => {
       expect(response.ok()).toBeTruthy();
       const data = await response.json();
       const products = data.products;
-      expect(products.every((p: Product) => p.priceCents <= maxPrice)).toBeTruthy();
+      expect(products.every((p: Product) => p.priceCents! <= maxPrice)).toBeTruthy();
     });
 
     test('should combine price filters', async ({ api }) => {
@@ -127,7 +137,7 @@ test.describe('Home Page API - Public Endpoints', () => {
       const data = await response.json();
       const products = data.products;
       expect(products.every((p: Product) =>
-        p.priceCents >= minPrice && p.priceCents <= maxPrice
+        p.priceCents! >= minPrice && p.priceCents! <= maxPrice
       )).toBeTruthy();
     });
 

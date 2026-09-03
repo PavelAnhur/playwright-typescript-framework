@@ -1,0 +1,23 @@
+id,name,sellerName,category,discount,effectiveCents
+1,Noir Saffiano Tote,Atelier Maison,Bags,"{""type"":""percentage"",""value"":15}",242250
+2,Aurum Chronograph Watch,Atelier Maison,Watches,null,1240000
+3,Cashmere Opera Scarf,Atelier Maison,Accessories,null,96000
+4,Veluto Silk Eau de Parfum,Atelier Maison,Fragrance,null,178000
+5,Onyx Leather Derby,Atelier Maison,Footwear,"{""type"":""fixed"",""value"":20000}",122000
+6,Marble Atelier Sunglasses,Atelier Maison,Accessories,null,68000
+7,Provence Linen Blazer,Atelier Maison,Apparel,null,215000
+8,Celeste Pearl Drop Earrings,Atelier Maison,Jewellery,null,320000
+9,Stone Calf Bucket Bag,Atelier Maison,Bags,null,195000
+10,Ivory Croc Clutch,Atelier Maison,Bags,null,340000
+11,Silver Moon Watch,Atelier Maison,Watches,null,890000
+12,Bronze Field Watch,Maison Rive,Watches,null,560000
+13,Alpaca Cable Gloves,Maison Rive,Accessories,null,72000
+14,Navy Silk Pocket Square,Maison Rive,Accessories,null,18000
+15,Cedar Amber Parfum,Maison Rive,Fragrance,null,145000
+16,White Rose Cologne,Maison Rive,Fragrance,null,98000
+17,Tan Grain Loafer,Maison Rive,Footwear,null,165000
+18,Moss Suede Mule,Maison Rive,Footwear,null,118000
+19,Navy Roll Neck,Maison Rive,Apparel,null,185000
+20,Stone Wool Trench Coat,Maison Rive,Apparel,null,420000
+21,Gold Signet Ring,Maison Rive,Jewellery,null,185000
+22,Pearl Cuff Bracelet,Maison Rive,Jewellery,null,240000
