@@ -1,9 +1,9 @@
 export interface OrderItem {
-  productId: number;
-  productName: string;
+  productId?: number;
+  name: string;
   quantity: number;
-  unitPriceCents: number;
-  totalCents: number;
+  unitCents: number;
+  totalCents?: number;
 }
 
 export interface Order {
@@ -12,4 +12,12 @@ export interface Order {
   totalCents: number;
   status: 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: string;
+  shipping: ShippingInfo;
+}
+
+export interface ShippingInfo {
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
 }
