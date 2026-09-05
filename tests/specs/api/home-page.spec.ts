@@ -89,8 +89,8 @@ test.describe('Home Page API - Public Endpoints', () => {
       )).toBeTruthy();
     });
 
-    test.fixme('should sort products by price ascending', async ({ api }) => {
-      const response = await api.get('products?sort=price');
+    test('should sort products by price ascending', async ({ api }) => {
+      const response = await api.get('products?sort=price_asc');
       expect(response.ok()).toBeTruthy();
       const data = await response.json();
       const products = data.products;
@@ -99,8 +99,8 @@ test.describe('Home Page API - Public Endpoints', () => {
       expect(prices).toEqual(sorted);
     });
 
-    test.fixme('should sort products by price descending', async ({ api }) => {
-      const response = await api.get('products?sort=-price');
+    test('should sort products by price descending', async ({ api }) => {
+      const response = await api.get('products?sort=price_desc');
       expect(response.ok()).toBeTruthy();
       const data = await response.json();
       const products = data.products;
@@ -141,21 +141,19 @@ test.describe('Home Page API - Public Endpoints', () => {
       )).toBeTruthy();
     });
 
-    test.fixme('should handle invalid sort parameter', async ({ api }) => {
+    test('should handle invalid sort parameter', async ({ api }) => {
       const response = await api.get('products?sort=invalid');
       expect(response.ok()).toBeFalsy();
       const data = await response.json();
-      expect(data.error).toMatchObject({
-        code: 'VALIDATION_ERROR',
-        message: expect.stringContaining('sort'),
-      });
+      expect(data.error).toBe('INVALID_SORT_OPTION');
+      expect(data.message).toContain('Invalid sort option:');
     });
 
-    test.fixme('should handle invalid price filters', async ({ api }) => {
+    test('should handle invalid price filters', async ({ api }) => {
       const response = await api.get('products?minPrice=not-a-number');
       expect(response.status()).toBe(400);
       const data = await response.json();
-      expect(data.error.code).toBe('VALIDATION_ERROR');
+      expect(data.error).toBe('INVALID_MIN_PRICE');
     });
   });
 

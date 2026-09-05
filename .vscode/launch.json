@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "command": "npm start",
+      "name": "Run npm start",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "name": "Attach to Chrome",
+      "port": 9222,
+      "request": "attach",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Maison Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development",
+        "PORT": "4000",
+        "MAISON_JWT_SECRET": "debug-secret"
+      },
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Playwright Test",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "playwright",
+        "test",
+        "--debug"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Specific Test",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "playwright",
+        "test",
+        "${relativeFile}",
+        "--debug"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
