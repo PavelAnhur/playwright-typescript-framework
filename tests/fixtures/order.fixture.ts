@@ -1,6 +1,6 @@
 import type { APIResponse } from '@playwright/test';
-import { test as authTest } from './auth.fixture';
 import type { ShippingInfo } from '@src/types/order';
+import { test as authTest } from './auth.fixture';
 
 export interface OrderFixtures {
   createOrder: (items?: Array<{ productId: number; quantity: number }>, shipping?: ShippingInfo) => Promise<APIResponse>;

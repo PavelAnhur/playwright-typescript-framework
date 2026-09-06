@@ -1,9 +1,9 @@
 export interface Certificate {
-  id: number,
-  issuedAt: string,
-  issuer: string,
-  material: string,
-  productId: number,
-  productName: string,
-  serialNo: string,
+  id: number;
+  productId: number;
+  productName: string;
+  serialNo: string;
+  issuer: string;
+  material: string;
+  issuedAt: string;
 }

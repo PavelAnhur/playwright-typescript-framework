@@ -4,13 +4,20 @@ import type { Cart } from '@src/types/cart';
 import type { Order } from '@src/types/order';
 import type { Product } from '@src/types/product';
 
+
 test.describe('Buyer API - Authenticated Scenarios', () => {
-  test.beforeEach(async ({ api }) => {
+  test.beforeEach(async ({ api, authedBuyer }) => {
     // Reset the database to a clean state before each test
     await api.post('_reset');
+    const response = await api.get('products');
+    const data = await response.json();
+    testProduct = data.products[0];
+    await authedBuyer.delete('cart');
   });
 
-  test.describe.serial('Cart Operations', () => {
+  let testProduct: Product;
+
+  test.describe('Cart Operations', () => {
     test('should get empty cart for new user', async ({ authedBuyer }) => {
       const response = await authedBuyer.get('cart');
       expect(response.ok()).toBeTruthy();
@@ -21,13 +28,10 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(cart.count).toBe(0);
     });
 
-    test('should add item to cart', async ({ authedBuyer, api }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product: Product = productsData.products[0];
+    test('should add item to cart', async ({ authedBuyer }) => {
       const response = await authedBuyer.post('cart/items', {
         data: {
-          productId: product.id,
+          productId: testProduct.id,
           quantity: 2,
         },
       });
@@ -35,54 +39,26 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       const responseData = await response.json();
       const cart: Cart = responseData.cart;
       expect(cart.items).toHaveLength(1);
-      expect(cart.items[0]?.productId).toBe(product.id);
+      expect(cart.items[0]?.productId).toBe(testProduct.id);
       expect(cart.items[0]?.quantity).toBe(2);
-      expect(cart.items[0]?.unitCents).toBe(product.effectiveCents || product.priceCents);
-      expect(cart.subtotalCents).toBe(product.priceCents! * 2);
+      expect(cart.items[0]?.unitCents).toBe(testProduct.effectiveCents || testProduct.priceCents);
+      expect(cart.subtotalCents).toBe(testProduct.priceCents! * 2);
     });
 
-    test('should update item quantity in cart', async ({ api, authedBuyer }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product: Product = productsData.products[0];
-      await authedBuyer.post('cart/items', {
-        data: { productId: product.id, quantity: 1 },
-      });
+    test('should update item quantity in cart', async ({ authedBuyer }) => {
       const response = await authedBuyer.post('cart/items', {
-        data: { productId: product.id, quantity: 5 },
+        data: { productId: testProduct.id, quantity: 5 },
       });
       expect(response.ok()).toBeTruthy();
       const responseData = await response.json();
       const cart: Cart = responseData.cart;
       expect(cart.items[0]?.quantity).toBe(5);
-      expect(cart.subtotalCents).toBe(product.priceCents! * 5);
+      expect(cart.subtotalCents).toBe(testProduct.priceCents! * 5);
     });
 
-    test('should remove item from cart', async ({ api, authedBuyer }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product: Product = productsData.products[0];
+    test('should clear entire cart', async ({ authedBuyer }) => {
       await authedBuyer.post('cart/items', {
-        data: { productId: product.id, quantity: 1 },
-      });
-      const getCartResponse = await authedBuyer.get('cart');
-      const cart: Cart = await getCartResponse.json()
-        .then(resData => resData.cart);
-      const itemId = cart.items[0]?.itemId;
-      const response = await authedBuyer.delete(`cart/items/${itemId}`);
-      expect(response.ok()).toBeTruthy();
-      const updatedCart: Cart = await response.json()
-        .then(resData => resData.cart);
-      expect(updatedCart.items).toHaveLength(0);
-      expect(updatedCart.subtotalCents).toBe(0);
-    });
-
-    test('should clear entire cart', async ({ api, authedBuyer }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product = productsData.products[0];
-      await authedBuyer.post('cart/items', {
-        data: { productId: product.id, quantity: 1 }
+        data: { productId: testProduct.id, quantity: 2 }
       });
       const response = await authedBuyer.delete('cart');
       expect(response.ok()).toBeTruthy();
@@ -92,12 +68,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(cart.subtotalCents).toBe(0);
     });
 
-    test('should return 400 when adding product with invalid quantity', async ({ api, authedBuyer }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product = productsData.products[0];
+    test('should return 400 when adding product with invalid quantity', async ({ authedBuyer }) => {
       const response = await authedBuyer.post('cart/items', {
-        data: { productId: product.id, quantity: 0 },
+        data: { productId: testProduct.id, quantity: 0 },
       });
       expect(response.status()).toBe(400);
       const error = await response.json();
@@ -127,22 +100,35 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(cart.items[0]?.unitCents).toBe(product.effectiveCents);
       expect(cart.subtotalCents).toBe(product.effectiveCents);
     });
+
+    test('should remove item from cart', async ({ authedBuyer }) => {
+      await authedBuyer.post('cart/items', {
+        data: { productId: testProduct.id, quantity: 2 },
+      });
+      const getCartResponse = await authedBuyer.get('cart');
+      const cart: Cart = await getCartResponse.json()
+        .then(resData => resData.cart);
+      const itemId = cart.items[0]?.itemId;
+      const response = await authedBuyer.delete(`cart/items/${itemId}`);
+      expect(response.ok()).toBeTruthy();
+      const updatedCart: Cart = await response.json()
+        .then(resData => resData.cart);
+      expect(updatedCart.items).toHaveLength(0);
+      expect(updatedCart.subtotalCents).toBe(0);
+    });
   });
 
-  test.describe.serial('Order Operations', () => {
-    test('should create order from cart', async ({ api, authedBuyer, createOrder }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product = productsData.products[0];
+  test.describe('Order Operations', () => {
+    test('should create order from cart', async ({ authedBuyer, createOrder }) => {
       const response = await createOrder([
-        { productId: product.id, quantity: 2 }
+        { productId: testProduct.id, quantity: 2 }
       ]);
       expect(response.ok()).toBeTruthy();
       const order: Order = await response.json()
         .then(resData => resData.order);
       expect(order.items).toHaveLength(1);
       expect(order.items[0]?.quantity).toBe(2);
-      expect(order.totalCents).toBe(product.effectiveCents * 2 || product.priceCents * 2);
+      expect(order.totalCents).toBe(testProduct.effectiveCents! * 2 || testProduct.priceCents! * 2);
       expect(order.status).toBe('confirmed');
       expect(order.reference).toBeDefined();
       const cartResponse = await authedBuyer.get('cart');
@@ -151,12 +137,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(cart.items).toHaveLength(0);
     });
 
-    test('should get order history', async ({ api, authedBuyer, createOrder }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product = productsData.products[0];
+    test('should get order history', async ({ authedBuyer, createOrder }) => {
       await createOrder([
-        { productId: product.id, quantity: 1 }
+        { productId: testProduct.id, quantity: 1 }
       ]);
       const response = await authedBuyer.get('orders');
       expect(response.ok()).toBeTruthy();
@@ -171,12 +154,9 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       });
     });
 
-    test('should get single order by reference', async ({ api, authedBuyer, createOrder }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product = productsData.products[0];
+    test('should get single order by reference', async ({ authedBuyer, createOrder }) => {
       const orderResponse = await createOrder([
-        { productId: product.id, quantity: 1 }
+        { productId: testProduct.id, quantity: 1 }
       ]);
       const createdOrder: Order = await orderResponse.json()
         .then(resData => resData.order);
@@ -195,20 +175,6 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(response.status()).toBe(404);
       const error = await response.json();
       expect(error.error.code).toBe('ORDER_NOT_FOUND');
-    });
-
-    test('should return 403 when accessing another buyers order', async ({ api, createOrder, authedSeller1 }) => {
-      const productsResponse = await api.get('products');
-      const productsData = await productsResponse.json();
-      const product = productsData.products[0];
-      const orderResponse = await createOrder([
-        { productId: product.id, quantity: 1 }
-      ]);
-      const { order: createdOrder } = await orderResponse.json() as { order: Order };
-      const reference = createdOrder.reference;
-      // Try to access order with invalid token (simulating different user)
-      const response = await authedSeller1.get(`orders/${reference}`);
-      expect(response.status()).toBe(403);
     });
 
     test('should not create order with empty cart', async ({ authedBuyer }) => {
@@ -242,6 +208,18 @@ test.describe('Buyer API - Authenticated Scenarios', () => {
       expect(response.status()).toBe(409);
       const error = await response.json();
       expect(error.error.code).toBe('INSUFFICIENT_STOCK');
+    });
+
+    test('should return 403 when accessing another buyers order', async ({ createOrder, authedSeller1 }) => {
+      const orderResponse = await createOrder([
+        { productId: testProduct.id, quantity: 2 }
+      ]);
+      const data = await orderResponse.json();
+      const createdOrder = data.order;
+      const reference = createdOrder.reference;
+      // Try to access order with invalid token (simulating different user)
+      const response = await authedSeller1.get(`orders/${reference}`);
+      expect(response.status()).toBe(403);
     });
   });
 
