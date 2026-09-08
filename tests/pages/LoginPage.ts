@@ -2,8 +2,8 @@ import { getTestUser } from '@config/env';
 import { type Locator, type Page, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 
+
 export class LoginPage extends BasePage {
-  // Login form elements
   readonly loginForm: Locator;
   readonly emailInput: Locator;
   readonly passwordInput: Locator;
@@ -11,10 +11,11 @@ export class LoginPage extends BasePage {
   readonly alertContainer: Locator;
   readonly gotoRegisterLink: Locator;
   readonly demoHint: Locator;
+  readonly loginHeading: Locator;
+  readonly loginPageHead: Locator;
 
   constructor(page: Page) {
     super(page);
-    // Login form
     this.loginForm = page.getByTestId('login-form');
     this.emailInput = page.getByTestId('login-email');
     this.passwordInput = page.getByTestId('login-password');
@@ -22,6 +23,8 @@ export class LoginPage extends BasePage {
     this.alertContainer = page.locator('#login-alert');
     this.gotoRegisterLink = page.getByTestId('goto-register');
     this.demoHint = page.getByTestId('demo-hint');
+    this.loginHeading = page.getByRole('heading', { name: 'Sign In' });
+    this.loginPageHead = page.locator('.tiny');
   }
 
   /**
@@ -33,14 +36,11 @@ export class LoginPage extends BasePage {
   }
 
   /**
-   * Wait for the login page to be fully loaded
+   * Wait for the login page to be loaded
    */
   async waitForLoad(): Promise<void> {
     await super.waitForLoad();
-    await expect(this.loginForm).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.passwordInput).toBeVisible();
-    await expect(this.submitButton).toBeVisible();
+    await expect(this.loginForm).toBeAttached();
   }
 
   /**
@@ -141,7 +141,7 @@ export class LoginPage extends BasePage {
   async waitForLoginSuccess(): Promise<void> {
     await this.page.waitForURL(/#\//);
     await this.page.waitForSelector('[data-app-ready="true"]');
-    await this.page.waitForSelector('[data-testid="current-user"]');
+    await this.currentUser.waitFor({ state: 'visible' });
   }
 
   /**

@@ -7,8 +7,8 @@ test.describe('Authenticated Buyer - Home Page', () => {
       // Verify buyer is logged in
       await expect(buyerHomePage.currentUser).toBeVisible();
       // Verify cart link with count
-      await expect(buyerHomePage.cartLink).toBeVisible();
-      await expect(buyerHomePage.cartLink).toContainText('Cart');
+      await expect(buyerHomePage.navCart).toBeVisible();
+      await expect(buyerHomePage.navCart).toContainText('Cart');
       await expect(buyerHomePage.cartCount).toBeVisible();
       // Verify orders link is visible for buyer
       await expect(buyerHomePage.ordersLink).toBeVisible();
@@ -23,7 +23,7 @@ test.describe('Authenticated Buyer - Home Page', () => {
     });
 
     test('should navigate to cart when cart link is clicked', async ({ buyerHomePage }) => {
-      await buyerHomePage.cartLink.click();
+      await buyerHomePage.navCart.click();
       await buyerHomePage.expectUrlToContain('/#/cart');
     });
 
@@ -34,8 +34,8 @@ test.describe('Authenticated Buyer - Home Page', () => {
 
     test('should logout successfully', async ({ buyerHomePage }) => {
       await buyerHomePage.logout();
-      await expect(buyerHomePage.loginLink).toBeVisible();
-      await expect(buyerHomePage.cartLink).toBeHidden();
+      await expect(buyerHomePage.navLogin).toBeVisible();
+      await expect(buyerHomePage.navCart).toBeHidden();
     });
   });
 
@@ -60,7 +60,7 @@ test.describe('Authenticated Buyer - Home Page', () => {
       await authedBuyer.post('cart/items', {
         data: { productId: product.id, quantity: 1 },
       });
-      await buyerHomePage.cartLink.click();
+      await buyerHomePage.navCart.click();
       await expect(buyerHomePage.getElement('[data-testId="cart-line"]')).toBeVisible();
       await expect(buyerHomePage.getElement('[data-testId="line-name"]')).toHaveText(product.name);
       await expect(buyerHomePage.getElement('[data-testId="line-qty"]')).toHaveText('Qty 1');
@@ -180,7 +180,7 @@ test.describe('Authenticated Buyer - Home Page', () => {
   test.describe('Flash Messages', () => {
     test('should show flash message on login', async ({ buyerHomePage }) => {
       await buyerHomePage.logout();
-      (await buyerHomePage.goToLogin()).loginAsDemoUser('buyer');
+      (await buyerHomePage.openLoginPage()).loginAsDemoUser('buyer');
       await expect(buyerHomePage.flash).toBeVisible();
       await expect(buyerHomePage.flash).toContainText('Welcome');
     });
