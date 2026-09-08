@@ -11,12 +11,34 @@ export abstract class BasePage {
   readonly loadingIndicator: Locator;
   readonly cookieBanner: Locator;
   readonly cookieAcceptButton: Locator;
+  // Shared navigation elements
+  readonly brand: Locator;
+  readonly navToggle: Locator;
+  readonly navMobileMenu: Locator;
+  readonly navShop: Locator;
+  readonly navCart: Locator;
+  readonly navLogin: Locator;
+  readonly logoutLink: Locator;
+  readonly sellerListing: Locator;
+  readonly currentUser: Locator;
+  readonly skipLink: Locator;
 
   constructor(protected readonly page: Page) {
     this.flashMessage = page.locator('.flash, .alert, [role="alert"]');
     this.loadingIndicator = page.locator('.loading, .spinner, [data-testid="loading"]');
     this.cookieBanner = page.locator('.cookie-banner, .cookie-consent, [data-testid="cookie-banner"]');
     this.cookieAcceptButton = page.locator('button:has-text("Accept"), button:has-text("Allow"), [data-testid="accept-cookies"]');
+
+    this.brand = page.getByTestId('brand');
+    this.navToggle = page.getByTestId('nav-toggle');
+    this.navMobileMenu = page.getByTestId('nav-mobile-menu');
+    this.navShop = page.getByTestId('nav-shop');
+    this.navCart = page.getByTestId('nav-cart');
+    this.navLogin = page.getByTestId('nav-login');
+    this.logoutLink = page.getByTestId('logout-link');
+    this.sellerListing = page.getByTestId('my-listings');
+    this.currentUser = page.getByTestId('current-user');
+    this.skipLink = page.getByTestId('skip-link');
   }
 
   /**
@@ -153,27 +175,10 @@ export abstract class BasePage {
     return this.page.locator(selector, options);
   }
 
-  /**
-   * Wait for a specific element to be visible
-   */
-  async waitForElement(
-    locator: Locator,
-    timeout: number = T.LONG,
-  ): Promise<void> {
-    await locator.waitFor({ state: 'visible', timeout });
-  }
 
   /**
-   * Check if an element is present
-   */
-  async isElementPresent(locator: Locator): Promise<boolean> {
-    const count = await locator.count();
-    return count > 0;
-  }
-
-  /**
-   * Check if an element is visible quickly
-   */
+ * Check if an element is visible quickly
+ */
   async isElementVisible(
     locator: Locator,
     timeout: number = T.VERY_SHORT,
@@ -218,7 +223,6 @@ export abstract class BasePage {
  */
   async reload(): Promise<void> {
     await this.page.reload();
-    await this.waitForLoad();
   }
 
   /**
@@ -241,5 +245,78 @@ export abstract class BasePage {
    */
   async expectUrlToBe(path: string): Promise<void> {
     await expect(this.page).toHaveURL(path);
+  }
+
+  async goToShop(): Promise<void> {
+    await this.navShop.click();
+    await this.page.waitForURL(/#\//);
+  }
+
+  async goToCart(): Promise<void> {
+    await this.navCart.click();
+    await this.page.waitForURL(/#\/cart/);
+  }
+
+  async goToLogin(): Promise<void> {
+    await this.navLogin.click();
+    await this.page.waitForURL(/#\/login/);
+  }
+
+  // ============ Keyboard Navigation Methods ============
+
+  /**
+   * Press the Tab key
+   */
+  async pressTab(): Promise<void> {
+    await this.page.keyboard.press('Tab');
+  }
+
+  /**
+   * Press Shift+Tab for reverse tab navigation
+   */
+  async pressShiftTab(): Promise<void> {
+    await this.page.keyboard.press('Shift+Tab');
+  }
+
+  /**
+   * Press a specific key
+   */
+  async pressKey(key: string): Promise<void> {
+    await this.page.keyboard.press(key);
+  }
+
+  /**
+   * Press Enter key
+   */
+  async pressEnter(): Promise<void> {
+    await this.page.keyboard.press('Enter');
+  }
+
+  /**
+   * Press Escape key
+   */
+  async pressEscape(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Press Space key
+   */
+  async pressSpace(): Promise<void> {
+    await this.page.keyboard.press('Space');
+  }
+
+  async setMobileViewport(width: number = 375, height: number = 812): Promise<void> {
+    await this.page.setViewportSize({ width: width, height: height });
+  }
+
+  // ============ Wait/Timeout Methods ============
+
+  /**
+   * Wait for a specific amount of time in milliseconds
+   * Use sparingly - prefer waiting for elements/conditions instead
+   */
+  async waitForTimeout(ms: number): Promise<void> {
+    await this.page.waitForTimeout(ms);
   }
 }

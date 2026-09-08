@@ -5,14 +5,6 @@ import { LoginPage } from './LoginPage';
 
 export class HomePage extends BasePage {
   // Navigation
-  readonly brandContainer: Locator;
-  readonly skipLink: Locator;
-  readonly navToggle: Locator;
-  readonly navMobileMenu: Locator;
-  readonly shopLink: Locator;
-  readonly loginLink: Locator;
-  readonly currentUser: Locator;
-  readonly cartLink: Locator;
   readonly cartCount: Locator;
   readonly ordersLink: Locator;
   readonly logoutLink: Locator;
@@ -38,14 +30,6 @@ export class HomePage extends BasePage {
   constructor(readonly page: Page) {
     super(page);
     // Navigation
-    this.brandContainer = page.getByTestId('brand');
-    this.skipLink = page.getByTestId('skip-link');
-    this.navToggle = page.getByTestId('nav-toggle');
-    this.navMobileMenu = page.getByTestId('nav-mobile-menu');
-    this.shopLink = page.getByTestId('nav-shop');
-    this.loginLink = page.getByTestId('nav-login');
-    this.currentUser = page.getByTestId('current-user');
-    this.cartLink = page.getByTestId('nav-cart');
     this.cartCount = page.getByTestId('cart-count');
     this.ordersLink = page.getByTestId('nav-orders');
     this.logoutLink = page.getByTestId('logout-link');
@@ -76,24 +60,24 @@ export class HomePage extends BasePage {
 
   async waitForLoad(): Promise<void> {
     await super.waitForLoad();
-    await expect(this.brandContainer).toBeVisible();
+    await expect(this.brand).toBeVisible();
     await expect(this.catalogue).toBeVisible();
   }
 
   async clickBrand(): Promise<void> {
-    await this.brandContainer.click();
+    await this.brand.click();
     await this.expectAtHomePage();
   }
 
-  async goToLogin(): Promise<LoginPage> {
-    await this.loginLink.click();
+  async openLoginPage(): Promise<LoginPage> {
+    await this.navLogin.click();
     const loginPage = new LoginPage(this.page);
     await loginPage.waitForLoad();
     return loginPage;
   }
 
   async focusSkipLink(): Promise<void> {
-    await this.page.keyboard.press('Tab');
+    await this.pressTab();
   }
 
   // Mobile Navigation
@@ -102,17 +86,13 @@ export class HomePage extends BasePage {
   }
 
   async expectMobileMenuVisible(): Promise<void> {
-    await expect(this.shopLink).toBeVisible();
-    await expect(this.loginLink).toBeVisible();
+    await expect(this.navShop).toBeVisible();
+    await expect(this.navLogin).toBeVisible();
   }
 
   async expectMobileMenuHidden(): Promise<void> {
-    await expect(this.shopLink).toBeVisible({ visible: false });
-    await expect(this.loginLink).toBeVisible({ visible: false });
-  }
-
-  async setMobileViewport(): Promise<void> {
-    await this.page.setViewportSize({ width: 375, height: 812 });
+    await expect(this.navShop).toBeVisible({ visible: false });
+    await expect(this.navLogin).toBeVisible({ visible: false });
   }
 
   async openMobileMenu(): Promise<void> {

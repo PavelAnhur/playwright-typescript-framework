@@ -5,9 +5,9 @@ test.describe('Header and Navigation', () => {
   test.beforeEach(async ({ homePage }) => {
     await homePage.open();
   });
-  
+
   test('brand logo is visible and links to home', async ({ homePage }) => {
-    await expect(homePage.brandContainer).toContainText('MAISON');
+    await expect(homePage.brand).toContainText('MAISON');
     await homePage.clickBrand();
   });
 
@@ -34,14 +34,14 @@ test.describe('Header and Navigation', () => {
   });
 
   test('login link navigates to login page', async ({ homePage }) => {
-    await expect(homePage.loginLink).toBeVisible();
-    await homePage.goToLogin();
+    await expect(homePage.navLogin).toBeVisible();
+    await homePage.openLoginPage();
   });
 
   test('shop link is visible and clickable', async ({ homePage }) => {
-    await expect(homePage.shopLink).toBeVisible();
+    await expect(homePage.navShop).toBeVisible();
     // Shop link might be on the same page (hash routing)
-    await homePage.shopLink.click();
+    await homePage.navShop.click();
     // Verify we're still on home page (since it's #/)
     await homePage.expectAtHomePage();
   });
