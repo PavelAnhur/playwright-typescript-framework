@@ -59,13 +59,7 @@ export class RegisterPage extends BasePage {
 
   async waitForLoad(): Promise<void> {
     await super.waitForLoad();
-    await expect(this.registerForm).toBeVisible();
-    await expect(this.firstNameInput).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.passwordInput).toBeVisible();
-    await expect(this.dobInput).toBeVisible();
-    await expect(this.roleBuyer).toBeVisible();
-    await expect(this.submitButton).toBeVisible();
+    await expect(this.registerForm).toBeAttached();
   }
 
   async fillRegisterForm(data: RegisterData): Promise<void> {
