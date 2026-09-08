@@ -1,6 +1,3 @@
-/**
- * Storage state interface
- */
 export interface StorageState {
   cookies: Array<{
     name: string;
