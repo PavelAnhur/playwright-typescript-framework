@@ -1,9 +1,11 @@
 import { expect, test } from '@fixtures';
-import type { Product, ProductCsvRow } from '@src/types/product';
+import type { CsvRow } from '@src/types/csv';
+import type { Product, ProductFields } from '@src/types/product';
 
 
 test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
   test('should return all products with correct shape - parameterized', async ({ api, csvData }) => {
+    type ProductCsvRow = ProductFields & CsvRow;
     const productData = csvData<ProductCsvRow>('products.csv');
     const response = await api.get('products');
     expect(response.ok()).toBeTruthy();

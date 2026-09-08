@@ -1,6 +1,3 @@
-import type { CsvValue } from "./csv";
-
-
 export interface Product {
   id: number;
   sellerId?: number;
@@ -24,11 +21,6 @@ export interface Discount {
   value: number;
 }
 
-export type ProductCsvRow = {
-  id: number;
-  name: string;
-  sellerName: string;
-  category: string;
-  discount: Discount | null;
+export type ProductFields = Pick<Product, 'id' | 'name' | 'sellerName' | 'category' | 'discount'> & {
   effectiveCents: number;
-} & Record<string, CsvValue>;
+};
