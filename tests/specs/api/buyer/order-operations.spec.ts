@@ -5,41 +5,16 @@ import type { Product } from '@src/types/product';
 
 
 test.describe('Buyer API -- Order Operations', () => {
-  let testProduct: Product;
 
   test.beforeEach(async ({ api, authedBuyer }) => {
     await api.post('_reset');
-    const response = await api.get('products');
-    const data = await response.json();
-    testProduct = data.products[1];
     await authedBuyer.delete('cart');
   });
 
-  test('should create order from cart', async ({ api, authedBuyer, createOrder }) => {
-    const response = await api.get('products');
-    const testProduct = await response.json()
-      .then(responseData => responseData.products[2]);
-    const responseOrder = await createOrder([
-      { productId: testProduct.id, quantity: 2 }
-    ]);
-    expect(responseOrder.ok()).toBeTruthy();
-    const order: Order = await responseOrder.json()
-      .then(responseData => responseData.order);
-    expect(order.items).toHaveLength(1);
-    expect(order.items[0]?.quantity).toBe(2);
-    expect(order.totalCents).toBe(testProduct.effectiveCents! * 2 || testProduct.priceCents! * 2);
-    expect(order.status).toBe('confirmed');
-    expect(order.reference).toBeDefined();
-    const cartResponse = await authedBuyer.get('cart');
-    const cart: Cart = await cartResponse.json()
-      .then(responseData => responseData.cart);
-    expect(cart.items).toHaveLength(0);
-  });
-
   test('should get order history', async ({ api, authedBuyer, createOrder }) => {
-    const responseProducts = await api.get('products');
-    const data = await responseProducts.json();
-    testProduct = data.products[6];
+    const products = await api.get('products');
+    const data = await products.json();
+    const testProduct = data.products[6];
     await createOrder([
       { productId: testProduct.id, quantity: 1 }
     ]);
@@ -56,10 +31,16 @@ test.describe('Buyer API -- Order Operations', () => {
     });
   });
 
-  test('should get single order by reference', async ({ authedBuyer, createOrder }) => {
-    const productId = 5
+  test('should get single order by reference', async ({
+    api,
+    authedBuyer,
+    createOrder
+  }) => {
+    const products = await api.get('products');
+    const data = await products.json();
+    const testProductId = data.products[5].id;
     const orderResponse = await createOrder([
-      { productId, quantity: 1 }
+      { productId: testProductId, quantity: 1 }
     ]);
     const createdOrder: Order = await orderResponse.json()
       .then(responseData => responseData.order);
@@ -99,9 +80,16 @@ test.describe('Buyer API -- Order Operations', () => {
     expect(error.error.code).toBe('INSUFFICIENT_STOCK');
   });
 
-  test('should return 403 when accessing another buyers order', async ({ createOrder, authedSeller1 }) => {
+  test('should return 403 when accessing another buyers order', async ({
+    api,
+    createOrder,
+    authedSeller1
+  }) => {
+    const products = await api.get('products');
+    const testProductId = await products.json()
+      .then(responseData => responseData.products[5].id);
     const orderResponse = await createOrder([
-      { productId: testProduct.id, quantity: 2 }
+      { productId: testProductId, quantity: 2 }
     ]);
     const data = await orderResponse.json();
     const createdOrder = data.order;
@@ -123,5 +111,26 @@ test.describe('Buyer API -- Order Operations', () => {
     const updatedProduct: Product = await updatedProductResponse.json()
       .then(responseData => responseData.product);
     expect(updatedProduct.stock).toBe(initialStock - 2);
+  });
+
+  test('should create order from cart', async ({ api, authedBuyer, createOrder }) => {
+    const response = await api.get('products');
+    const product = await response.json()
+      .then(responseData => responseData.products[2]);
+    const responseOrder = await createOrder([
+      { productId: product.id, quantity: 2 }
+    ]);
+    expect(responseOrder.ok()).toBeTruthy();
+    const order: Order = await responseOrder.json()
+      .then(responseData => responseData.order);
+    expect(order.items).toHaveLength(1);
+    expect(order.items[0]?.quantity).toBe(2);
+    expect(order.totalCents).toBe(product.effectiveCents! * 2 || product.priceCents! * 2);
+    expect(order.status).toBe('confirmed');
+    expect(order.reference).toBeDefined();
+    const cartResponse = await authedBuyer.get('cart');
+    const cart: Cart = await cartResponse.json()
+      .then(responseData => responseData.cart);
+    expect(cart.items).toHaveLength(0);
   });
 });

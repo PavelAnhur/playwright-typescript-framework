@@ -101,13 +101,13 @@ test.describe('Buyer API -- Cart Operations', () => {
   test('should remove item from cart', async ({ api, authedBuyer }) => {
     const productsResponse = await api.get('products');
     const product = await productsResponse.json()
-      .then(responseData => responseData.products[7]);
+      .then(responseData => responseData.products[9]);
     await authedBuyer.post('cart/items', {
       data: { productId: product.id, quantity: 2 },
     });
-    const getCartResponse = await authedBuyer.get('cart');
-    const cart: Cart = await getCartResponse.json()
-      .then(resData => resData.cart);
+    const cartResponse = await authedBuyer.get('cart');
+    const cart: Cart = await cartResponse.json()
+      .then(responseData => responseData.cart);
     const itemId = cart.items[0]?.itemId;
     const response = await authedBuyer.delete(`cart/items/${itemId}`);
     expect(response.ok()).toBeTruthy();
