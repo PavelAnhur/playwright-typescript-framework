@@ -10,7 +10,7 @@
 
 ## 📋 Overview
 
-This comprehensive test automation framework was built to test the **Maison** Application Under Test (AUT) — a luxury e-commerce demo application. It demonstrates professional testing practices across three key layers:
+This comprehensive test automation framework was built to test the [**Maison** Application Under Test (AUT)](https://github.com/PavelAnhur/maison) — a luxury e-commerce demo application. It demonstrates professional testing practices across three key layers:
 
 - **🧪 Unit Tests** - Fast, isolated component testing with Vitest
 - **🔌 API Tests** - Contract and integration testing with Playwright
