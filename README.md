@@ -24,7 +24,7 @@ This comprehensive test automation framework was built to test the **Maison** Ap
 - ✅ **Data-Driven Testing** - CSV-based test data with proper typing
 - ✅ **Environment-specific Testing** - Environment-aware configuration with caching
 - ✅ **Cross-Browser Testing** - Chrome, Firefox, WebKit, and mobile viewports
-- ✅ **Comprehensive Reporting** - HTML reports, JUnit XML, and CI/CD integration
+- ✅ **Comprehensive Reporting** - Allure report, HTML reports, JUnit XML, and CI/CD integration
 - ✅ **Type Safety** - Full TypeScript support with strict type checking
 - ✅ **Parallel Execution** - Optimized test execution with parallel workers
 - ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
