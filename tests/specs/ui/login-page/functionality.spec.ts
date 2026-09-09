@@ -1,15 +1,19 @@
 import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
+import { addAllureAttachment, addAllureEnvironment, addAllureMetadata } from '@utils/allure-helper';
+import { ContentType, Severity } from "allure-js-commons";
 
 
-test.describe('Login Page Functionality', () => {
+test.describe('Login Page UI -- Functionality', () => {
   const buyer = getTestUser('buyer');
 
-  test.beforeEach(async ({ loginPage }) => {
+  test.beforeEach(async ({ loginPage }, testInfo) => {
     await loginPage.open();
+    addAllureEnvironment(testInfo);
   });
 
   test('should successfully login with buyer credentials', async ({ loginPage }) => {
+    addAllureMetadata({ severity: Severity.CRITICAL });
     await loginPage.login(buyer.email, buyer.password);
     await loginPage.waitForLoginSuccess();
     await expect(loginPage.currentUser).toBeVisible();
@@ -19,6 +23,7 @@ test.describe('Login Page Functionality', () => {
   });
 
   test('should successfully login with seller credentials', async ({ loginPage }) => {
+    addAllureMetadata({ severity: Severity.CRITICAL });
     const seller = getTestUser('seller1');
     await loginPage.login(seller.email, seller.password);
     await loginPage.waitForLoginSuccess();
@@ -32,6 +37,7 @@ test.describe('Login Page Functionality', () => {
     await expect(loginPage.alertContainer).toBeVisible();
     await expect(loginPage.alertContainer).toContainText('Email or password is incorrect.');
     const currentPath = await loginPage.getCurrentPath();
+    addAllureAttachment('Current path', currentPath, ContentType.TEXT);
     expect(currentPath).toContain('login');
   });
 

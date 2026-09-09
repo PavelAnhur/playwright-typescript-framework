@@ -1,7 +1,8 @@
 import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 
-test.describe('Login Page Session Management', () => {
+
+test.describe('Login Page UI -- Session Management', () => {
   const buyer = getTestUser('buyer');
 
   test.beforeEach(async ({ loginPage }) => {

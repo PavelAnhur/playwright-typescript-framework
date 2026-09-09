@@ -1,7 +1,7 @@
 import { expect, test } from '@fixtures';
 
 
-test.describe('Catalogue Toolbar', () => {
+test.describe('Home Page UI -- Catalogue Toolbar', () => {
   test.beforeEach(async ({ homePage }) => {
     await homePage.open();
   });

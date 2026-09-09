@@ -3,6 +3,7 @@ import { LoginPage } from "@pages/LoginPage";
 import { RegisterPage } from "@pages/RegisterPage";
 import { test as base } from "@playwright/test";
 
+
 export interface PageFixtures {
   homePage: HomePage;
   loginPage: LoginPage;

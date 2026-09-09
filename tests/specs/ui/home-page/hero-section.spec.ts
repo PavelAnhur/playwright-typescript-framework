@@ -1,7 +1,7 @@
 import { expect, test } from '@fixtures';
 
 
-test.describe('Hero Section', () => {
+test.describe('Home Page UI -- Hero Section', () => {
   test('hero content is displayed correctly', async ({ homePage }) => {
     await homePage.open();
     await expect(homePage.eyebrow).toHaveText('The Maison Collection');

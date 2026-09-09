@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@fixtures';
 
 
-test.describe('Accessibility', () => {
+test.describe('Home Page UI -- Accessibility', () => {
   test('home page has no serious violations', async ({ page }) => {
     await page.goto('/');
     const results = await new AxeBuilder({ page })

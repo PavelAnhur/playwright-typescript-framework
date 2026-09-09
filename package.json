@@ -17,7 +17,11 @@
     "start": "node maison/server/dist/index.js",
     "start:dev": "cd maison/server && npm start",
     "build:server": "cd maison/server && npm run build",
-    "codegen": "npx playwright codegen http://localhost:4000"
+    "codegen": "npx playwright codegen http://localhost:4000",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report",
+    "allure:serve": "allure serve allure-results",
+    "allure:clear": "rm -rf allure-results allure-report"
   },
   "keywords": [],
   "license": "MIT",
@@ -30,6 +34,8 @@
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "@vitest/coverage-v8": "^4.1.11",
+    "allure-commandline": "^2.43.0",
+    "allure-playwright": "^3.12.0",
     "csv-parse": "^7.0.2",
     "dotenv": "^17.4.2",
     "eslint": "^10.9.1",
