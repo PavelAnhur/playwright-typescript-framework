@@ -23,6 +23,13 @@ jobs:
         node-version: '24'
         cache: 'npm'
 
+    - name: Install Allure
+      run: |
+        wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+        tar -zxvf allure-2.24.0.tgz
+        sudo mv allure-2.24.0 /opt/allure
+        sudo ln -s /opt/allure/bin/allure /usr/bin/allure      
+
     - run: npm ci --legacy-peer-deps
     - run: npm run typecheck
     - run: npm run lint
@@ -113,6 +120,24 @@ jobs:
 
     - name: Run API tests
       run: npm run test:api
+
+    - name: Generate Allure Report
+      run: npm run allure:generate
+
+    - name: Upload Allure Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: allure-report
+        path: allure-report/
+
+    - name: Deploy Allure Report to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: always()
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+        publish_dir: ./allure-report
+        destination_dir: allure-report
 
     - name: Upload test results
       if: always()

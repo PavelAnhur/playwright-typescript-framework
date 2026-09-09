@@ -2,7 +2,7 @@ import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 
 
-test.describe('Login Page User Experience', () => {
+test.describe('Login Page UI -- User Experience', () => {
   const buyer = getTestUser('buyer');
 
   test.beforeEach(async ({ loginPage }) => {

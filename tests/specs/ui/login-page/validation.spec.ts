@@ -1,7 +1,7 @@
 import { expect, test } from '@fixtures';
 
 
-test.describe('Login Page Form Validation', () => {
+test.describe('Login Page UI -- Form Validation', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.open();
   });

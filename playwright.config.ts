@@ -24,7 +24,13 @@ export default defineConfig({
     ["list"],
     ["html", { open: "never" }],
     ["junit", { outputFile: "test-results/junit.xml" }],
+    ["allure-playwright", {
+      outputFolder: "allure-results",
+      details: true,
+      suiteTitle: true,
+    }],
   ],
+  globalSetup: './src/setup/global-setup.ts',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -65,19 +71,5 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 7a'] },
     },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
 });

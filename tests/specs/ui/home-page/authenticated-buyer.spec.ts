@@ -1,7 +1,7 @@
 import { expect, test } from '@fixtures';
 
 
-test.describe('Authenticated Buyer - Home Page', () => {
+test.describe('Home Page UI -- Authenticated Buyer', () => {
   test.describe('Header & Navigation', () => {
     test('should show buyer-specific navigation elements', async ({ buyerHomePage }) => {
       // Verify buyer is logged in

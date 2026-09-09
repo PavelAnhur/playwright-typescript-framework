@@ -28,3 +28,7 @@ docs/.vitepress/cache/
 /playwright/.auth/
 
 maison/
+
+# Allure
+allure-results/
+allure-report/

@@ -1,7 +1,7 @@
 import { expect, test } from '@fixtures';
 
 
-test.describe('Header and Navigation', () => {
+test.describe('Home Page UI -- Header and Navigation', () => {
   test.beforeEach(async ({ homePage }) => {
     await homePage.open();
   });

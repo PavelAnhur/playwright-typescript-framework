@@ -1,7 +1,7 @@
 import { expect, test } from '@fixtures';
 
 
-test.describe('Register Page UI Tests', () => {
+test.describe('Register Page UI', () => {
   test.beforeEach(async ({ registerPage }) => {
     registerPage.open();
   })
