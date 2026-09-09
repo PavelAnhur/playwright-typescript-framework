@@ -22,6 +22,7 @@ This comprehensive test automation framework was built to test the **Maison** Ap
 - ✅ **Page Object Pattern** - Clean, maintainable page objects with shared components
 - ✅ **Custom Fixtures** - Reusable test fixtures for authentication, products, and orders
 - ✅ **Data-Driven Testing** - CSV-based test data with proper typing
+- ✅ **Environment-specific Testing** - Environment-aware configuration with caching
 - ✅ **Cross-Browser Testing** - Chrome, Firefox, WebKit, and mobile viewports
 - ✅ **Comprehensive Reporting** - HTML reports, JUnit XML, and CI/CD integration
 - ✅ **Type Safety** - Full TypeScript support with strict type checking
