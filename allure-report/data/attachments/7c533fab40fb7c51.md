@@ -1,0 +1,207 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: ui/home-page/authenticated-buyer.spec.ts >> Home Page UI -- Authenticated Buyer >> Product Catalogue >> should display all product cards
+- Location: tests/specs/ui/home-page/authenticated-buyer.spec.ts:71:5
+
+# Error details
+
+```
+Error: expect(locator).toHaveCount(expected) failed
+
+Locator:  getByTestId('product-card')
+Expected: 22
+Received: 37
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveCount" with timeout 5000ms
+  - waiting for getByTestId('product-card')
+    14 × locator resolved to 37 elements
+       - unexpected value "37"
+
+```
+
+# Test source
+
+```ts
+  1   | import { expect, test } from '@fixtures';
+  2   | 
+  3   | 
+  4   | test.describe('Home Page UI -- Authenticated Buyer', () => {
+  5   |   test.describe('Header & Navigation', () => {
+  6   |     test('should show buyer-specific navigation elements', async ({ buyerHomePage }) => {
+  7   |       // Verify buyer is logged in
+  8   |       await expect(buyerHomePage.currentUser).toBeVisible();
+  9   |       // Verify cart link with count
+  10  |       await expect(buyerHomePage.navCart).toBeVisible();
+  11  |       await expect(buyerHomePage.navCart).toContainText('Cart');
+  12  |       await expect(buyerHomePage.cartCount).toBeVisible();
+  13  |       // Verify orders link is visible for buyer
+  14  |       await expect(buyerHomePage.ordersLink).toBeVisible();
+  15  |       await expect(buyerHomePage.ordersLink).toHaveText('Orders');
+  16  |       // Verify logout link
+  17  |       await expect(buyerHomePage.logoutLink).toBeVisible();
+  18  |       await expect(buyerHomePage.logoutLink).toHaveText('Logout');
+  19  |     });
+  20  | 
+  21  |     test('should show correct user role in data attribute', async ({ buyerHomePage }) => {
+  22  |       await expect(buyerHomePage.currentUser).toHaveAttribute('data-role', 'buyer');
+  23  |     });
+  24  | 
+  25  |     test('should navigate to cart when cart link is clicked', async ({ buyerHomePage }) => {
+  26  |       await buyerHomePage.navCart.click();
+  27  |       await buyerHomePage.expectUrlToContain('/#/cart');
+  28  |     });
+  29  | 
+  30  |     test('should navigate to orders when orders link is clicked', async ({ buyerHomePage }) => {
+  31  |       await buyerHomePage.ordersLink.click();
+  32  |       await buyerHomePage.expectUrlToContain('/#/orders');
+  33  |     });
+  34  | 
+  35  |     test('should logout successfully', async ({ buyerHomePage }) => {
+  36  |       await buyerHomePage.logout();
+  37  |       await expect(buyerHomePage.navLogin).toBeVisible();
+  38  |       await expect(buyerHomePage.navCart).toBeHidden();
+  39  |     });
+  40  |   });
+  41  | 
+  42  |   test.describe.serial('Cart & Orders Access', () => {
+  43  |     test('should show correct cart count when items are added', async ({ buyerHomePage, api, authedBuyer }) => {
+  44  |       await api.post('_reset');
+  45  |       const productsResponse = await api.get('products');
+  46  |       const productsData = await productsResponse.json();
+  47  |       const product = productsData.products[0];
+  48  |       await authedBuyer.post('cart/items', {
+  49  |         data: { productId: product.id, quantity: 2 },
+  50  |       });
+  51  |       await buyerHomePage.reload();
+  52  |       await expect(buyerHomePage.cartCount).toHaveText('2');
+  53  |     });
+  54  | 
+  55  |     test('should show product in cart when navigating to cart page', async ({ buyerHomePage, api, authedBuyer }) => {
+  56  |       await api.post('_reset');
+  57  |       const productsResponse = await api.get('products');
+  58  |       const productsData = await productsResponse.json();
+  59  |       const product = productsData.products[0];
+  60  |       await authedBuyer.post('cart/items', {
+  61  |         data: { productId: product.id, quantity: 1 },
+  62  |       });
+  63  |       await buyerHomePage.navCart.click();
+  64  |       await expect(buyerHomePage.getElement('[data-testId="cart-line"]')).toBeVisible();
+  65  |       await expect(buyerHomePage.getElement('[data-testId="line-name"]')).toHaveText(product.name);
+  66  |       await expect(buyerHomePage.getElement('[data-testId="line-qty"]')).toHaveText('Qty 1');
+  67  |     });
+  68  |   });
+  69  | 
+  70  |   test.describe('Product Catalogue', () => {
+  71  |     test('should display all product cards', async ({ buyerHomePage }) => {
+  72  |       await buyerHomePage.waitForCatalogue();
+> 73  |       await expect(buyerHomePage.productCards).toHaveCount(22);
+      |                                                ^ Error: expect(locator).toHaveCount(expected) failed
+  74  |     });
+  75  | 
+  76  |     test('should show sale badges for discounted products', async ({ buyerHomePage }) => {
+  77  |       const productCard = buyerHomePage.getProductById(1);
+  78  |       const saleBadge = productCard.getByTestId('sale-badge');
+  79  |       await expect(saleBadge).toBeVisible();
+  80  |       await expect(productCard).toContainText('Sale');
+  81  |     });
+  82  | 
+  83  |     test('should show sold out badge for out of stock products', async ({ buyerHomePage }) => {
+  84  |       const productCard = buyerHomePage.getProductById(6);
+  85  |       const soldOutBadge = productCard.getByTestId('soldout-badge');
+  86  |       await expect(soldOutBadge).toBeVisible();
+  87  |       await expect(soldOutBadge).toContainText('Sold Out');
+  88  |     });
+  89  | 
+  90  |     test('should show price was for discounted products', async ({ buyerHomePage }) => {
+  91  |       const productCard = buyerHomePage.getProductById(1);
+  92  |       const priceWas = productCard.getByTestId('price-was');
+  93  |       await expect(priceWas).toBeVisible();
+  94  |       await expect(priceWas).toContainText('$2,850.00');
+  95  | 
+  96  |       const productCard5 = buyerHomePage.getProductById(5);
+  97  |       const priceWasProduct5 = productCard5.getByTestId('price-was');
+  98  |       await expect(priceWasProduct5).toBeVisible();
+  99  |       await expect(priceWasProduct5).toContainText('$1,420.00');
+  100 |     });
+  101 | 
+  102 |     test('should show correct discounted price for product 1', async ({ buyerHomePage }) => {
+  103 |       const productCard = buyerHomePage.getProductById(1);
+  104 |       const currentPrice = productCard.getByTestId('price');
+  105 |       await expect(currentPrice).toContainText('$2,422.50');
+  106 |     });
+  107 | 
+  108 |     test('should navigate to product detail when product card is clicked', async ({ buyerHomePage }) => {
+  109 |       await buyerHomePage.getProductById(1).click();
+  110 |       buyerHomePage.expectUrlToContain('/#/product/1');
+  111 |     });
+  112 |   });
+  113 | 
+  114 |   test.describe('Catalogue Toolbar', () => {
+  115 |     test('should filter products by search', async ({ buyerHomePage }) => {
+  116 |       await buyerHomePage.searchFor('Tote');
+  117 |       await expect(buyerHomePage.productCards).toHaveCount(1);
+  118 |       await expect(buyerHomePage.productName).toHaveText('Noir Saffiano Tote');
+  119 |     });
+  120 | 
+  121 |     test('should filter products by category', async ({ buyerHomePage }) => {
+  122 |       await buyerHomePage.filterByCategory('Bags');
+  123 |       await expect(buyerHomePage.productCards).toHaveCount(3);
+  124 |       const categories = await buyerHomePage.getElement('.card__cat').allTextContents();
+  125 |       expect(categories.every(cat => cat === 'Bags')).toBe(true);
+  126 |     });
+  127 | 
+  128 |     test('should sort products by price low to high', async ({ buyerHomePage }) => {
+  129 |       await buyerHomePage.sortBy('price_asc');
+  130 |       const prices = await buyerHomePage.priceList.allTextContents();
+  131 |       const numericPrices = prices.map(p => parseFloat(p.replace(/[^0-9.]/g, '')));
+  132 |       const sorted = [...numericPrices].sort((a, b) => a - b);
+  133 |       expect(numericPrices).toEqual(sorted);
+  134 |     });
+  135 | 
+  136 |     test('should sort products by price high to low', async ({ buyerHomePage }) => {
+  137 |       await buyerHomePage.sortBy('price_desc');
+  138 |       const prices = await buyerHomePage.priceList.allTextContents();
+  139 |       const numericPrices = prices.map(p => parseFloat(p.replace(/[^0-9.]/g, '')));
+  140 |       const sorted = [...numericPrices].sort((a, b) => b - a);
+  141 |       expect(numericPrices).toEqual(sorted);
+  142 |     });
+  143 |   });
+  144 | 
+  145 |   test.describe('Accessibility', () => {
+  146 |     test('should have aria-live region for catalogue updates', async ({ buyerHomePage }) => {
+  147 |       await expect(buyerHomePage.catalogue).toHaveAttribute('aria-live', 'polite');
+  148 |     });
+  149 | 
+  150 |     test('should have skip link', async ({ buyerHomePage }) => {
+  151 |       await expect(buyerHomePage.skipLink).toBeVisible();
+  152 |       await expect(buyerHomePage.skipLink).toHaveText('Skip to content');
+  153 |     });
+  154 | 
+  155 |     test('should have accessible nav toggle', async ({ buyerHomePage }) => {
+  156 |       await expect(buyerHomePage.navToggle).toHaveAttribute('aria-controls', 'primary-nav');
+  157 |       await expect(buyerHomePage.navToggle).toHaveAttribute('aria-expanded', 'false');
+  158 |       await expect(buyerHomePage.navToggle).toHaveAttribute('aria-label', 'Open navigation');
+  159 |     });
+  160 | 
+  161 |     test('should have accessible search input', async ({ buyerHomePage }) => {
+  162 |       await expect(buyerHomePage.searchInput).toHaveAttribute('aria-label', 'Search products');
+  163 |     });
+  164 | 
+  165 |     test('should have accessible category filter', async ({ buyerHomePage }) => {
+  166 |       await expect(buyerHomePage.categorySelect).toHaveAttribute('aria-label', 'Filter by category');
+  167 |     });
+  168 | 
+  169 |     test('should have accessible sort select', async ({ buyerHomePage }) => {
+  170 |       await expect(buyerHomePage.sortSelect).toHaveAttribute('aria-label', 'Sort products');
+  171 |     });
+  172 | 
+  173 |     test('should have product card with accessible labels', async ({ buyerHomePage }) => {
+```
