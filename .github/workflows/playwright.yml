@@ -51,18 +51,6 @@ jobs:
 
     - run: npm ci --legacy-peer-deps
 
-    - name: Run Unit tests with coverage
-      run: npm run test:unit:coverage
-
-    - name: Upload coverage reports
-      if: always()
-      uses: actions/upload-artifact@v4 # Updated to v4
-      with:
-        name: unit-test-coverage
-        path: coverage/
-        retention-days: 10
-
-  # Playwright E2E tests
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -115,11 +103,14 @@ jobs:
         done
         echo "App never came up after 30s"; exit 1
 
-    - name: Run UI tests
-      run: npm run test:ui
+    - name: Run Unit tests
+      run: npm run test:unit
 
     - name: Run API tests
       run: npm run test:api
+
+    - name: Run UI tests
+      run: npm run test:ui
 
     - name: Generate Allure Report
       run: npm run allure:generate
@@ -145,7 +136,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: e2e-test-results
+        name: test-results
         path: |
           test-results/
           playwright-report/
