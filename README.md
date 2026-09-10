@@ -10,11 +10,13 @@
 
 ## 📋 Overview
 
-This comprehensive test automation framework was built to test the **Maison** Application Under Test (AUT) — a luxury e-commerce demo application. It demonstrates professional testing practices across three key layers:
+This comprehensive test automation framework was built to test the [**Maison** Application Under Test (AUT)](https://github.com/PavelAnhur/maison) — a luxury e-commerce demo application. It demonstrates professional testing practices across three key layers:
 
 - **🧪 Unit Tests** - Fast, isolated component testing with Vitest
 - **🔌 API Tests** - Contract and integration testing with Playwright
 - **🖥️ UI Tests** - End-to-end browser automation with Playwright
+
+### The Allure test execution report can be found [here](https://pavelanhur.github.io/playwright-typescript-framework/)
 
 ### Key Features
 
@@ -24,7 +26,7 @@ This comprehensive test automation framework was built to test the **Maison** Ap
 - ✅ **Data-Driven Testing** - CSV-based test data with proper typing
 - ✅ **Environment-specific Testing** - Environment-aware configuration with caching
 - ✅ **Cross-Browser Testing** - Chrome, Firefox, WebKit, and mobile viewports
-- ✅ **Comprehensive Reporting** - HTML reports, JUnit XML, and CI/CD integration
+- ✅ **Comprehensive Reporting** - Allure report, HTML reports, JUnit XML, and CI/CD integration
 - ✅ **Type Safety** - Full TypeScript support with strict type checking
 - ✅ **Parallel Execution** - Optimized test execution with parallel workers
 - ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
