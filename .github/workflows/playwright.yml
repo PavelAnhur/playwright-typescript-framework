@@ -38,6 +38,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: lint
+    permissions:
+      contents: write
     steps:
     - name: Checkout test framework
       uses: actions/checkout@v4
@@ -98,6 +100,16 @@ jobs:
     - name: Generate Allure Report
       run: npm run allure:generate
 
+    - name: Verify Allure report exists
+      if: always()
+      run: |
+        if [ ! -d "allure-report" ]; then
+          echo "❌ allure-report/ was not generated"
+          ls -la
+          exit 1
+        fi
+        echo "✅ allure-report/ found"
+
     - name: Upload Allure Report
       uses: actions/upload-artifact@v4
       if: always()
@@ -112,8 +124,9 @@ jobs:
       with:
         github_token: ${{ secrets.GH_TOKEN }}
         publish_dir: ./allure-report
-        destination_dir: allure-report
+        publish_branch: gh-pages
         keep_files: true
+        force_orphan: false
 
     - name: Upload test results
       if: always()
