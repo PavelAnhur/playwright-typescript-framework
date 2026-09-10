@@ -19,7 +19,7 @@ vi.mock('@utils/path-utils', async () => {
   };
 });
 
-describe('path-utils', () => {
+describe('unit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env['TEST_ENV'];

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { detectSpecPath } from '../../utils/stack-trace';
 
-describe('stack-trace', () => {
+
+describe('unit', () => {
   describe('detectSpecPath', () => {
     beforeEach(() => {
       vi.clearAllMocks();

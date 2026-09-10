@@ -15,13 +15,14 @@ import fs from 'fs';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+
 // Mock dependencies
 vi.mock('fs');
 vi.mock('path');
 vi.mock('csv-parse/sync');
 vi.mock('@utils/path-utils');
 
-describe('file-utils', () => {
+describe('unit', () => {
   const mockAbsolutePath = '/absolute/path/to/test/data.csv';
 
   beforeEach(() => {
