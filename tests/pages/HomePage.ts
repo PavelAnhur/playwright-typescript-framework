@@ -1,4 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
+import { Step } from '@utils/step-decorator';
 import { BasePage } from './BasePage';
 import { LoginPage } from './LoginPage';
 
@@ -53,22 +54,26 @@ export class HomePage extends BasePage {
     this.soldoutBadge = page.getByTestId('soldout-badge');
   }
 
+  @Step('Open home page')
   async open(): Promise<void> {
     await super.goto('/');
     await this.waitForLoad();
   }
 
+  @Step('Wait for home page to be ready')
   async waitForLoad(): Promise<void> {
     await super.waitForLoad();
     await expect(this.brand).toBeVisible();
     await expect(this.catalogue).toBeVisible();
   }
 
+  @Step('Click brand logo')
   async clickBrand(): Promise<void> {
     await this.brand.click();
     await this.expectAtHomePage();
   }
 
+  @Step('Open login page from navigation')
   async openLoginPage(): Promise<LoginPage> {
     await this.navLogin.click();
     const loginPage = new LoginPage(this.page);
@@ -76,42 +81,51 @@ export class HomePage extends BasePage {
     return loginPage;
   }
 
+  @Step('Focus skip link with Tab')
   async focusSkipLink(): Promise<void> {
     await this.pressTab();
   }
 
-  // Mobile Navigation
+  // ---------- Mobile navigation ----------
+
+  @Step('Assert nav toggle aria-expanded is "{0}"')
   async expectNavToggleAriaExpanded(expected: string): Promise<void> {
     await expect(this.navToggle).toHaveAttribute('aria-expanded', expected);
   }
 
+  @Step('Assert mobile menu is visible')
   async expectMobileMenuVisible(): Promise<void> {
     await expect(this.navShop).toBeVisible();
     await expect(this.navLogin).toBeVisible();
   }
 
+  @Step('Assert mobile menu is hidden')
   async expectMobileMenuHidden(): Promise<void> {
     await expect(this.navShop).toBeVisible({ visible: false });
     await expect(this.navLogin).toBeVisible({ visible: false });
   }
 
+  @Step('Open mobile menu')
   async openMobileMenu(): Promise<void> {
     await this.navToggle.click();
     await this.expectMobileMenuVisible();
     await this.expectNavToggleAriaExpanded('true');
   }
 
+  @Step('Close mobile menu')
   async closeMobileMenu(): Promise<void> {
     await this.navToggle.click();
     await this.expectMobileMenuHidden();
     await this.expectNavToggleAriaExpanded('false');
   }
 
+  @Step('Assert we are on the home page')
   async expectAtHomePage(): Promise<void> {
     await expect(this.page).toHaveURL('#/');
   }
 
-  // Product Methods
+  // ---------- Product queries ---------- 
+
   getProductById(productId: number | string): Locator {
     return this.page.locator(`[data-testid="product-card"][data-product-id="${productId}"]`);
   }
@@ -121,31 +135,38 @@ export class HomePage extends BasePage {
       element.map(el => el.getAttribute('data-name') || ''));
   }
 
+  @Step('Wait for catalogue to be visible')
   async waitForCatalogue(): Promise<void> {
     await expect(this.catalogue).toBeVisible();
   }
 
+  @Step('Wait for products to appear')
   async waitForProducts(): Promise<void> {
     await expect(this.productCards.first()).toBeVisible();
   }
 
-  // Toolbar Actions
+  // ---------- Toolbar actions ----------
+
+  @Step('Search for "{0}"')
   async searchFor(productName: string): Promise<void> {
     await this.searchInput.fill(productName);
     await this.searchSubmit.click();
     await this.waitForProducts();
   }
 
+  @Step('Filter by category "{0}"')
   async filterByCategory(category: string): Promise<void> {
     await this.categorySelect.selectOption(category);
     await this.waitForProducts();
   }
 
+  @Step('Sort by "{0}"')
   async sortBy(sortOption: string): Promise<void> {
     await this.sortSelect.selectOption(sortOption);
     await this.waitForProducts();
   }
 
+  @Step('Clear search query')
   async clearSearch(): Promise<void> {
     await this.searchInput.clear();
     await this.searchSubmit.click();
@@ -166,6 +187,9 @@ export class HomePage extends BasePage {
     }
   }
 
+  // ---------- Session ----------
+
+  @Step('Log out if logged in')
   async logout(): Promise<void> {
     if (await this.isUserLoggedIn()) {
       await this.logoutLink.click();

@@ -1,5 +1,7 @@
 import { T } from '@config/timeouts';
 import { type Locator, type Page, expect } from '@playwright/test';
+import { Step } from '@utils/step-decorator';
+
 
 /**
  * Abstract base class for all Page Objects.
@@ -138,13 +140,6 @@ export abstract class BasePage {
   }
 
   /**
-   * Take a screenshot
-   */
-  async screenshot(options?: { path?: string; fullPage?: boolean }): Promise<Buffer> {
-    return await this.page.screenshot(options);
-  }
-
-  /**
    * Get a Locator for an element by selector or testId
    * This is the preferred method for finding elements in tests
    * 
@@ -204,118 +199,106 @@ export abstract class BasePage {
     }
   }
 
-  /**
-   * Check if flash message contains text
-   */
-  async expectFlashMessage(text: string): Promise<void> {
-    await expect(this.flashMessage).toContainText(text);
-  }
-
-  /**
-   * Clear all cookies
-   */
-  async clearCookies(): Promise<void> {
-    await this.page.context().clearCookies();
-  }
-
-  /**
- * Reload the page
- */
+  @Step('Reload page')
   async reload(): Promise<void> {
     await this.page.reload();
   }
 
-  /**
-   * Go back to previous page
-   */
+  @Step('Go back')
   async goBack(): Promise<void> {
     await this.page.goBack();
     await this.waitForLoad();
   }
 
-  /**
-   * Expect URL to contain a specific path
-   */
-  async expectUrlToContain(path: string): Promise<void> {
-    await expect(this.page).toHaveURL(new RegExp(path));
-  }
+  // ---------- Shared navigation actions ----------
 
-  /**
-   * Expect URL to be exactly a specific path
-   */
-  async expectUrlToBe(path: string): Promise<void> {
-    await expect(this.page).toHaveURL(path);
-  }
-
+  @Step('Go to shop')
   async goToShop(): Promise<void> {
     await this.navShop.click();
     await this.page.waitForURL(/#\//);
   }
 
+  @Step('Go to cart')
   async goToCart(): Promise<void> {
     await this.navCart.click();
     await this.page.waitForURL(/#\/cart/);
   }
 
+  @Step('Go to login')
   async goToLogin(): Promise<void> {
     await this.navLogin.click();
     await this.page.waitForURL(/#\/login/);
   }
 
-  // ============ Keyboard Navigation Methods ============
+  // ---------- Assertions ----------
 
-  /**
-   * Press the Tab key
-   */
+  @Step('Assert URL contains "{0}"')
+  async expectUrlToContain(path: string): Promise<void> {
+    await expect(this.page).toHaveURL(new RegExp(path));
+  }
+
+  @Step('Assert URL is "{0}"')
+  async expectUrlToBe(path: string): Promise<void> {
+    await expect(this.page).toHaveURL(path);
+  }
+
+  @Step('Assert flash message contains "{0}"')
+  async expectFlashMessage(text: string): Promise<void> {
+    await expect(this.flashMessage).toContainText(text);
+  }
+
+  // ---------- Keyboard Navigation ----------
+
+  @Step('Press Tab')
   async pressTab(): Promise<void> {
     await this.page.keyboard.press('Tab');
   }
 
-  /**
-   * Press Shift+Tab for reverse tab navigation
-   */
+  @Step('Press Shift+Tab')
   async pressShiftTab(): Promise<void> {
     await this.page.keyboard.press('Shift+Tab');
   }
 
-  /**
-   * Press a specific key
-   */
+  @Step('Press key "{0}"')
   async pressKey(key: string): Promise<void> {
     await this.page.keyboard.press(key);
   }
 
-  /**
-   * Press Enter key
-   */
+  @Step('Press Enter')
   async pressEnter(): Promise<void> {
     await this.page.keyboard.press('Enter');
   }
 
-  /**
-   * Press Escape key
-   */
+  @Step('Press Escape')
   async pressEscape(): Promise<void> {
     await this.page.keyboard.press('Escape');
   }
 
-  /**
-   * Press Space key
-   */
+  @Step('Press Space')
   async pressSpace(): Promise<void> {
     await this.page.keyboard.press('Space');
   }
 
+  // ---------- Environment ----------
+
+  @Step('Set viewport to {0}x{1}')
   async setMobileViewport(width: number = 375, height: number = 812): Promise<void> {
     await this.page.setViewportSize({ width: width, height: height });
   }
 
-  // ============ Wait/Timeout Methods ============
+  @Step('Clear cookies')
+  async clearCookies(): Promise<void> {
+    await this.page.context().clearCookies();
+  }
 
-  /**
-   * Wait for a specific amount of time in milliseconds
-   * Use sparingly - prefer waiting for elements/conditions instead
-   */
+  @Step('Take screenshot')
+  async screenshot(options?: { path?: string; fullPage?: boolean }): Promise<Buffer> {
+    return await this.page.screenshot(options);
+  }
+
+  // ---------- Wait/Timeout Methods (discouraged, kept for edge cases) ----------
+
+  @Step('Wait {0}ms')
   async waitForTimeout(ms: number): Promise<void> {
     await this.page.waitForTimeout(ms);
   }

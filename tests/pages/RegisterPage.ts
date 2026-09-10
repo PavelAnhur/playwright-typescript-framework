@@ -2,6 +2,7 @@ import { TIMEOUTS } from '@config/timeouts';
 import { type Locator, type Page, expect } from '@playwright/test';
 import type { Account } from '@src/types/account';
 import { BasePage } from './BasePage';
+import { Step } from '@utils/step-decorator';
 
 
 export interface RegisterData extends Account {
@@ -52,16 +53,23 @@ export class RegisterPage extends BasePage {
     this.dobMonthSelect = page.getByTestId('dob-month-select');
   }
 
+  // ---------- Navigation ----------
+
+  @Step('Open registration page')
   async open(): Promise<void> {
     await super.goto('/#/register');
     await this.waitForLoad();
   }
 
+  @Step('Wait for registration page to be ready')
   async waitForLoad(): Promise<void> {
     await super.waitForLoad();
     await expect(this.registerForm).toBeAttached();
   }
 
+  // ---------- Form actions ----------
+
+  @Step('Fill registration form (email: "{0}")')
   async fillRegisterForm(data: RegisterData): Promise<void> {
     await this.firstNameInput.fill(data.firstName);
     await this.lastNameInput.fill(data.lastName);
@@ -75,9 +83,7 @@ export class RegisterPage extends BasePage {
     }
   }
 
-  /**
-   * Select date of birth using the date picker
-   */
+  @Step('Select date of birth: {0}')
   async selectDateOfBirth(dob: string): Promise<boolean> {
     const [year, month, day] = dob.split('-').map(Number);
     await this.dobDisplay.click();
@@ -99,27 +105,34 @@ export class RegisterPage extends BasePage {
     if (this.dobMonthSelect) {
       await this.dobMonthSelect.selectOption({ value: (month!).toString() });
     }
-    const dayButton = this.page.getByTestId(`dob-day-${day}`);
+    const paddedDay = String(day).padStart(2, '0');
+    const dayButton = this.page.getByTestId(`dob-day-${paddedDay}`);
     await dayButton.click();
     await expect(this.datePickerDialog).toHaveAttribute('aria-hidden', 'true');
     return true;
   }
 
+  @Step('Submit registration form')
   async submit(): Promise<void> {
     await this.submitButton.click();
   }
 
+  @Step('Register new user (email: "{0}")')
   async register(data: RegisterData): Promise<void> {
     await this.fillRegisterForm(data);
     await this.submit();
   }
 
+  // ---------- Assertions & waits ----------
+
+  @Step('Wait for successful registration redirect')
   async waitForRegistrationSuccess(): Promise<void> {
     await this.page.waitForURL(/#\//);
     await this.page.waitForSelector('[data-app-ready="true"]');
     await this.currentUser.waitFor({ state: 'visible' });
   }
 
+  @Step('Wait for registration error message')
   async waitForRegistrationError(): Promise<void> {
     await expect(this.alertContainer).toBeVisible();
   }
