@@ -201,26 +201,26 @@ npx playwright show-report
 
 
 ### 🎯 Key Achievements
-✅ Comprehensive Testing: 270+ tests across three layers\
+✅ Comprehensive Testing: 250+ tests across three layers\
 ✅ Maintainable Code: Page Object Model and custom fixtures\
 ✅ Type Safety: Full TypeScript coverage\
 ✅ Parallel Execution: Optimized test execution\
 ✅ CI/CD Ready: Automated testing in GitHub Actions\
-✅ Cross-Browser: Chrome, Firefox, WebKit, and mobile\
+✅ Cross-Browser: Chrome, Firefox, WebKit, and mobile
 
 ### 🤝 Contributing
 Fork the repository\
 Create your feature branch (git checkout -b feature/amazing-feature)\
 Commit your changes (git commit -m 'Add some amazing feature')\
 Push to the branch (git push origin feature/amazing-feature)\
-Open a Pull Request\
+Open a Pull Request
 
 ### 📝 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 📬 Connect with Me
 LinkedIn: [Pavel Anhur](https://www.linkedin.com/in/pavel-anhur-1917821bb/)\
-Email: pavel.anhur@gmail.com\
+Email: pavel.anhur@gmail.com
 
 🌟 Why This Project?
 This project demonstrates my expertise in:
@@ -229,4 +229,4 @@ Test Automation: Building comprehensive test suites for modern web applications\
 Framework Design: Creating maintainable, scalable test frameworks\
 TypeScript: Writing type-safe, production-quality code\
 CI/CD: Automating testing in continuous integration pipelines\
-Best Practices: Following industry standards (POM, fixtures, data-driven testing)\
+Best Practices: Following industry standards (POM, fixtures, data-driven testing)
