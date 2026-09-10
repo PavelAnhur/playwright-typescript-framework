@@ -1,0 +1,138 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: api/buyer/order-operations.spec.ts >> Buyer API -- Order Operations >> should create order from cart
+- Location: tests/specs/api/buyer/order-operations.spec.ts:116:3
+
+# Error details
+
+```
+Error: expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 2
+Received array:  [{"name": "White Rose Cologne", "quantity": 1, "unitCents": 98000}, {"name": "Stone Wool Trench Coat", "quantity": 2, "unitCents": 420000}]
+```
+
+# Test source
+
+```ts
+  26  |     expect(orders[0]).toMatchObject({
+  27  |       reference: expect.any(String),
+  28  |       totalCents: expect.any(Number),
+  29  |       status: 'confirmed',
+  30  |       items: expect.any(Array),
+  31  |     });
+  32  |   });
+  33  | 
+  34  |   test('should get single order by reference', async ({
+  35  |     api,
+  36  |     authedBuyer,
+  37  |     createOrder
+  38  |   }) => {
+  39  |     const products = await api.get('products');
+  40  |     const data = await products.json();
+  41  |     const testProductId = data.products[5].id;
+  42  |     const orderResponse = await createOrder([
+  43  |       { productId: testProductId, quantity: 1 }
+  44  |     ]);
+  45  |     const createdOrder: Order = await orderResponse.json()
+  46  |       .then(responseData => responseData.order);
+  47  |     const reference = createdOrder.reference;
+  48  |     const response = await authedBuyer.get(`orders/${reference}`);
+  49  |     expect(response.ok()).toBeTruthy();
+  50  |     const order: Order = await response.json()
+  51  |       .then(responseData => responseData.order);
+  52  |     expect(order.reference).toBe(reference);
+  53  |     expect(order.totalCents).toBe(createdOrder.totalCents);
+  54  |     expect(order.status).toBe('confirmed');
+  55  |   });
+  56  | 
+  57  |   test('should return 404 for non-existent order reference', async ({ authedBuyer }) => {
+  58  |     const response = await authedBuyer.get('orders/NONEXISTENT-123');
+  59  |     expect(response.status()).toBe(404);
+  60  |     const error = await response.json();
+  61  |     expect(error.error.code).toBe('ORDER_NOT_FOUND');
+  62  |   });
+  63  | 
+  64  |   test('should not create order with empty cart', async ({ authedBuyer }) => {
+  65  |     const response = await authedBuyer.post('orders');
+  66  |     expect(response.status()).toBe(400);
+  67  |     const error = await response.json();
+  68  |     expect(error.error.code).toBe('INVALID_SHIPPING');
+  69  |   });
+  70  | 
+  71  |   test('should not allow order if stock is insufficient', async ({ api, authedBuyer }) => {
+  72  |     const productResponse = await api.get('products/1');
+  73  |     const stock = await productResponse.json()
+  74  |       .then(responseData => responseData.product.stock);
+  75  |     const response = await authedBuyer.post('cart/items', {
+  76  |       data: { productId: 1, quantity: stock + 1 },
+  77  |     });
+  78  |     expect(response.status()).toBe(409);
+  79  |     const error = await response.json();
+  80  |     expect(error.error.code).toBe('INSUFFICIENT_STOCK');
+  81  |   });
+  82  | 
+  83  |   test('should return 403 when accessing another buyers order', async ({
+  84  |     api,
+  85  |     createOrder,
+  86  |     authedSeller1
+  87  |   }) => {
+  88  |     const products = await api.get('products');
+  89  |     const testProductId = await products.json()
+  90  |       .then(responseData => responseData.products[5].id);
+  91  |     const orderResponse = await createOrder([
+  92  |       { productId: testProductId, quantity: 2 }
+  93  |     ]);
+  94  |     const data = await orderResponse.json();
+  95  |     const createdOrder = data.order;
+  96  |     const reference = createdOrder.reference;
+  97  |     // Try to access order with invalid token (simulating different user)
+  98  |     const response = await authedSeller1.get(`orders/${reference}`);
+  99  |     expect(response.status()).toBe(403);
+  100 |   });
+  101 | 
+  102 |   test('should decrement stock when order is created', async ({ api, createOrder }) => {
+  103 |     const productId = 3;
+  104 |     const productResponse = await api.get(`products/${productId}`);
+  105 |     const initialStock = await productResponse.json()
+  106 |       .then(responseData => responseData.product.stock);
+  107 |     await createOrder([
+  108 |       { productId, quantity: 2 }
+  109 |     ]);
+  110 |     const updatedProductResponse = await api.get(`products/${productId}`);
+  111 |     const updatedProduct: Product = await updatedProductResponse.json()
+  112 |       .then(responseData => responseData.product);
+  113 |     expect(updatedProduct.stock).toBe(initialStock - 2);
+  114 |   });
+  115 | 
+  116 |   test('should create order from cart', async ({ api, authedBuyer, createOrder }) => {
+  117 |     const response = await api.get('products');
+  118 |     const product = await response.json()
+  119 |       .then(responseData => responseData.products[2]);
+  120 |     const responseOrder = await createOrder([
+  121 |       { productId: product.id, quantity: 2 }
+  122 |     ]);
+  123 |     expect(responseOrder.ok()).toBeTruthy();
+  124 |     const order: Order = await responseOrder.json()
+  125 |       .then(responseData => responseData.order);
+> 126 |     expect(order.items).toHaveLength(1);
+      |                         ^ Error: expect(received).toHaveLength(expected)
+  127 |     expect(order.items[0]?.quantity).toBe(2);
+  128 |     expect(order.totalCents).toBe(product.effectiveCents! * 2 || product.priceCents! * 2);
+  129 |     expect(order.status).toBe('confirmed');
+  130 |     expect(order.reference).toBeDefined();
+  131 |     const cartResponse = await authedBuyer.get('cart');
+  132 |     const cart: Cart = await cartResponse.json()
+  133 |       .then(responseData => responseData.cart);
+  134 |     expect(cart.items).toHaveLength(0);
+  135 |   });
+  136 | });
+  137 | 
+```
