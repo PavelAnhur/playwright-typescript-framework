@@ -16,6 +16,8 @@ This comprehensive test automation framework was built to test the [**Maison** A
 - **🔌 API Tests** - Contract and integration testing with Playwright
 - **🖥️ UI Tests** - End-to-end browser automation with Playwright
 
+### The Allure test execution report can be found [here](https://pavelanhur.github.io/playwright-typescript-framework/)
+
 ### Key Features
 
 - ✅ **Three Testing Layers** - Unit, API, and UI tests in one unified framework
