@@ -34,6 +34,7 @@
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "@vitest/coverage-v8": "^3.2.7",
+    "@vitest/runner": "^3.2.7",
     "allure-commandline": "^2.43.0",
     "allure-js-commons": "^3.12.1",
     "allure-playwright": "^3.12.0",
