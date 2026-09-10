@@ -34,23 +34,6 @@ jobs:
     - run: npm run typecheck
     - run: npm run lint
 
-  # Unit tests job (runs in parallel with Playwright tests)
-  unit-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: lint
-    steps:
-    - name: Checkout test framework
-      uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
-        cache: 'npm'
-
-    - run: npm ci --legacy-peer-deps
-
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
