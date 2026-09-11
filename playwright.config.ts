@@ -15,7 +15,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: ENV.isCI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: ENV.isCI ? 4 : undefined,
+  workers: ENV.isCI ? 2 : undefined,
   // A bit more headroom for slower remote targets.
   timeout: TIMEOUTS.DOM_CONTENT_LOADED,
   expect: { timeout: TIMEOUTS.LONG },

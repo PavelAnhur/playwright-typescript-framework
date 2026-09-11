@@ -6,12 +6,11 @@ import type { Product } from '@src/types/product';
 test.describe('Buyer API -- Cart Operations', () => {
   let testProduct: Product;
 
-  test.beforeEach(async ({ api, authedBuyer }) => {
+  test.beforeEach(async ({ api }) => {
     await api.post('_reset');
     const response = await api.get('products');
     const data = await response.json();
     testProduct = data.products[0];
-    await authedBuyer.delete('cart');
   });
 
   test('should get empty cart for new user', async ({ authedBuyer }) => {
@@ -22,6 +21,27 @@ test.describe('Buyer API -- Cart Operations', () => {
     expect(cart.items).toHaveLength(0);
     expect(cart.subtotalCents).toBe(0);
     expect(cart.count).toBe(0);
+  });
+
+  test('should remove item from cart', async ({ authedBuyer }) => {
+    const addResponse = await authedBuyer.post('cart/items', {
+      data: { productId: testProduct.id, quantity: 3 },
+    });
+    expect(addResponse.ok()).toBeTruthy();
+    const cartResponse = await authedBuyer.get('cart');
+    expect(cartResponse.ok()).toBeTruthy();
+    const cart: Cart = await cartResponse.json()
+      .then(responseData => responseData.cart);
+    expect(cart.items).toHaveLength(1);
+    expect(cart.items[0]).toBeDefined();
+    const itemId = cart.items[0]?.itemId;
+    expect(itemId).toBeDefined();
+    const response = await authedBuyer.delete(`cart/items/${itemId}`);
+    expect(response.ok()).toBeTruthy();
+    const updatedCart: Cart = await response.json()
+      .then(resData => resData.cart);
+    expect(updatedCart.items).toHaveLength(0);
+    expect(updatedCart.subtotalCents).toBe(0);
   });
 
   test('should add item to cart', async ({ authedBuyer }) => {
@@ -95,29 +115,5 @@ test.describe('Buyer API -- Cart Operations', () => {
       .then(resData => resData.cart);
     expect(cart.items[0]?.unitCents).toBe(product.effectiveCents);
     expect(cart.subtotalCents).toBe(product.effectiveCents);
-  });
-
-  test('should remove item from cart', async ({ api, authedBuyer }) => {
-    const productsResponse = await api.get('products');
-    const product = await productsResponse.json()
-      .then(responseData => responseData.products[9]);
-    const addResponse = await authedBuyer.post('cart/items', {
-      data: { productId: product.id, quantity: 2 },
-    });
-    expect(addResponse.ok()).toBeTruthy();
-    const cartResponse = await authedBuyer.get('cart');
-    expect(cartResponse.ok()).toBeTruthy();
-    const cart: Cart = await cartResponse.json()
-      .then(responseData => responseData.cart);
-    expect(cart.items).toHaveLength(1);
-    expect(cart.items[0]).toBeDefined();
-    const itemId = cart.items[0]?.itemId;
-    expect(itemId).toBeDefined();
-    const response = await authedBuyer.delete(`cart/items/${itemId}`);
-    expect(response.ok()).toBeTruthy();
-    const updatedCart: Cart = await response.json()
-      .then(resData => resData.cart);
-    expect(updatedCart.items).toHaveLength(0);
-    expect(updatedCart.subtotalCents).toBe(0);
   });
 });
