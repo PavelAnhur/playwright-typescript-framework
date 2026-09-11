@@ -18,7 +18,7 @@
     "start:dev": "cd maison/server && npm start",
     "build:server": "cd maison/server && npm run build",
     "codegen": "npx playwright codegen http://localhost:4000",
-    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:generate": "cp categories.json allure-results/ && allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
     "allure:serve": "allure serve allure-results",
     "allure:clear": "rm -rf allure-results allure-report"

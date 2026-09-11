@@ -7,7 +7,6 @@ test.describe('Buyer API -- Cart Operations', () => {
   let testProduct: Product;
 
   test.beforeEach(async ({ api, authedBuyer }) => {
-    // Reset the database to a clean state before each test
     await api.post('_reset');
     const response = await api.get('products');
     const data = await response.json();

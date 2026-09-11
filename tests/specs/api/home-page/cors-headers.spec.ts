@@ -12,7 +12,8 @@ test.describe('Home Page API -- CORS Headers', () => {
     expect(response.headers()['access-control-allow-credentials']).toBe('true');
   });
 
-  test.fixme('should not include CORS headers for disallowed origin', async ({ api }) => {
+  test('should not include CORS headers for disallowed origin', async ({ api }) => {
+    test.skip(true, 'Known Bug: CORS headers for disallowed origin');
     const response = await api.get('products', {
       headers: {
         Origin: 'https://evil.com',

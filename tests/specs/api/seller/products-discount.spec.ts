@@ -53,7 +53,8 @@ test.describe('Seller API -- Product Discount Management', () => {
       expect(product.discount?.value).toBe(1500);
     });
 
-    test.fixme('seller cannot add discount exceeding product price', async ({ createProduct, authedSeller1 }) => {
+    test('seller cannot add discount exceeding product price', async ({ createProduct, authedSeller1 }) => {
+      test.skip(true, 'Known Bug: discount exceeding product price');
       const productId = await createProduct({
         name: 'Discount Test Product',
         description: 'Product for discount testing',
