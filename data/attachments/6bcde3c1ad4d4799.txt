@@ -1,0 +1,3 @@
+📁 Storage file not found for buyer@maison.test, will create new one
+📁 Created storage directory: /home/runner/work/playwright-typescript-framework/playwright-typescript-framework/.auth
+✅ Storage state created for buyer@maison.test at /home/runner/work/playwright-typescript-framework/playwright-typescript-framework/.auth/buyer.json
