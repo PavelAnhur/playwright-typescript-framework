@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Known Bug: Duplicate Certificate",
+    "matchedStatuses": [
+      "skipped"
+    ],
+    "messageRegex": ".*duplicate certificate.*"
+  },
+  {
+    "name": "Known Bug: Pagination and Filtering",
+    "matchedStatuses": [
+      "skipped"
+    ],
+    "messageRegex": ".*(listing pagination|filter listings by category).*"
+  },
+  {
+    "name": "Known Bug: Product Discount Management",
+    "matchedStatuses": [
+      "skipped"
+    ],
+    "messageRegex": ".*discount exceeding product price.*"
+  },
+  {
+    "name": "Known Bug: CORS Headers",
+    "matchedStatuses": [
+      "skipped"
+    ],
+    "messageRegex": ".*CORS headers for disallowed origin.*"
+  },
+  {
+    "name": "Known Bug: Login Page UI - Edge Cases",
+    "matchedStatuses": [
+      "skipped"
+    ],
+    "messageRegex": ".*unicode characters in email.*"
+  },
+  {
+    "name": "Known Bug: Login Page UI - Navigation",
+    "matchedStatuses": [
+      "skipped"
+    ],
+    "messageRegex": ".*preserve login form data when navigating back.*"
+  }
+]

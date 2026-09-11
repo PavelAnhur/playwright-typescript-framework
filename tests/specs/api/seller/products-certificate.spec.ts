@@ -34,7 +34,8 @@ test.describe('Seller API -- POST /api/v1/products/:id/certificate', () => {
     expect(body.error.code).toBe('FORBIDDEN_NOT_OWNER');
   });
 
-  test.fixme('seller cannot issue duplicate certificate for same product', async ({ authedSeller1 }) => {
+  test('seller cannot issue duplicate certificate for same product', async ({ authedSeller1 }) => {
+    test.skip(true, 'Known Bug: duplicate certificate');
     // First certificate
     await authedSeller1.post(`products/${productId}/certificate`);
     // Second certificate (should fail)

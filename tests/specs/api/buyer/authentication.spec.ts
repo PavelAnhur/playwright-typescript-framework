@@ -4,11 +4,6 @@ import type { User } from '@src/types/account';
 
 
 test.describe('Buyer API -- Authentication & Authorization', () => {
-  test.beforeEach(async ({ api, authedBuyer }) => {
-    await api.post('_reset');
-    await authedBuyer.delete('cart');
-  });
-
   test('should return 401 when accessing cart without token', async ({ api }) => {
     const response = await api.get('cart');
     expect(response.status()).toBe(401);

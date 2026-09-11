@@ -97,8 +97,31 @@ jobs:
     - name: Run UI tests
       run: npm run test:ui
 
+    - name: Load Allure history
+      uses: actions/checkout@v4
+      if: always()
+      continue-on-error: true
+      with:
+        ref: gh-pages
+        path: gh-pages
+
     - name: Generate Allure Report
-      run: npm run allure:generate
+      run: |
+        # Copy the history from the previous deployment into the results folder
+        if [ -d "gh-pages/allure-report/history" ]; then
+          cp -r gh-pages/allure-report/history allure-results/history
+        fi
+        npm run allure:generate
+
+    - name: Verify Allure report exists
+      if: always()
+      run: |
+        if [ ! -d "allure-report" ]; then
+          echo "❌ allure-report/ was not generated"
+          ls -la
+          exit 1
+        fi
+        echo "✅ allure-report/ found"
 
     - name: Verify Allure report exists
       if: always()

@@ -24,7 +24,8 @@ test.describe('Login Page UI -- Navigation', () => {
     await expect(loginPage.getElement('[data-testId="catalogue"]')).toBeVisible();
   });
 
-  test.fixme('should preserve login form data when navigating back', async ({ loginPage }) => {
+  test('should preserve login form data when navigating back', async ({ loginPage }) => {
+    test.skip(true, 'Known Bug: preserve login form data when navigating back');
     await loginPage.fillLoginForm(buyer.email, buyer.password);
     await loginPage.goToShop();
     await loginPage.expectUrlToBe('#/');

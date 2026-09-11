@@ -6,7 +6,7 @@ import type { Product } from '@src/types/product';
 
 test.describe('Buyer API -- Order Operations', () => {
 
-  test.beforeEach(async ({ api, authedBuyer }) => {
+  test.beforeAll(async ({ api, authedBuyer }) => {
     await api.post('_reset');
     await authedBuyer.delete('cart');
   });

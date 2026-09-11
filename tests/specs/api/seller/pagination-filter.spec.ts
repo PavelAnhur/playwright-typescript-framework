@@ -3,7 +3,8 @@ import type { Product } from '@src/types/product';
 
 
 test.describe('Seller API -- Pagination and Filtering for Seller Products', () => {
-  test.fixme('seller can paginate their listings', async ({ authedSeller1 }) => {
+  test('seller can paginate their listings', async ({ authedSeller1 }) => {
+    test.skip(true, 'Known Bug: listing pagination');
     for (let i = 0; i < 10; i++) {
       await authedSeller1.post('products', {
         data: {
@@ -36,7 +37,8 @@ test.describe('Seller API -- Pagination and Filtering for Seller Products', () =
     }
   });
 
-  test.fixme('seller can filter their listings by category', async ({ authedSeller1 }) => {
+  test('seller can filter their listings by category', async ({ authedSeller1 }) => {
+    test.skip(true, 'Known Bug: filter listings by category');
     const categories = ['furniture', 'lighting', 'art'];
     for (const category of categories) {
       await authedSeller1.post('products', {
