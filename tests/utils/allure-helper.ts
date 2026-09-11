@@ -60,17 +60,11 @@ export function addAllureMetadata(options: {
   if (severity) allure.severity(severity);
 }
 
-/**
- * Add screenshot to Allure report on failure
- */
 export async function addScreenshotOnFailure(page: Page): Promise<void> {
   const screenshot = await page.screenshot();
   await addAllureAttachment('Screenshot', screenshot, allure.ContentType.PNG);
 }
 
-/**
- * Add JSON data as attachment
- */
 export async function addAllureJson(
   name: string,
   data: Record<string, unknown>
@@ -82,23 +76,14 @@ export async function addAllureJson(
   );
 }
 
-/**
- * Add text data as attachment
- */
 export async function addAllureText(name: string, text: string): Promise<void> {
   await addAllureAttachment(name, text, allure.ContentType.TEXT);
 }
 
-/**
- * Add HTML as attachment
- */
 export async function addAllureHtml(name: string, html: string): Promise<void> {
   await addAllureAttachment(name, html, allure.ContentType.HTML);
 }
 
-/**
- * Add attachments to Allure report
- */
 export async function addAllureAttachment(
   name: string,
   content: string | Buffer,
