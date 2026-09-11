@@ -123,16 +123,6 @@ jobs:
         fi
         echo "✅ allure-report/ found"
 
-    - name: Verify Allure report exists
-      if: always()
-      run: |
-        if [ ! -d "allure-report" ]; then
-          echo "❌ allure-report/ was not generated"
-          ls -la
-          exit 1
-        fi
-        echo "✅ allure-report/ found"
-
     - name: Upload Allure Report
       uses: actions/upload-artifact@v4
       if: always()

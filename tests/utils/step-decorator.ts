@@ -21,10 +21,7 @@ import * as allure from 'allure-js-commons';
 export function Step(template?: string) {
   return function <A extends unknown[], R>(
     target: (...args: A) => Promise<R>,
-    context: ClassMethodDecoratorContext<
-      object,
-      (...args: A) => Promise<R>
-    >
+    context: ClassMethodDecoratorContext<object, (...args: A) => Promise<R>>
   ): (...args: A) => Promise<R> {
     const methodName = String(context.name);
 
