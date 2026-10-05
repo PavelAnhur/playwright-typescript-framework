@@ -30,11 +30,3 @@ export async function logCall(entry: LogEntry): Promise<void> {
   await ensureDir();
   await appendFile(logFile, JSON.stringify(entry) + '\n', 'utf8');
 }
-
-export function getLogFilePath(): string {
-  return logFile;
-}
-
-export function getRunId(): string {
-  return runId;
-}

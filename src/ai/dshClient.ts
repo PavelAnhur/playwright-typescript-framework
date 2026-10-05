@@ -43,7 +43,6 @@ async function callOnce(options: CallOptions): Promise<CallResult> {
     temperature: options.temperature ?? 0,
     max_tokens: options.maxTokens ?? 4096,
   };
-
   if (options.jsonMode ?? true) {
     body["response_format"] = { type: 'json_object' };
   }

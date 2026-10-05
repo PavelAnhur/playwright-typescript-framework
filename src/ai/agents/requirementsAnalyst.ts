@@ -52,7 +52,6 @@ export async function analyzeRequirements(
   requirementFile: string
 ): Promise<{ analysis: RequirementsAnalysis; outputPath: string }> {
   const requirement = await readFile(requirementFile, 'utf8');
-
   const result = await callModel({
     agent: AGENT,
     messages: [
@@ -61,9 +60,7 @@ export async function analyzeRequirements(
     ],
     metadata: { requirementFile: basename(requirementFile) },
   });
-
   const cleaned = stripFences(result.content);
-
   let parsed: unknown;
   try {
     parsed = JSON.parse(cleaned);
@@ -71,26 +68,22 @@ export async function analyzeRequirements(
     const msg = error instanceof Error ? error.message : String(error);
     throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`);
   }
-
   const validated = RequirementsAnalysisSchema.safeParse(parsed);
   if (!validated.success) {
     throw new Error(
       `Model output failed schema validation: ${validated.error.message}\n\nRaw:\n${cleaned.slice(0, 500)}`
     );
   }
-
   await mkdir(aiConfig.generatedCasesDir, { recursive: true });
   const outputName = basename(requirementFile).replace(/\.md$/, '.yaml');
   const outputPath = join(aiConfig.generatedCasesDir, outputName);
   await writeFile(outputPath, toYaml(validated.data), 'utf8');
-
   return { analysis: validated.data, outputPath };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const target =
     process.argv[2] ?? join(aiConfig.requirementsDir, 'checkout.md');
-
   analyzeRequirements(target)
     .then(({ analysis, outputPath }) => {
       console.log(`✅ risks: ${analysis.risks.length}, cases: ${analysis.cases.length}`);

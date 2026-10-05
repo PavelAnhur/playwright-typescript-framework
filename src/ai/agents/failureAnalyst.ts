@@ -70,11 +70,9 @@ export async function analyzeFailure(
 ): Promise<{ hypothesis: FailureHypothesis; outputPath: string }> {
   const raw = await readFile(fixtureFile, 'utf8');
   const ctx = parseFixture(raw);
-
   if (!ctx.errorMessage) {
     throw new Error(`Fixture ${fixtureFile} has no error message section`);
   }
-
   const result = await callModel({
     agent: AGENT,
     messages: [
@@ -83,7 +81,6 @@ export async function analyzeFailure(
     ],
     metadata: { fixtureFile: basename(fixtureFile), testTitle: ctx.testTitle },
   });
-
   let parsed: unknown;
   try {
     parsed = JSON.parse(result.content);
@@ -91,26 +88,22 @@ export async function analyzeFailure(
     const msg = error instanceof Error ? error.message : String(error);
     throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`);
   }
-
   const validated = FailureHypothesisSchema.safeParse(parsed);
   if (!validated.success) {
     throw new Error(
       `Model output failed schema validation: ${validated.error.message}\n\nRaw:\n${result.content.slice(0, 500)}`
     );
   }
-
   await mkdir(aiConfig.generatedCasesDir, { recursive: true });
   const outputName = basename(fixtureFile).replace(/\.txt$/, '.triage.json');
   const outputPath = join(aiConfig.generatedCasesDir, outputName);
   await writeFile(outputPath, JSON.stringify(validated.data, null, 2), 'utf8');
-
   return { hypothesis: validated.data, outputPath };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const target =
     process.argv[2] ?? join(aiConfig.projectRoot, 'fixtures', 'failures', 'checkout-button-disabled.txt');
-
   analyzeFailure(target)
     .then(({ hypothesis, outputPath }) => {
       console.log(`✅ category: ${hypothesis.category}, confidence: ${hypothesis.confidence}`);
