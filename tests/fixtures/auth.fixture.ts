@@ -2,7 +2,7 @@
 import { getTestUser } from "@config/env";
 import { type APIRequestContext } from "@playwright/test";
 import { AuthContextManager } from "@utils/auth-context.manager";
-import { test as apiTest } from "./api.fuxture";
+import { test as apiTest } from "./api.fixture";
 
 
 export interface AuthFixtures {

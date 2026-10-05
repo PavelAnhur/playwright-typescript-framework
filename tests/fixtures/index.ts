@@ -1,6 +1,6 @@
 import { ENV } from '@config/env';
-import { expect, mergeTests } from "@playwright/test";
-import { test as apiTest } from './api.fuxture';
+import { expect, mergeTests, request } from "@playwright/test";
+import { test as apiTest } from './api.fixture';
 import { test as authBrowserTest } from './auth.browser.fixture';
 import { test as authTest } from './auth.fixture';
 import { test as csvTest } from './csv.fixture';
@@ -19,4 +19,4 @@ export const test = mergeTests(
   productTest
 );
 
-export { ENV, expect };
+export { ENV, expect, request };

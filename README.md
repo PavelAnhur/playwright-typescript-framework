@@ -55,7 +55,7 @@ playwright-typescript-framework/
 │   └── setup/
 ├── tests/
 │   ├── fixtures/
-│   │   ├── api.fuxture.ts
+│   │   ├── api.fixture.ts
 │   │   ├── auth.browser.fixture.ts
 │   │   ├── auth.fixture.ts
 │   │   ├── csv.fixture.ts
