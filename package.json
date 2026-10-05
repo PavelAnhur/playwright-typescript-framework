@@ -22,7 +22,11 @@
     "allure:generate": "cp categories.json allure-results/ && allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
     "allure:serve": "allure serve allure-results",
-    "allure:clear": "rm -rf allure-results allure-report"
+    "allure:clear": "rm -rf allure-results allure-report",
+    "ai:requirements": "tsx src/ai/agents/requirementsAnalyst.ts",
+    "ai:triage": "tsx src/ai/agents/failureAnalyst.ts",
+    "ai:judge": "tsx src/ai/agents/judge.ts",
+    "ai:demo": "npm run ai:requirements && npm run ai:triage && npm run ai:judge"
   },
   "keywords": [],
   "license": "MIT",
@@ -44,7 +48,11 @@
     "dotenv": "^17.4.2",
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.8.3",
     "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
   }
 }
