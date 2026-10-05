@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-10-05T19:59:01.498Z",
+  "totalFailed": 1,
+  "triaged": 1,
+  "skipped": 0,
+  "failures": [
+    {
+      "testTitle": "seller can paginate their listings",
+      "testFile": "/home/pavel/projects/playwright-typescript-framework/tests/specs/api/seller/pagination-filter.spec.ts",
+      "errorMessage": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m27\u001b[39m",
+      "hypothesis": {
+        "hypothesis": "The test expects the total number of pages to be less than or equal to 3, but it received 27. This suggests the pagination logic is returning many more pages than expected, likely because the test data setup created more items than the test anticipated, or the API's pagination limit (items per page) is smaller than the test assumed. Since the test is checking a specific condition about page count based on seeded data, and the condition failed, this is most likely a test issue where the test's expectation is incorrect or outdated relative to the actual data state.",
+        "category": "test_issue",
+        "confidence": "medium",
+        "evidence": [
+          "Expected: <= 3",
+          "Received: 27",
+          "Test title: seller can paginate their listings"
+        ]
+      },
+      "triageError": null
+    }
+  ]
+}

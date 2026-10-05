@@ -19,9 +19,11 @@ Verdict mapping:
 - "incorrect" — score 0-3.
 
 Hallucination rules:
-- A hallucination is any claim in the hypothesis that is not supported by the input, OR any "evidence" quote that does not appear verbatim in the input.
+- A hallucination is any claim in the hypothesis that is not supported by the error context, OR any evidence quote that does not appear verbatim in the error context.
+- Evidence quotes that appear in the error context, even with minor whitespace differences, are NOT hallucinations. Verbatim means the words, not the exact byte sequence.
+- If a test source is provided, the hypothesis must be consistent with the test's actual assertions. If the hypothesis refers to concepts (e.g., "pages") that do not appear in the test source, that is a hallucination.
 - List each hallucination separately in the "hallucinations" array. If none, return an empty array.
-- Be strict: "fails consistently in CI" is supported only if the input says so; "likely a timing issue" without a timing clue is a hallucination.
+- Be strict about invented facts. Be fair about near-verbatim quotes.
 
 Return ONLY valid JSON, no markdown, no prose outside the JSON.
 
@@ -34,7 +36,8 @@ Output shape (exact):
 }`;
 
 export interface JudgeInput {
-  originalContext: string;
+  errorContext: string;
+  testSource?: string;
   hypothesis: string;
   category: string;
   confidence: string;
@@ -42,15 +45,23 @@ export interface JudgeInput {
 }
 
 export function buildJudgeUser(input: JudgeInput): string {
-  return [
-    '--- ORIGINAL FAILURE CONTEXT ---',
-    input.originalContext,
-    '',
-    '--- AGENT HYPOTHESIS ---',
-    `Category: ${input.category}`,
-    `Confidence: ${input.confidence}`,
-    `Hypothesis: ${input.hypothesis}`,
-    'Evidence:',
-    ...input.evidence.map((e, i) => `  ${i + 1}. ${e}`),
-  ].join('\n');
+  const parts: string[] = [];
+  parts.push('--- ERROR CONTEXT (verbatim source for evidence quotes) ---');
+  parts.push(input.errorContext);
+  if (input.testSource) {
+    parts.push('');
+    parts.push('--- TEST SOURCE (check terminology against this) ---');
+    parts.push(input.testSource);
+  }
+  parts.push('');
+  parts.push('--- AGENT HYPOTHESIS ---');
+  parts.push(`Category: ${input.category}`);
+  parts.push(`Confidence: ${input.confidence}`);
+  parts.push(`Hypothesis: ${input.hypothesis}`);
+  parts.push('Evidence:');
+  for (let i = 0; i < input.evidence.length; i++) {
+    const e = input.evidence[i];
+    if (e !== undefined) parts.push(`  ${i + 1}. ${e}`);
+  }
+  return parts.join('\n');
 }
