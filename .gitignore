@@ -36,3 +36,6 @@ allure-report/
 # ai-qa-harness
 logs/
 generated-cases/
+
+# demo recording artifact
+TITLE.txt
