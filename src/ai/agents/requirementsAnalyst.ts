@@ -66,7 +66,7 @@ export async function analyzeRequirements(
     parsed = JSON.parse(cleaned);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`);
+    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`, { cause: error });
   }
   const validated = RequirementsAnalysisSchema.safeParse(parsed);
   if (!validated.success) {

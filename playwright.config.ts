@@ -29,6 +29,7 @@ export default defineConfig({
       details: true,
       suiteTitle: true,
     }],
+    ["./reporters/ai-triage-reporter.ts"],
   ],
   globalSetup: './src/setup/global-setup.ts',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

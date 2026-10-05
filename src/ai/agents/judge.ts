@@ -42,7 +42,7 @@ export async function judgeTriage(
     responseParsed = JSON.parse(result.content);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Judge returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`);
+    throw new Error(`Judge returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`, { cause: error });
   }
   const validated = JudgeVerdictSchema.safeParse(responseParsed);
   if (!validated.success) {

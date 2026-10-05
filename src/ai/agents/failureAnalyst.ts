@@ -66,12 +66,11 @@ function parseFixture(raw: string): FailureContext {
 }
 
 export async function analyzeFailure(
-  fixtureFile: string
-): Promise<{ hypothesis: FailureHypothesis; outputPath: string }> {
-  const raw = await readFile(fixtureFile, 'utf8');
-  const ctx = parseFixture(raw);
+  ctx: FailureContext,
+  metadata: Record<string, unknown> = {}
+): Promise<{ hypothesis: FailureHypothesis; outputPath: string | null }> {
   if (!ctx.errorMessage) {
-    throw new Error(`Fixture ${fixtureFile} has no error message section`);
+    throw new Error('FailureContext is missing errorMessage');
   }
   const result = await callModel({
     agent: AGENT,
@@ -79,14 +78,14 @@ export async function analyzeFailure(
       { role: 'system', content: failureAnalystSystem },
       { role: 'user', content: buildFailureAnalystUser(ctx) },
     ],
-    metadata: { fixtureFile: basename(fixtureFile), testTitle: ctx.testTitle },
+    metadata: { ...metadata, testTitle: ctx.testTitle },
   });
   let parsed: unknown;
   try {
     parsed = JSON.parse(result.content);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`);
+    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`, { cause: error });
   }
   const validated = FailureHypothesisSchema.safeParse(parsed);
   if (!validated.success) {
@@ -94,20 +93,33 @@ export async function analyzeFailure(
       `Model output failed schema validation: ${validated.error.message}\n\nRaw:\n${result.content.slice(0, 500)}`
     );
   }
-  await mkdir(aiConfig.generatedCasesDir, { recursive: true });
-  const outputName = basename(fixtureFile).replace(/\.txt$/, '.triage.json');
-  const outputPath = join(aiConfig.generatedCasesDir, outputName);
-  await writeFile(outputPath, JSON.stringify(validated.data, null, 2), 'utf8');
+  const outputName = typeof metadata["outputName"] === 'string'
+    ? metadata["outputName"]
+    : null;
+  let outputPath: string | null = null;
+  if (outputName !== null) {
+    await mkdir(aiConfig.generatedCasesDir, { recursive: true });
+    outputPath = join(aiConfig.generatedCasesDir, outputName);
+    await writeFile(outputPath, JSON.stringify(validated.data, null, 2), 'utf8');
+  }
   return { hypothesis: validated.data, outputPath };
+}
+
+async function analyzeFailureFromFile(fixtureFile: string) {
+  const raw = await readFile(fixtureFile, 'utf8');
+  const ctx = parseFixture(raw);
+  const outputName = basename(fixtureFile).replace(/\.txt$/, '.triage.json');
+  return analyzeFailure(ctx, { fixtureFile: basename(fixtureFile), outputName });
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const target =
     process.argv[2] ?? join(aiConfig.projectRoot, 'fixtures', 'failures', 'checkout-button-disabled.txt');
-  analyzeFailure(target)
+
+  analyzeFailureFromFile(target)
     .then(({ hypothesis, outputPath }) => {
       console.log(`✅ category: ${hypothesis.category}, confidence: ${hypothesis.confidence}`);
-      console.log(`📄 written: ${outputPath}`);
+      if (outputPath) console.log(`📄 written: ${outputPath}`);
       console.log('');
       console.log(hypothesis.hypothesis);
     })
