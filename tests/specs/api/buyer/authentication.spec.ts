@@ -1,5 +1,4 @@
-import { ENV, expect, test } from '@fixtures';
-import { request } from '@playwright/test';
+import { ENV, expect, test, request } from '@fixtures';
 import type { User } from '@src/types/account';
 
 
