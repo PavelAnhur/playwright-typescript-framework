@@ -31,6 +31,24 @@ This comprehensive test automation framework was built to test the [**Maison** A
 - ✅ **Parallel Execution** - Optimized test execution with parallel workers
 - ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
 
+## 🤖 AI-QA Harness
+
+An additional layer that applies LLM agents to the QA workflow around this framework. Three narrow agents, each with a defined input and validated output:
+
+| Agent                    | Input                     | Output                                      |
+| ------------------------ | ------------------------- | ------------------------------------------- |
+| **requirements-analyst** | Requirements document     | Risks + test cases (YAML)                   |
+| **failure-analyst**      | Test failure fixture      | Hypothesis + category + evidence (JSON)     |
+| **judge**                | Triage + original failure | Score + verdict + hallucination list (JSON) |
+
+Run the full pipeline with:
+
+```bash
+npm run ai:demo
+```
+
+Output lands in `generated-cases/`, raw call logs in `logs/ai/`. See [`src/ai/README.md`](src/ai/README.md) for design notes and a frozen sample run in `fixtures/sample-output/`.
+
 ## 📁 Project Structure
 
 <details>
