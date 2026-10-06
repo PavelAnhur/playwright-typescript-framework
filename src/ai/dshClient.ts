@@ -74,6 +74,11 @@ async function callOnce(options: CallOptions): Promise<CallResult> {
 }
 
 export async function callModel(options: CallOptions): Promise<CallResult> {
+  if (!aiConfig.hasValidConfig) {
+    throw new Error(
+      'AI configuration not available. Please set DSH_BASE_URL, DSH_MODEL, and DSH_API_KEY in your environment.'
+    );
+  }
   const maxAttempts = (options.retries ?? 2) + 1;
   const promptText = options.messages.map(m => `[${m.role}] ${m.content}`).join('\n\n');
   let lastError: unknown;

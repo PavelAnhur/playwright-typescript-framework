@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { analyzeFailure } from '../src/ai/agents/failureAnalyst';
 import type { FailureContext } from '../src/ai/prompts/failureAnalyst.ts';
 import type { FailureHypothesis } from '../src/ai/schemas.ts';
+import { aiConfig } from '../src/ai/config';
 
 interface TriagedFailure {
   testTitle: string;
@@ -46,6 +47,10 @@ class AiTriageReporter implements Reporter {
   }
 
   async onEnd(_result: FullResult): Promise<void> {
+    if (!aiConfig.hasValidConfig) {
+      console.log('\n🤖 ai-triage: AI configuration not available, skipping failure analysis\n');
+      return;
+    }
     if (this.failures.length === 0) {
       console.log('\n🤖 ai-triage: no failures to analyze\n');
       return;
