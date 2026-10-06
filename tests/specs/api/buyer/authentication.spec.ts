@@ -31,7 +31,7 @@ test.describe('Buyer API -- Authentication & Authorization', () => {
     expect(response.ok()).toBeTruthy();
     const user: User = await response.json()
       .then(responseData => responseData.user);
-    expect(user.email).toBe(ENV.testUsers[0].testBuyer.email);
+    expect(user.email).toBe(ENV.testUsers.testBuyer.email);
     expect(user.role).toBe('buyer');
     expect(user.id).toBeDefined();
   });

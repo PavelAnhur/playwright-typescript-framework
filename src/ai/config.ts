@@ -1,24 +1,16 @@
-import { config as loadEnv } from 'dotenv';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const here = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(here, '..', '..');
-
-loadEnv({ path: resolve(projectRoot, '.env.local'), override: true, quiet: true });
-
-function required(name: string): string {
-  const value = process.env[name];
-  if (!value || value.trim() === '') {
-    throw new Error(`Missing required env var: ${name}. Add it to .env.local`);
-  }
-  return value;
+import { ENV } from '@config/env';
+import { resolve } from 'node:path';
+if (!ENV.hasAiConfig) {
+  throw new Error(
+    'AI configuration is missing. Please set DSH_BASE_URL, DSH_MODEL, and DSH_API_KEY in your environment.\n' +
+    'Make sure they are present in .env.local or appropriate environment file.'
+  );
 }
-
+const projectRoot = process.cwd();
 export const aiConfig = {
-  baseUrl: required('DSH_BASE_URL'),
-  model: required('DSH_MODEL'),
-  apiKey: required('DSH_API_KEY'),
+  baseUrl: ENV.aiConfig.baseUrl!,
+  model: ENV.aiConfig.model!,
+  apiKey: ENV.aiConfig.apiKey!,
   projectRoot,
   logsDir: resolve(projectRoot, 'logs', 'ai'),
   requirementsDir: resolve(projectRoot, 'fixtures', 'requirements'),
