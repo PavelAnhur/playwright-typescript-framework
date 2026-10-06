@@ -101,7 +101,19 @@ export async function analyzeFailure(
   if (outputName !== null) {
     await mkdir(aiConfig.generatedCasesDir, { recursive: true });
     outputPath = join(aiConfig.generatedCasesDir, outputName);
-    await writeFile(outputPath, JSON.stringify(validated.data, null, 2), 'utf8');
+    const enriched = {
+      ...validated.data,
+      sourceContext: [
+        `Test title: ${ctx.testTitle}`,
+        `Test file: ${ctx.testFile}`,
+        '',
+        '--- ERROR MESSAGE ---',
+        ctx.errorMessage,
+        ...(ctx.stackTrace ? ['', '--- STACK TRACE ---', ctx.stackTrace] : []),
+        ...(ctx.extraContext ? ['', '--- EXTRA CONTEXT ---', ctx.extraContext] : []),
+      ].join('\n'),
+    };
+    await writeFile(outputPath, JSON.stringify(enriched, null, 2), 'utf8');
   }
   return { hypothesis: validated.data, outputPath };
 }

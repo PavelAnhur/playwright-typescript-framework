@@ -18,13 +18,13 @@ interface TriageSummary {
   category?: string;
   confidence?: string;
   evidence?: string[];
+  sourceContext?: string;
+  sourceError?: string;
 }
 
-async function loadTriage(
-  triageFile: string
-): Promise<{ hypothesis: unknown; errorContext: string }> {
+async function loadTriage(triageFile: string): Promise<{ hypothesis: unknown; errorContext: string }> {
   const raw = await readFile(triageFile, 'utf8');
-  const parsed = JSON.parse(raw) as TriageSummary;
+  const parsed = JSON.parse(raw) as TriageSummary & { sourceError?: string };
   if (parsed.failures && parsed.failures.length > 0 && parsed.failures[0]) {
     const first = parsed.failures[0];
     if (!first.hypothesis) {
@@ -32,7 +32,7 @@ async function loadTriage(
     }
     return { hypothesis: first.hypothesis, errorContext: first.errorMessage };
   }
-  return { hypothesis: parsed, errorContext: '' };
+  return { hypothesis: parsed, errorContext: parsed.sourceContext ?? parsed.sourceError ?? '' };
 }
 
 export async function judgeTriage(
@@ -107,13 +107,10 @@ export async function judgeTriage(
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const triageFile = process.argv[2];
+  const triageFile =
+    process.argv[2] ?? join(aiConfig.generatedCasesDir, 'checkout-button-disabled.triage.json');
   const errorContextFile = process.argv[3] ?? null;
   const testSourceFile = process.argv[4] ?? null;
-  if (!triageFile) {
-    console.error('usage: judge.ts <triage-file> [<error-context-file>] [<test-source-file>]');
-    process.exit(1);
-  }
   judgeTriage(triageFile, errorContextFile, testSourceFile);
   judgeTriage(triageFile, errorContextFile)
     .then(({ verdict, outputPath }) => {
