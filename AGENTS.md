@@ -39,6 +39,10 @@ Test layers: Vitest (unit), Playwright API, Playwright UI.
 - UI tests → `tests/specs/ui/`
 - New fixtures go in `tests/fixtures/` and are merged in `index.ts`
 - New page objects extend `BasePage`
+- **Function/method formatting**:
+  - No empty lines inside function/method bodies
+  - No inline comments within function/method bodies
+  - Maintain consistent indentation and line spacing outside functions
 
 ## Known Gotchas
 - Fixture filename typo: `api.fuxture.ts` should be `api.fixture.ts`
