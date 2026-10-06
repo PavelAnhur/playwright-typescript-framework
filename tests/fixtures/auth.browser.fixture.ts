@@ -8,7 +8,6 @@ import { readJsonFile } from '@utils/file-utils';
 import fs from 'fs';
 import path from 'path';
 
-
 export interface AuthBrowserFixtures {
   buyerHomePage: HomePage;
   sellerHomePage: HomePage;
@@ -85,13 +84,19 @@ async function shouldRefreshStorageState(account: Account, storagePath: string):
       return true;
     }
     if (expires <= fiveMinutesFromNow) {
-      console.log(`⚠️ Token expiring soon for ${account.email} (${Math.round((expires - now) / 60)} min), will refresh`);
+      console.log(
+        `⚠️ Token expiring soon for ${account.email} (${Math.round((expires - now) / 60)} min), will refresh`
+      );
       return true;
     }
-    console.log(`✅ Token valid for ${account.email} (expires in ${Math.round((expires - now) / 60)} min)`);
+    console.log(
+      `✅ Token valid for ${account.email} (expires in ${Math.round((expires - now) / 60)} min)`
+    );
     return false;
   } catch (error) {
-    console.error(`⚠️ Error reading storage file for ${account.email}, will refresh:`, { cause: error });
+    console.error(`⚠️ Error reading storage file for ${account.email}, will refresh:`, {
+      cause: error,
+    });
     return true;
   }
 }
@@ -102,7 +107,7 @@ async function shouldRefreshStorageState(account: Account, storagePath: string):
 async function createStorageState(
   browser: Browser,
   account: Account,
-  storagePath: string,
+  storagePath: string
 ): Promise<void> {
   ensureStorageDir();
   cleanupStorageFile(storagePath);

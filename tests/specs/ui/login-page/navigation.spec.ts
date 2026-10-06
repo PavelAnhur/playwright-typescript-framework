@@ -1,7 +1,6 @@
 import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 
-
 test.describe('Login Page UI -- Navigation', () => {
   const buyer = getTestUser('buyer');
 
@@ -13,7 +12,7 @@ test.describe('Login Page UI -- Navigation', () => {
     await loginPage.goToRegister();
     await loginPage.expectUrlToBe('#/register');
     const registerHeading = loginPage.getElement('h1', {
-      hasText: /Create Account|Register/i
+      hasText: /Create Account|Register/i,
     });
     await expect(registerHeading).toBeVisible();
   });

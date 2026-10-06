@@ -5,13 +5,7 @@
  * - Arrays: [value, value, ...]
  * - Objects: { key: value, nested: { ... } }
  */
-export type CsvValue =
-  | string
-  | number
-  | boolean
-  | null
-  | CsvValue[]
-  | { [key: string]: CsvValue };
+export type CsvValue = string | number | boolean | null | CsvValue[] | { [key: string]: CsvValue };
 
 /**
  * Represents a single row in a CSV file

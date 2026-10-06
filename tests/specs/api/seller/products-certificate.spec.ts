@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Certificate } from '@src/types/certificate';
 
-
 test.describe('Seller API -- POST /api/v1/products/:id/certificate', () => {
   let productId: number;
 
@@ -19,7 +18,8 @@ test.describe('Seller API -- POST /api/v1/products/:id/certificate', () => {
     const response = await authedSeller1.post(`products/${productId}/certificate`);
     expect(response.status()).toBe(201);
     const certificateResponse = await authedSeller1.get(`products/${productId}/certificate`);
-    const certificate: Certificate = await certificateResponse.json()
+    const certificate: Certificate = await certificateResponse
+      .json()
       .then(resData => resData.certificate);
     expect(certificate.productId).toBe(productId);
     expect(certificate.issuedAt).toEqual('2024-01-01');
@@ -27,7 +27,9 @@ test.describe('Seller API -- POST /api/v1/products/:id/certificate', () => {
     expect(certificate.serialNo).toBe(`MAISON-AC-00${productId}`);
   });
 
-  test('seller cannot issue certificate for another seller\'s product', async ({ authedSeller2 }) => {
+  test("seller cannot issue certificate for another seller's product", async ({
+    authedSeller2,
+  }) => {
     const response = await authedSeller2.post(`products/${productId}/certificate`);
     expect(response.status()).toBe(403);
     const body = await response.json();

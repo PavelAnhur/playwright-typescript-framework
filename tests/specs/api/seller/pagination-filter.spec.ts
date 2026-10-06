@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Seller API -- Pagination and Filtering for Seller Products', () => {
   test('seller can paginate their listings', async ({ authedSeller1 }) => {
     test.skip(true, 'Known Bug: listing pagination');
@@ -17,18 +16,14 @@ test.describe('Seller API -- Pagination and Filtering for Seller Products', () =
       });
     }
     // Test first page
-    const response1 = await authedSeller1.get(
-      'products/seller/mine?limit=3&offset=0'
-    );
+    const response1 = await authedSeller1.get('products/seller/mine?limit=3&offset=0');
     const body1 = await response1.json();
     expect(body1.products.length).toBeLessThanOrEqual(3);
     expect(body1.pagination).toBeDefined();
     expect(body1.pagination.limit).toBe(3);
     expect(body1.pagination.offset).toBe(0);
     // Test second page
-    const response2 = await authedSeller1.get(
-      'products/seller/mine?limit=3&offset=3'
-    );
+    const response2 = await authedSeller1.get('products/seller/mine?limit=3&offset=3');
     const body2 = await response2.json();
     expect(body2.products.length).toBeLessThanOrEqual(3);
     expect(body2.pagination.offset).toBe(3);
@@ -51,9 +46,7 @@ test.describe('Seller API -- Pagination and Filtering for Seller Products', () =
         },
       });
     }
-    const response = await authedSeller1.get(
-      'products/seller/mine?category=furniture'
-    );
+    const response = await authedSeller1.get('products/seller/mine?category=furniture');
     const body = await response.json();
     body.products.forEach((product: Product) => {
       expect(product.category).toBe('furniture');

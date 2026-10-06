@@ -1,12 +1,7 @@
-import {
-  buildCsvFilePath,
-  extractDataFolder,
-  getAbsolutePath,
-} from '@utils/path-utils';
+import { buildCsvFilePath, extractDataFolder, getAbsolutePath } from '@utils/path-utils';
 import fs from 'fs';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 
 vi.mock('fs');
 vi.mock('path');
@@ -117,9 +112,7 @@ describe('unit', () => {
       vi.mocked(fs.existsSync).mockReturnValue(false);
       vi.mocked(path.resolve).mockImplementation((...args) => args.join('/'));
 
-      expect(() => buildCsvFilePath(mockFileName, mockSpecFilePath)).toThrow(
-        'CSV file not found'
-      );
+      expect(() => buildCsvFilePath(mockFileName, mockSpecFilePath)).toThrow('CSV file not found');
       expect(fs.existsSync).toHaveBeenCalled();
     });
 
@@ -144,9 +137,7 @@ describe('unit', () => {
     it('should handle different file extensions', () => {
       const fileName = 'data.json';
       vi.mocked(fs.existsSync).mockReturnValue(false);
-      expect(() => buildCsvFilePath(fileName, mockSpecFilePath)).toThrow(
-        'CSV file not found'
-      );
+      expect(() => buildCsvFilePath(fileName, mockSpecFilePath)).toThrow('CSV file not found');
     });
 
     it('should handle environment-specific file with special characters in filename', () => {
@@ -179,9 +170,7 @@ describe('unit', () => {
 
     it('should throw error when file does not exist', () => {
       vi.mocked(fs.existsSync).mockReturnValue(false);
-      expect(() => getAbsolutePath(mockFilePath)).toThrow(
-        `File not found: ${mockAbsolutePath}`
-      );
+      expect(() => getAbsolutePath(mockFilePath)).toThrow(`File not found: ${mockAbsolutePath}`);
       expect(path.resolve).toHaveBeenCalledWith(process.cwd(), mockFilePath);
       expect(fs.existsSync).toHaveBeenCalledWith(mockAbsolutePath);
     });
@@ -197,7 +186,8 @@ describe('unit', () => {
 
     it('should handle nested file paths', () => {
       const filePath = 'src/test-data/ui/home-page/catalog-toolbar/categories.csv';
-      const absolutePath = '/absolute/path/to/src/test-data/ui/home-page/catalog-toolbar/categories.csv';
+      const absolutePath =
+        '/absolute/path/to/src/test-data/ui/home-page/catalog-toolbar/categories.csv';
       vi.mocked(path.resolve).mockReturnValue(absolutePath);
       vi.mocked(fs.existsSync).mockReturnValue(true);
       const result = getAbsolutePath(filePath);
@@ -230,7 +220,7 @@ describe('unit', () => {
       vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
       vi.mocked(path.resolve).mockImplementation((...args) => args.join('/'));
       const environments = ['local', 'staging', 'production', 'ci'];
-      environments.forEach((env) => {
+      environments.forEach(env => {
         process.env['TEST_ENV'] = env;
         vi.mocked(fs.existsSync).mockImplementation((path: fs.PathLike) => {
           const pathString = path.toString();

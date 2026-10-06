@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page API -- CORS Headers', () => {
   test('should include CORS headers for allowed origin', async ({ api }) => {
     const response = await api.get('products', {

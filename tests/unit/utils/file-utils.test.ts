@@ -15,7 +15,6 @@ import fs from 'fs';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 // Mock dependencies
 vi.mock('fs');
 vi.mock('path');
@@ -320,9 +319,7 @@ describe('unit', () => {
 
       const result = readCsvFile('data.csv');
 
-      expect(result).toEqual([
-        { id: '1', name: 'John Doe, Jr.', description: 'Test, with comma' },
-      ]);
+      expect(result).toEqual([{ id: '1', name: 'John Doe, Jr.', description: 'Test, with comma' }]);
     });
 
     it('should handle CSV with empty values', () => {

@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page API -- API Error Envelope', () => {
   test('should return consistent error envelope', async ({ api }) => {
     const response = await api.get('products/999999999');

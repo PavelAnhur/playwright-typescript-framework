@@ -1,0 +1,64 @@
+risks:
+  - id: R1
+    description: 'Payment provider timeout handling is unspecified. The system may hang, crash, or show an unclear error.'
+    severity: high
+  - id: R2
+    description: 'Cart persistence if user abandons checkout is unspecified. User may lose cart items or have them locked.'
+    severity: medium
+  - id: R3
+    description: 'Postal code format validation logic per country is unspecified. May accept invalid formats or reject valid ones.'
+    severity: medium
+  - id: R4
+    description: 'Order cancellation after placement is unspecified. Users may be unable to cancel, leading to support burden.'
+    severity: low
+cases:
+  - id: C1
+    title: 'Happy path: Complete checkout with standard shipping'
+    steps:
+      - "Add a non-'standard-only' item to cart."
+      - 'Navigate to cart page.'
+      - "Click 'Proceed to checkout'."
+      - 'Enter valid shipping address (e.g., US country, valid postal code).'
+      - "Select 'Standard' shipping."
+      - 'Enter valid, non-expired payment details.'
+      - "Click 'Place order'."
+    expected: 'User is redirected to order confirmation page with a displayed order number.'
+  - id: C2
+    title: 'Checkout button disabled for empty cart'
+    steps:
+      - 'Ensure cart is empty.'
+      - 'Navigate to cart page.'
+    expected: "'Proceed to checkout' button is disabled or not clickable."
+  - id: C3
+    title: "Express shipping not offered for 'standard-only' items"
+    steps:
+      - "Add an item marked 'standard-only' to cart."
+      - 'Navigate to cart and proceed to checkout.'
+      - 'Enter shipping address.'
+      - 'Proceed to shipping method selection.'
+    expected: 'Express shipping option is not available or is disabled; only Standard shipping is offered.'
+  - id: C4
+    title: 'Payment rejected for expired card'
+    steps:
+      - 'Add an item to cart and proceed to checkout.'
+      - 'Enter shipping address and select a shipping method.'
+      - 'Enter payment details with an expiry date in the past.'
+      - "Click 'Place order'."
+    expected: "Payment is rejected with a clear error message (e.g., 'Card expired'). Order is not placed."
+  - id: C5
+    title: 'Postal code validation for selected country'
+    steps:
+      - 'Add item to cart and proceed to checkout.'
+      - "Select 'United Kingdom' as country."
+      - "Enter an invalid UK postal code (e.g., '12345')."
+      - 'Attempt to proceed to next step.'
+    expected: 'Form validation fails with an error message related to postal code format.'
+  - id: C6
+    title: 'Checkout with express shipping (paid)'
+    steps:
+      - "Add a non-'standard-only' item to cart."
+      - 'Proceed to checkout and enter shipping address.'
+      - "Select 'Express' shipping (verify a fee is shown)."
+      - 'Enter valid, non-expired payment details.'
+      - "Click 'Place order'."
+    expected: 'User is redirected to order confirmation page. Order summary reflects express shipping cost.'

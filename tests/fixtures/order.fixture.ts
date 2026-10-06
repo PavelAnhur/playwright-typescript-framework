@@ -3,7 +3,10 @@ import type { ShippingInfo } from '@src/types/order';
 import { test as authTest } from './auth.fixture';
 
 export interface OrderFixtures {
-  createOrder: (items?: Array<{ productId: number; quantity: number }>, shipping?: ShippingInfo) => Promise<APIResponse>;
+  createOrder: (
+    items?: Array<{ productId: number; quantity: number }>,
+    shipping?: ShippingInfo
+  ) => Promise<APIResponse>;
 }
 
 export const test = authTest.extend<OrderFixtures>({

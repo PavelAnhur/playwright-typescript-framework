@@ -1,7 +1,6 @@
 import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 
-
 test.describe('Login Page UI -- Security', () => {
   const buyer = getTestUser('buyer');
 
@@ -36,7 +35,10 @@ test.describe('Login Page UI -- Security', () => {
       await loginPage.waitForTimeout(100);
     }
     try {
-      await expect(loginPage.alertContainer).toContainText(/too many attempts|rate limit|slow down/i, { timeout: 100 });
+      await expect(loginPage.alertContainer).toContainText(
+        /too many attempts|rate limit|slow down/i,
+        { timeout: 100 }
+      );
     } catch {
       console.log('Rate limiting not implemented or not triggered');
     }

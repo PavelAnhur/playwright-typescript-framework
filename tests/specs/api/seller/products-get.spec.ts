@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Seller API -- GET /api/v1/products/seller/mine', () => {
   test('seller can get their own listings', async ({ authedSeller1 }) => {
     const response = await authedSeller1.get('products/seller/mine');

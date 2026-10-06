@@ -1,0 +1,23 @@
+Test title: Checkout > button is disabled when cart is empty
+Test file: tests/ui/checkout.spec.ts
+
+--- ERROR MESSAGE ---
+Error: expect(locator).toBeDisabled() failed
+
+Locator:  locator('[data-test="checkout-button"]')
+Expected: disabled
+Received: enabled
+Timeout:  5000ms
+
+Call log:
+  - Expect "toBeDisabled" with timeout 5000ms
+  - waiting for locator('[data-test="checkout-button"]')
+    14 × locator resolved to <button data-test="checkout-button" class="btn btn-primary">Proceed to checkout</button>
+
+--- STACK TRACE ---
+    at tests/ui/checkout.spec.ts:42:38
+
+--- EXTRA CONTEXT ---
+The test adds and then removes an item from the cart to reach an empty state,
+then asserts the checkout button is disabled. The assertion fails consistently
+in CI on every run.

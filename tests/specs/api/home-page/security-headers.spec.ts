@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Hoem Page API -- Security Headers', () => {
   test('should have proper security headers', async ({ api }) => {
     const response = await api.get('products');

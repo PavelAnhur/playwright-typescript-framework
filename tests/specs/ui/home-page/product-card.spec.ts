@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page UI -- Product Cards', () => {
   test.beforeEach(async ({ homePage }) => {
     await homePage.open();

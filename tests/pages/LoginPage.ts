@@ -3,7 +3,6 @@ import { type Locator, type Page, expect } from '@playwright/test';
 import { Step } from '@utils/step-decorator';
 import { BasePage } from './BasePage';
 
-
 export class LoginPage extends BasePage {
   readonly loginForm: Locator;
   readonly emailInput: Locator;
@@ -119,7 +118,7 @@ export class LoginPage extends BasePage {
   async getAlertMessage(): Promise<string> {
     try {
       if (await this.isElementVisible(this.alertContainer)) {
-        return await this.alertContainer.textContent() || '';
+        return (await this.alertContainer.textContent()) || '';
       }
       return '';
     } catch {
@@ -132,7 +131,7 @@ export class LoginPage extends BasePage {
   }
 
   async getDemoHint(): Promise<string> {
-    return await this.demoHint.textContent() || '';
+    return (await this.demoHint.textContent()) || '';
   }
 
   async isFormReady(): Promise<boolean> {
