@@ -66,7 +66,9 @@ export async function analyzeRequirements(
     parsed = JSON.parse(cleaned);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`, { cause: error });
+    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`, {
+      cause: error,
+    });
   }
   const validated = RequirementsAnalysisSchema.safeParse(parsed);
   if (!validated.success) {
@@ -82,14 +84,13 @@ export async function analyzeRequirements(
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const target =
-    process.argv[2] ?? join(aiConfig.requirementsDir, 'checkout.md');
+  const target = process.argv[2] ?? join(aiConfig.requirementsDir, 'checkout.md');
   analyzeRequirements(target)
     .then(({ analysis, outputPath }) => {
       console.log(`✅ risks: ${analysis.risks.length}, cases: ${analysis.cases.length}`);
       console.log(`📄 written: ${outputPath}`);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('❌', error instanceof Error ? error.message : error);
       process.exit(1);
     });

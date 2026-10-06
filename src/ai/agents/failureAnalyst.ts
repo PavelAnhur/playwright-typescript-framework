@@ -85,7 +85,10 @@ export async function analyzeFailure(
     parsed = JSON.parse(result.content);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`, { cause: error });
+    throw new Error(
+      `Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`,
+      { cause: error }
+    );
   }
   const validated = FailureHypothesisSchema.safeParse(parsed);
   if (!validated.success) {
@@ -93,9 +96,7 @@ export async function analyzeFailure(
       `Model output failed schema validation: ${validated.error.message}\n\nRaw:\n${result.content.slice(0, 500)}`
     );
   }
-  const outputName = typeof metadata["outputName"] === 'string'
-    ? metadata["outputName"]
-    : null;
+  const outputName = typeof metadata['outputName'] === 'string' ? metadata['outputName'] : null;
   let outputPath: string | null = null;
   if (outputName !== null) {
     await mkdir(aiConfig.generatedCasesDir, { recursive: true });
@@ -114,7 +115,8 @@ async function analyzeFailureFromFile(fixtureFile: string) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const target =
-    process.argv[2] ?? join(aiConfig.projectRoot, 'fixtures', 'failures', 'checkout-button-disabled.txt');
+    process.argv[2] ??
+    join(aiConfig.projectRoot, 'fixtures', 'failures', 'checkout-button-disabled.txt');
 
   analyzeFailureFromFile(target)
     .then(({ hypothesis, outputPath }) => {
@@ -123,7 +125,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log('');
       console.log(hypothesis.hypothesis);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('❌', error instanceof Error ? error.message : error);
       process.exit(1);
     });

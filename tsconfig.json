@@ -6,17 +6,9 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "types": [
-      "node"
-    ],
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
     // npm install -D @types/node
     "sourceMap": true,
     "declaration": true,
@@ -42,35 +34,14 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@fixtures": [
-        "./tests/fixtures/index.ts"
-      ],
-      "@pages/*": [
-        "./tests/pages/*"
-      ],
-      "@utils/*": [
-        "./tests/utils/*"
-      ],
-      "@data/*": [
-        "./src/test-data/*"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@src/*": [
-        "./src/*"
-      ]
+      "@fixtures": ["./tests/fixtures/index.ts"],
+      "@pages/*": ["./tests/pages/*"],
+      "@utils/*": ["./tests/utils/*"],
+      "@data/*": ["./src/test-data/*"],
+      "@config/*": ["./src/config/*"],
+      "@src/*": ["./src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "playwright.config.ts",
-    "tests/**/*.ts",
-    "*.ts",
-    "reporters/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.d.ts",
-  ]
+  "include": ["src/**/*.ts", "playwright.config.ts", "tests/**/*.ts", "*.ts", "reporters/**/*.ts"],
+  "exclude": ["node_modules", "**/*.d.ts"]
 }

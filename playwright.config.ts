@@ -1,5 +1,5 @@
 import { ENV } from '@config/env';
-import { TIMEOUTS } from "@config/timeouts";
+import { TIMEOUTS } from '@config/timeouts';
 import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/specs',
@@ -10,15 +10,18 @@ export default defineConfig({
   timeout: TIMEOUTS.DOM_CONTENT_LOADED,
   expect: { timeout: TIMEOUTS.LONG },
   reporter: [
-    ["list"],
-    ["html", { open: "never" }],
-    ["junit", { outputFile: "test-results/junit.xml" }],
-    ["allure-playwright", {
-      outputFolder: "allure-results",
-      details: true,
-      suiteTitle: true,
-    }],
-    ["./reporters/ai-triage-reporter.ts"],
+    ['list'],
+    ['html', { open: 'never' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+    [
+      'allure-playwright',
+      {
+        outputFolder: 'allure-results',
+        details: true,
+        suiteTitle: true,
+      },
+    ],
+    ['./reporters/ai-triage-reporter.ts'],
   ],
   globalSetup: './src/setup/global-setup.ts',
   use: {
@@ -28,13 +31,13 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "ui",
-      testDir: "./tests/specs/ui",
-      use: { ...devices["Desktop Chrome"] },
+      name: 'ui',
+      testDir: './tests/specs/ui',
+      use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: "api",
-      testDir: "./tests/specs/api",
+      name: 'api',
+      testDir: './tests/specs/api',
     },
     {
       name: 'firefox',

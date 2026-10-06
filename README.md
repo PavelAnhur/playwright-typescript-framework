@@ -1,4 +1,3 @@
-
 # 🎭 Playwright TypeScript Test Framework
 
 [![Playwright](https://img.shields.io/badge/Playwright-2.0.0+-45ba4b?logo=playwright&logoColor=white)](https://playwright.dev/)
@@ -163,6 +162,7 @@ playwright-typescript-framework/
 ├── package-lock.json
 └── eslint.config.js
 ```
+
 </details>
 
 ## 🚀 Getting Started
@@ -217,8 +217,8 @@ npx playwright show-report
 # See test-results/junit.xml
 ```
 
-
 ### 🎯 Key Achievements
+
 ✅ Comprehensive Testing: 250+ tests across three layers\
 ✅ Maintainable Code: Page Object Model and custom fixtures\
 ✅ Type Safety: Full TypeScript coverage\
@@ -227,6 +227,7 @@ npx playwright show-report
 ✅ Cross-Browser: Chrome, Firefox, WebKit, and mobile
 
 ### 🤝 Contributing
+
 Fork the repository\
 Create your feature branch (git checkout -b feature/amazing-feature)\
 Commit your changes (git commit -m 'Add some amazing feature')\
@@ -234,9 +235,11 @@ Push to the branch (git push origin feature/amazing-feature)\
 Open a Pull Request
 
 ### 📝 License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 📬 Connect with Me
+
 LinkedIn: [Pavel Anhur](https://www.linkedin.com/in/pavel-anhur-1917821bb/)\
 Email: pavel.anhur@gmail.com
 

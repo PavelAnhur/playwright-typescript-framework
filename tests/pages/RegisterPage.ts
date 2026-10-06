@@ -4,7 +4,6 @@ import type { Account } from '@src/types/account';
 import { BasePage } from './BasePage';
 import { Step } from '@utils/step-decorator';
 
-
 export interface RegisterData extends Account {
   firstName: string;
   lastName: string;
@@ -103,7 +102,7 @@ export class RegisterPage extends BasePage {
       }
     }
     if (this.dobMonthSelect) {
-      await this.dobMonthSelect.selectOption({ value: (month!).toString() });
+      await this.dobMonthSelect.selectOption({ value: month!.toString() });
     }
     const paddedDay = String(day).padStart(2, '0');
     const dayButton = this.page.getByTestId(`dob-day-${paddedDay}`);

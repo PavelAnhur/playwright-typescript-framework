@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
   test('should return a single product by ID', async ({ api }) => {
     const productId = 5;

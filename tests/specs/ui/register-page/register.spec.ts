@@ -1,10 +1,9 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Register Page UI', () => {
   test.beforeEach(async ({ registerPage }) => {
     registerPage.open();
-  })
+  });
 
   test('should display all registration elements', async ({ registerPage }) => {
     await expect(registerPage.registerForm).toBeVisible();
@@ -31,7 +30,7 @@ test.describe('Register Page UI', () => {
       email,
       password: 'Password123^^',
       dob: '1990-06-10',
-      role: 'buyer'
+      role: 'buyer',
     });
     await registerPage.waitForRegistrationSuccess();
     await registerPage.expectUrlToBe('#/');

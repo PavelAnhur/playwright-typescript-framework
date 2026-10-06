@@ -1,7 +1,6 @@
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
-
 const __dirname = import.meta.dirname;
 
 export default defineConfig({
@@ -29,10 +28,7 @@ export default defineConfig({
         },
       },
     ],
-    reporters: [
-      'default',
-      ['allure-vitest/reporter', { resultsDir: 'allure-results' }],
-    ],
+    reporters: ['default', ['allure-vitest/reporter', { resultsDir: 'allure-results' }]],
     setupFiles: ['allure-vitest/setup'],
   },
 });

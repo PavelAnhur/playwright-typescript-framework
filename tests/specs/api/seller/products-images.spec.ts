@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Seller API -- POST /api/v1/products/:id/images', () => {
   test('seller can add image to their product', async ({ createProduct, authedSeller1 }) => {
     const productId = await createProduct({
@@ -16,13 +15,15 @@ test.describe('Seller API -- POST /api/v1/products/:id/images', () => {
       data: { url: imageUrl },
     });
     expect(response.status()).toBe(201);
-    const product: Product = await response.json()
-      .then(resData => resData.product);
+    const product: Product = await response.json().then(resData => resData.product);
     expect(product.id).toBe(productId);
     expect(product.images).toContain(imageUrl);
   });
 
-  test('seller cannot add image to another seller\'s product', async ({ createProduct, authedSeller2 }) => {
+  test("seller cannot add image to another seller's product", async ({
+    createProduct,
+    authedSeller2,
+  }) => {
     const productId = await createProduct({
       name: 'Image Test Product',
       description: 'Product with images',

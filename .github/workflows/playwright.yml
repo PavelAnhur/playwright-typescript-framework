@@ -2,9 +2,8 @@ name: Playwright Tests - Maison AUT
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   workflow_dispatch:
-
 
 jobs:
   # Lint and typecheck job
@@ -14,25 +13,25 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     timeout-minutes: 5
     steps:
-    - name: Checkout test framework
-      uses: actions/checkout@v4
+      - name: Checkout test framework
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
 
-    - name: Install Allure
-      run: |
-        wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
-        tar -zxvf allure-2.24.0.tgz
-        sudo mv allure-2.24.0 /opt/allure
-        sudo ln -s /opt/allure/bin/allure /usr/bin/allure
+      - name: Install Allure
+        run: |
+          wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+          tar -zxvf allure-2.24.0.tgz
+          sudo mv allure-2.24.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
-    - run: npm ci --legacy-peer-deps
-    - run: npm run typecheck
-    - run: npm run lint
+      - run: npm ci --legacy-peer-deps
+      - run: npm run typecheck
+      - run: npm run lint
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -41,113 +40,113 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Checkout test framework
-      uses: actions/checkout@v4
+      - name: Checkout test framework
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
 
-    - run: npm ci --legacy-peer-deps
+      - run: npm ci --legacy-peer-deps
 
-    - name: Clone Maison
-      run: |
-        if git clone https://github.com/PavelAnhur/maison.git maison; then
-          echo "✅ Maison cloned successfully"
-        else
-          echo "❌ Failed to clone Maison"
-          exit 1
-        fi
-
-    - name: Build Maison server
-      run: |
-        if [ -d "maison/server" ]; then
-          cd maison/server
-          npm ci
-          npm run build
-        else
-          echo "❌ Maison not found in repository"
-          exit 1
-        fi
-
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps chromium
-
-    - name: Start app
-      run: npm start &
-
-    - name: Wait for app to be ready
-      run: |
-        for i in $(seq 1 30); do
-          if curl -sf http://localhost:4000/api/v1/health > /dev/null; then
-            echo "App is up (attempt $i)"; exit 0
+      - name: Clone Maison
+        run: |
+          if git clone https://github.com/PavelAnhur/maison.git maison; then
+            echo "✅ Maison cloned successfully"
+          else
+            echo "❌ Failed to clone Maison"
+            exit 1
           fi
-          echo "  attempt $i/30 — retrying in 1s"; sleep 1
-        done
-        echo "App never came up after 30s"; exit 1
 
-    - name: Run Unit tests
-      run: npm run test:unit
+      - name: Build Maison server
+        run: |
+          if [ -d "maison/server" ]; then
+            cd maison/server
+            npm ci
+            npm run build
+          else
+            echo "❌ Maison not found in repository"
+            exit 1
+          fi
 
-    - name: Run API tests
-      run: npm run test:api
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
 
-    - name: Run UI tests
-      run: npm run test:ui
+      - name: Start app
+        run: npm start &
 
-    - name: Load Allure history
-      uses: actions/checkout@v4
-      if: always()
-      continue-on-error: true
-      with:
-        ref: gh-pages
-        path: gh-pages
+      - name: Wait for app to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4000/api/v1/health > /dev/null; then
+              echo "App is up (attempt $i)"; exit 0
+            fi
+            echo "  attempt $i/30 — retrying in 1s"; sleep 1
+          done
+          echo "App never came up after 30s"; exit 1
 
-    - name: Generate Allure Report
-      run: |
-        # Copy the history from the previous deployment into the results folder
-        if [ -d "gh-pages/allure-report/history" ]; then
-          cp -r gh-pages/allure-report/history allure-results/history
-        fi
-        npm run allure:generate
+      - name: Run Unit tests
+        run: npm run test:unit
 
-    - name: Verify Allure report exists
-      if: always()
-      run: |
-        if [ ! -d "allure-report" ]; then
-          echo "❌ allure-report/ was not generated"
-          ls -la
-          exit 1
-        fi
-        echo "✅ allure-report/ found"
+      - name: Run API tests
+        run: npm run test:api
 
-    - name: Upload Allure Report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: allure-report
-        path: allure-report/
-        retention-days: 7
+      - name: Run UI tests
+        run: npm run test:ui
 
-    - name: Deploy Allure Report to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      if: always()
-      with:
-        github_token: ${{ secrets.GH_TOKEN }}
-        publish_dir: ./allure-report
-        publish_branch: gh-pages
-        keep_files: true
-        force_orphan: false
+      - name: Load Allure history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
 
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: |
-          test-results/
-          playwright-report/
-          allure-results/
-        retention-days: 10
+      - name: Generate Allure Report
+        run: |
+          # Copy the history from the previous deployment into the results folder
+          if [ -d "gh-pages/allure-report/history" ]; then
+            cp -r gh-pages/allure-report/history allure-results/history
+          fi
+          npm run allure:generate
+
+      - name: Verify Allure report exists
+        if: always()
+        run: |
+          if [ ! -d "allure-report" ]; then
+            echo "❌ allure-report/ was not generated"
+            ls -la
+            exit 1
+          fi
+          echo "✅ allure-report/ found"
+
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 7
+
+      - name: Deploy Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          publish_dir: ./allure-report
+          publish_branch: gh-pages
+          keep_files: true
+          force_orphan: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test-results/
+            playwright-report/
+            allure-results/
+          retention-days: 10

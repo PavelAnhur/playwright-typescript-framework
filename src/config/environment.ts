@@ -39,11 +39,7 @@ class Environment {
 
   private loadEnvironment(): void {
     const cwd = process.cwd();
-    const envFiles = [
-      '.env.local',
-      `.env.${process.env['ENV_NAME'] || 'local'}`,
-      '.env',
-    ];
+    const envFiles = ['.env.local', `.env.${process.env['ENV_NAME'] || 'local'}`, '.env'];
     for (const envFile of envFiles) {
       const envPath = path.resolve(cwd, envFile);
       if (fs.existsSync(envPath)) {
@@ -58,7 +54,10 @@ class Environment {
     const EnvironmentSchema = z.object({
       ENV_NAME: z.enum(['local', 'staging', 'production']).default('local'),
       NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-      CI: z.string().optional().transform(val => val === 'true' || val === '1'),
+      CI: z
+        .string()
+        .optional()
+        .transform(val => val === 'true' || val === '1'),
       MAISON_URL: z.string().url().default('http://localhost:4000'),
       MAISON_API_URL: z.string().url().default('http://localhost:4000/api/v1'),
       TEST_BUYER_EMAIL: z.string().email().default('buyer@maison.test'),
@@ -75,7 +74,9 @@ class Environment {
       this.validatedConfig = EnvironmentSchema.parse(this.envVars);
     } catch (error) {
       console.error('Environment validation failed:', error);
-      throw new Error('Environment validation failed. Please check your .env files.', { cause: error });
+      throw new Error('Environment validation failed. Please check your .env files.', {
+        cause: error,
+      });
     }
   }
 
@@ -178,9 +179,11 @@ class Environment {
     if (!this.validatedConfig) {
       throw new Error('Environment not initialized');
     }
-    return !!(this.validatedConfig.DSH_BASE_URL && 
-              this.validatedConfig.DSH_MODEL && 
-              this.validatedConfig.DSH_API_KEY);
+    return !!(
+      this.validatedConfig.DSH_BASE_URL &&
+      this.validatedConfig.DSH_MODEL &&
+      this.validatedConfig.DSH_API_KEY
+    );
   }
 
   validateAiConfig(): void {

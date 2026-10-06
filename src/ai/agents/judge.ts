@@ -20,7 +20,9 @@ interface TriageSummary {
   evidence?: string[];
 }
 
-async function loadTriage(triageFile: string): Promise<{ hypothesis: unknown; errorContext: string }> {
+async function loadTriage(
+  triageFile: string
+): Promise<{ hypothesis: unknown; errorContext: string }> {
   const raw = await readFile(triageFile, 'utf8');
   const parsed = JSON.parse(raw) as TriageSummary;
   if (parsed.failures && parsed.failures.length > 0 && parsed.failures[0]) {
@@ -41,7 +43,9 @@ export async function judgeTriage(
   const { hypothesis: rawHypothesis, errorContext: summaryError } = await loadTriage(triageFile);
   const validated = FailureHypothesisSchema.safeParse(rawHypothesis);
   if (!validated.success) {
-    throw new Error(`Triage file ${triageFile} is not a valid hypothesis: ${validated.error.message}`);
+    throw new Error(
+      `Triage file ${triageFile} is not a valid hypothesis: ${validated.error.message}`
+    );
   }
   let errorContext = summaryError;
   if (errorContextFile !== null) {
@@ -52,7 +56,9 @@ export async function judgeTriage(
     }
   }
   if (!errorContext) {
-    throw new Error('No error context available — pass an error context file or a summary with errorMessage');
+    throw new Error(
+      'No error context available — pass an error context file or a summary with errorMessage'
+    );
   }
   let testSource: string | undefined;
   if (testSourceFile !== null) {
@@ -108,7 +114,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('usage: judge.ts <triage-file> [<error-context-file>] [<test-source-file>]');
     process.exit(1);
   }
-  judgeTriage(triageFile, errorContextFile, testSourceFile)
+  judgeTriage(triageFile, errorContextFile, testSourceFile);
   judgeTriage(triageFile, errorContextFile)
     .then(({ verdict, outputPath }) => {
       console.log(`✅ score: ${verdict.score}/10, verdict: ${verdict.verdict}`);
@@ -122,7 +128,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log('');
       console.log(verdict.reasoning);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('❌', error instanceof Error ? error.message : error);
       process.exit(1);
     });

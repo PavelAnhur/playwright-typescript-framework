@@ -3,6 +3,7 @@
 This is a Playwright + TypeScript QA automation framework for testing the "Maison" e-commerce application. It combines unit tests (Vitest), API tests, and UI/E2E tests.
 
 ## Key Architecture & Directories
+
 - **`tests/specs/unit/`**: Unit tests (Vitest)
 - **`tests/specs/api/`**: API tests (Playwright)
 - **`tests/specs/ui/`**: UI/E2E tests (Playwright)
@@ -13,6 +14,7 @@ This is a Playwright + TypeScript QA automation framework for testing the "Maiso
 - **`maison/`**: The Application Under Test (AUT) server
 
 ## Common Commands
+
 - Run all tests sequentially (unit, api, ui): `npm run test:all`
 - Run unit tests: `npm run test:unit`
 - Run API tests: `npm run test:api`
@@ -25,7 +27,9 @@ This is a Playwright + TypeScript QA automation framework for testing the "Maiso
 Follow this five-phase loop for every task. Do not skip phases.
 
 ### ① EXPLORE
+
 Before touching anything, map the territory. Use read-only operations only:
+
 - `glob` to locate files
 - `grep` to locate symbols
 - read to inspect implementations
@@ -34,26 +38,33 @@ Do not guess file contents from filenames. Do not guess behavior from memory.
 Prefer reusing existing functions and patterns over inventing new machinery.
 
 ### ② PLAN
+
 If the change touches more than one file, or involves an irreversible action (migration, file deletion, config change, dependency change):
+
 - Write a `todo_write` list first
 - Then execute it item by item
-If the requirement is ambiguous, ask the user — do not fill gaps with guesses.
+  If the requirement is ambiguous, ask the user — do not fill gaps with guesses.
 
 ### ③ IMPLEMENT
+
 - **Read before write.** Always open a file before editing it.
 - Make small, focused changes. One change, one verification.
 - Do not refactor unrelated code. Do not make "while I'm here" improvements.
 - Match existing patterns in the codebase.
 
 ### ④ VERIFY
+
 This is the boundary between a working agent and a chatting model.
+
 - **Run the code.** Tests, builds, linters, actual invocations.
 - **No claim without evidence.** Do not say "tests pass" until you have seen tests pass. Do not say "fixed" until you have seen the original failure disappear.
 - Every non-zero exit code must be handled. Do not skip and continue.
 - If verification fails, return to ③ with the failure output as the next input.
 
 ### ⑤ INTEGRATE
+
 Report what a human can check:
+
 - Which files changed and why
 - Which commands ran and what they returned
 - What remains undone
@@ -75,7 +86,7 @@ Rules that apply across all phases:
 1. **ES Modules**: Use `import`/`export` syntax.
 2. **TypeScript Strict Mode**: The project uses TS in strict mode. Ensure type safety.
 3. **Path Aliases**: Use `tsconfig.json` path aliases where defined.
-4. **Test Layer Placement**: 
+4. **Test Layer Placement**:
    - Unit tests → `tests/specs/unit/`
    - API tests → `tests/specs/api/`
    - UI tests → `tests/specs/ui/`
@@ -99,11 +110,13 @@ Rules that apply across all phases:
 ## Pre-approved Actions
 
 The following actions do not require asking the user first:
+
 - Read-only operations (glob, grep, read, list directories)
 - Running linters and typechecks on files you just edited
 - Running the project's existing test commands
 
 The following always require explicit user confirmation:
+
 - `git commit`, `git push`, or any history-changing git operation
 - Deleting any file
 - Modifying `package.json` dependencies

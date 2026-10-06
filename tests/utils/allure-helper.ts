@@ -1,8 +1,7 @@
 import { type Page, type TestInfo } from '@playwright/test';
-import * as allure from "allure-js-commons";
+import * as allure from 'allure-js-commons';
 import fs from 'fs';
 import path from 'path';
-
 
 /**
  * Add test-specific environment variables
@@ -18,7 +17,8 @@ export function addAllureEnvironment(info: TestInfo): void {
   if (fs.existsSync(envPath)) {
     const content = fs.readFileSync(envPath, 'utf-8');
     existingEnv = Object.fromEntries(
-      content.split('\n')
+      content
+        .split('\n')
         .filter(line => line.includes('='))
         .map(line => {
           const [key, ...values] = line.split('=');
@@ -65,15 +65,8 @@ export async function addScreenshotOnFailure(page: Page): Promise<void> {
   await addAllureAttachment('Screenshot', screenshot, allure.ContentType.PNG);
 }
 
-export async function addAllureJson(
-  name: string,
-  data: Record<string, unknown>
-): Promise<void> {
-  await addAllureAttachment(
-    name,
-    JSON.stringify(data, null, 2),
-    allure.ContentType.JSON
-  );
+export async function addAllureJson(name: string, data: Record<string, unknown>): Promise<void> {
+  await addAllureAttachment(name, JSON.stringify(data, null, 2), allure.ContentType.JSON);
 }
 
 export async function addAllureText(name: string, text: string): Promise<void> {

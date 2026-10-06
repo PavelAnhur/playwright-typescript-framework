@@ -44,12 +44,12 @@ async function callOnce(options: CallOptions): Promise<CallResult> {
     max_tokens: options.maxTokens ?? 4096,
   };
   if (options.jsonMode ?? true) {
-    body["response_format"] = { type: 'json_object' };
+    body['response_format'] = { type: 'json_object' };
   }
   const response = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${aiConfig.apiKey}`,
+      Authorization: `Bearer ${aiConfig.apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
@@ -57,10 +57,9 @@ async function callOnce(options: CallOptions): Promise<CallResult> {
   const durationMs = Date.now() - started;
   if (!response.ok) {
     const text = await response.text();
-    throw Object.assign(
-      new Error(`HTTP ${response.status}: ${text.slice(0, 300)}`),
-      { status: response.status }
-    );
+    throw Object.assign(new Error(`HTTP ${response.status}: ${text.slice(0, 300)}`), {
+      status: response.status,
+    });
   }
   const json = (await response.json()) as ChatCompletionResponse;
   const content = json.choices?.[0]?.message?.content ?? '';
@@ -76,7 +75,7 @@ async function callOnce(options: CallOptions): Promise<CallResult> {
 
 export async function callModel(options: CallOptions): Promise<CallResult> {
   const maxAttempts = (options.retries ?? 2) + 1;
-  const promptText = options.messages.map((m) => `[${m.role}] ${m.content}`).join('\n\n');
+  const promptText = options.messages.map(m => `[${m.role}] ${m.content}`).join('\n\n');
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -97,7 +96,7 @@ export async function callModel(options: CallOptions): Promise<CallResult> {
       const status = (error as { status?: number }).status;
       const retryable = status === undefined || RETRYABLE_STATUS.has(status);
       if (!retryable || attempt === maxAttempts) break;
-      await new Promise((r) => setTimeout(r, 500 * attempt));
+      await new Promise(r => setTimeout(r, 500 * attempt));
     }
   }
   const message = lastError instanceof Error ? lastError.message : String(lastError);

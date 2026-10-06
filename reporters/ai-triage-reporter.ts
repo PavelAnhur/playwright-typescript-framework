@@ -52,7 +52,9 @@ class AiTriageReporter implements Reporter {
     }
     const toTriage = this.failures.slice(0, MAX_TRIAGE);
     const skipped = this.failures.length - toTriage.length;
-    console.log(`\n🤖 ai-triage: analyzing ${toTriage.length} failure(s)${skipped > 0 ? ` (${skipped} more skipped, cap ${MAX_TRIAGE})` : ''}...\n`);
+    console.log(
+      `\n🤖 ai-triage: analyzing ${toTriage.length} failure(s)${skipped > 0 ? ` (${skipped} more skipped, cap ${MAX_TRIAGE})` : ''}...\n`
+    );
     const triaged: TriagedFailure[] = [];
     for (const { test, result } of toTriage) {
       const errorMessage = result.error?.message ?? 'Unknown error';
@@ -114,7 +116,7 @@ class AiTriageReporter implements Reporter {
     console.log(`  environment:  ${byCategory.environment}`);
     if (byCategory.unavailable > 0) console.log(`  unavailable:  ${byCategory.unavailable}`);
     if (skipped > 0) console.log(`  skipped:      ${skipped}`);
-    const suspects = triaged.filter((t) => t.hypothesis?.category === 'product_bug');
+    const suspects = triaged.filter(t => t.hypothesis?.category === 'product_bug');
     if (suspects.length > 0) {
       console.log('\n  product bug suspects:');
       for (const s of suspects) {

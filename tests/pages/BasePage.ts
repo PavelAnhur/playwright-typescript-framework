@@ -2,13 +2,11 @@ import { T } from '@config/timeouts';
 import { type Locator, type Page, expect } from '@playwright/test';
 import { Step } from '@utils/step-decorator';
 
-
 /**
  * Abstract base class for all Page Objects.
  * Provides common functionality and utilities for page interactions.
  */
 export abstract class BasePage {
-
   readonly flashMessage: Locator;
   readonly loadingIndicator: Locator;
   readonly cookieBanner: Locator;
@@ -28,8 +26,12 @@ export abstract class BasePage {
   constructor(protected readonly page: Page) {
     this.flashMessage = page.locator('.flash, .alert, [role="alert"]');
     this.loadingIndicator = page.locator('.loading, .spinner, [data-testid="loading"]');
-    this.cookieBanner = page.locator('.cookie-banner, .cookie-consent, [data-testid="cookie-banner"]');
-    this.cookieAcceptButton = page.locator('button:has-text("Accept"), button:has-text("Allow"), [data-testid="accept-cookies"]');
+    this.cookieBanner = page.locator(
+      '.cookie-banner, .cookie-consent, [data-testid="cookie-banner"]'
+    );
+    this.cookieAcceptButton = page.locator(
+      'button:has-text("Accept"), button:has-text("Allow"), [data-testid="accept-cookies"]'
+    );
 
     this.brand = page.getByTestId('brand');
     this.navToggle = page.getByTestId('nav-toggle');
@@ -71,7 +73,7 @@ export abstract class BasePage {
       if (await indicator.isVisible({ timeout: T.VERY_SHORT })) {
         await this.loadingIndicator.waitFor({
           state: 'hidden',
-          timeout: T.SHORT
+          timeout: T.SHORT,
         });
       }
     } catch {
@@ -84,15 +86,12 @@ export abstract class BasePage {
    */
   async handleBanners(): Promise<void> {
     try {
-      const bannerExists = await this.cookieBanner
-        .isVisible({ timeout: T.VERY_SHORT });
+      const bannerExists = await this.cookieBanner.isVisible({ timeout: T.VERY_SHORT });
       if (bannerExists) {
-        const buttonVisible = await this.cookieAcceptButton
-          .isVisible({ timeout: T.VERY_SHORT });
+        const buttonVisible = await this.cookieAcceptButton.isVisible({ timeout: T.VERY_SHORT });
         if (buttonVisible) {
           await this.cookieAcceptButton.click();
-          await this.cookieBanner
-            .waitFor({ state: 'hidden', timeout: T.SHORT });
+          await this.cookieBanner.waitFor({ state: 'hidden', timeout: T.SHORT });
         }
       }
     } catch {
@@ -109,8 +108,7 @@ export abstract class BasePage {
     try {
       if (await this.cookieBanner.isVisible({ timeout: T.VERY_SHORT })) {
         await this.cookieAcceptButton.click();
-        await this.cookieBanner
-          .waitFor({ state: 'hidden', timeout: T.MEDIUM });
+        await this.cookieBanner.waitFor({ state: 'hidden', timeout: T.MEDIUM });
       }
     } catch {
       // Cookie banner might not exist or already handled
@@ -142,21 +140,21 @@ export abstract class BasePage {
   /**
    * Get a Locator for an element by selector or testId
    * This is the preferred method for finding elements in tests
-   * 
+   *
    * @param selector - CSS selector, testId, or attribute selector
    * @param options - Optional configuration
    * @returns Locator for the element
-   * 
+   *
    * @example
    * // By CSS selector
    * const title = page.getElement('h1');
-   * 
+   *
    * // By testId
    * const submit = page.getElement('[data-testid="submit"]');
-   * 
+   *
    * // By text content
    * const button = page.getElement('button:has-text("Submit")');
-   * 
+   *
    * // With options
    * const list = page.getElement('ul.items', { has: page.locator('li.active') });
    */
@@ -170,14 +168,10 @@ export abstract class BasePage {
     return this.page.locator(selector, options);
   }
 
-
   /**
- * Check if an element is visible quickly
- */
-  async isElementVisible(
-    locator: Locator,
-    timeout: number = T.VERY_SHORT,
-  ): Promise<boolean> {
+   * Check if an element is visible quickly
+   */
+  async isElementVisible(locator: Locator, timeout: number = T.VERY_SHORT): Promise<boolean> {
     try {
       return await locator.isVisible({ timeout });
     } catch {
@@ -191,7 +185,7 @@ export abstract class BasePage {
   async getFlashMessage(): Promise<string> {
     try {
       if (await this.isElementVisible(this.flashMessage, T.VERY_SHORT)) {
-        return await this.flashMessage.textContent() || '';
+        return (await this.flashMessage.textContent()) || '';
       }
       return '';
     } catch {

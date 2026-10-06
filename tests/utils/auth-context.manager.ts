@@ -2,7 +2,6 @@ import { ENV } from '@config/env';
 import { request, type APIRequestContext } from '@playwright/test';
 import type { Account } from '@src/types/account';
 
-
 export class AuthContextManager {
   private static readonly MAX_RETRIES = 3;
   private static readonly BASE_RETRY_DELAY_MS = 1000;
@@ -53,10 +52,9 @@ export class AuthContextManager {
         }
       }
     }
-    throw new Error(
-      `Failed to create authenticated context for ${account.email}`,
-      { cause: lastError }
-    );
+    throw new Error(`Failed to create authenticated context for ${account.email}`, {
+      cause: lastError,
+    });
   }
 
   private async createContext(account: Account): Promise<APIRequestContext> {
@@ -113,7 +111,7 @@ export class AuthContextManager {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 
