@@ -22,7 +22,9 @@ interface TriageSummary {
   sourceError?: string;
 }
 
-async function loadTriage(triageFile: string): Promise<{ hypothesis: unknown; errorContext: string }> {
+async function loadTriage(
+  triageFile: string
+): Promise<{ hypothesis: unknown; errorContext: string }> {
   const raw = await readFile(triageFile, 'utf8');
   const parsed = JSON.parse(raw) as TriageSummary & { sourceError?: string };
   if (parsed.failures && parsed.failures.length > 0 && parsed.failures[0]) {

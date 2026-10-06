@@ -48,7 +48,6 @@ Test layers: Vitest (unit), Playwright API, Playwright UI.
 - **Function/method formatting**:
   - No empty lines inside function/method bodies
   - No inline comments within function/method bodies
-  - Maintain consistent indentation and line spacing outside functions
 
 ## Known Gotchas
 

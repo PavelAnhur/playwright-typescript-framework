@@ -1,6 +1,7 @@
 import { ENV } from '@config/env';
 import { TIMEOUTS } from '@config/timeouts';
 import { defineConfig, devices } from '@playwright/test';
+
 export default defineConfig({
   testDir: './tests/specs',
   fullyParallel: true,
