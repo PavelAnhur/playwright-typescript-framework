@@ -1,12 +1,11 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Seller API -- Edge Cases and Error Handling', () => {
   test('seller cannot create product with missing required fields', async ({ authedSeller1 }) => {
     const invalidData: Record<string, Partial<Product>> = {
-      'INVALID_NAME': { description: 'No name', priceCents: 1000, category: 'test', stock: 1 },
-      'INVALID_PRICE': { name: 'No price', category: 'test', stock: 1 },
+      INVALID_NAME: { description: 'No name', priceCents: 1000, category: 'test', stock: 1 },
+      INVALID_PRICE: { name: 'No price', category: 'test', stock: 1 },
       // 'INVALID_CATEGORY': { name: 'No category', priceCents: 1000, stock: 1 },     bug, need to fix
       // 'INVALID_STOCK': { name: 'No stock', priceCents: 1000, category: 'test' },   bug, need to fix
     };

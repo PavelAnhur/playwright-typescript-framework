@@ -1,14 +1,13 @@
 import { readFile } from '@utils/file-utils';
 import { buildCsvFilePath } from '@utils/path-utils';
 
-
 /**
  * Reads CSV data from a file with automatic type conversion.
- * 
+ *
  * @param fileName - The CSV file name (e.g., 'products.csv')
  * @param specFilePath - The path of the calling spec file
  * @returns Array of typed objects with automatic type conversion
- * 
+ *
  * @example
  * ```ts
  * const categories = getCsvData('categories.csv', __filename);
@@ -27,7 +26,7 @@ export function getCsvData<T extends Record<string, unknown> = Record<string, un
   // Read and parse the CSV file
   const rawData = readFile(filePath) as Record<string, string>[];
   // Transform each row with automatic type conversion
-  const transformedData = rawData.map((row) => {
+  const transformedData = rawData.map(row => {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(row)) {
       result[key] = parseFieldValue(value);
@@ -58,8 +57,10 @@ function parseFieldValue(value: string | null | undefined): ParsedValue {
     return Number(trimmed);
   }
   // JSON (objects and arrays)
-  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
-    (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+  if (
+    (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+    (trimmed.startsWith('[') && trimmed.endsWith(']'))
+  ) {
     try {
       return JSON.parse(trimmed);
     } catch {

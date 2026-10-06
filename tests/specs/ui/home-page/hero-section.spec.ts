@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page UI -- Hero Section', () => {
   test('hero content is displayed correctly', async ({ homePage }) => {
     await homePage.open();

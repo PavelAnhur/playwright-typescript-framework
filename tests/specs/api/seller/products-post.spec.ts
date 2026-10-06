@@ -14,8 +14,7 @@ test.describe('Seller API -- POST /api/v1/products', () => {
       data: productData,
     });
     expect(response.status()).toBe(201);
-    const product: Product = await response.json()
-      .then(resData => resData.product);
+    const product: Product = await response.json().then(resData => resData.product);
     expect(product).toBeDefined();
     expect(product.id).toBeDefined();
     expect(product.name).toBe(productData.name);

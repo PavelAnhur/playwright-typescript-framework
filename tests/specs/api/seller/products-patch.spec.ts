@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Seller API -- PATCH /api/v1/products/:id', () => {
   test('seller can update their own product', async ({ createProduct, authedSeller1 }) => {
     const preProduct = await createProduct({
@@ -22,8 +21,7 @@ test.describe('Seller API -- PATCH /api/v1/products/:id', () => {
       data: updates,
     });
     expect(response.status()).toBe(200);
-    const product: Product = await response.json()
-      .then(resData => resData.product);
+    const product: Product = await response.json().then(resData => resData.product);
     expect(product.id).toBe(preProduct.id);
     expect(product.name).toBe(updates.name);
     expect(product.description).toBe(updates.description);
@@ -33,14 +31,18 @@ test.describe('Seller API -- PATCH /api/v1/products/:id', () => {
     expect(product.effectiveCents).toBe(updates.priceCents);
   });
 
-  test('seller cannot update another seller\'s product', async ({ createProduct, authedSeller1, authedSeller2 }) => {
+  test("seller cannot update another seller's product", async ({
+    createProduct,
+    authedSeller1,
+    authedSeller2,
+  }) => {
     const preProduct = await createProduct({
       name: 'Update Test Product',
       description: 'Initial description',
       priceCents: 5000,
       category: 'furniture',
       stock: 10,
-      seller: authedSeller1
+      seller: authedSeller1,
     });
     const response = await authedSeller2.patch(`products/${preProduct.id}`, {
       data: { name: 'Attempted Hijack' },
@@ -67,7 +69,7 @@ test.describe('Seller API -- PATCH /api/v1/products/:id', () => {
       priceCents: 5000,
       category: 'furniture',
       stock: 10,
-      seller: authedSeller1
+      seller: authedSeller1,
     });
     const response = await authedBuyer.patch(`products/${preProduct.id}`, {
       data: { name: 'Buyer Update Attempt' },

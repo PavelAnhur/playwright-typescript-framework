@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Login Page UI -- Accessibility', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.open();

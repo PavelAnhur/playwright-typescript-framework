@@ -3,7 +3,6 @@ import { Step } from '@utils/step-decorator';
 import { BasePage } from './BasePage';
 import { LoginPage } from './LoginPage';
 
-
 export class HomePage extends BasePage {
   // Navigation
   readonly cartCount: Locator;
@@ -124,7 +123,7 @@ export class HomePage extends BasePage {
     await expect(this.page).toHaveURL('#/');
   }
 
-  // ---------- Product queries ---------- 
+  // ---------- Product queries ----------
 
   getProductById(productId: number | string): Locator {
     return this.page.locator(`[data-testid="product-card"][data-product-id="${productId}"]`);
@@ -132,7 +131,8 @@ export class HomePage extends BasePage {
 
   async getProductNames(): Promise<string[]> {
     return await this.productCards.evaluateAll(element =>
-      element.map(el => el.getAttribute('data-name') || ''));
+      element.map(el => el.getAttribute('data-name') || '')
+    );
   }
 
   @Step('Wait for catalogue to be visible')
@@ -174,9 +174,9 @@ export class HomePage extends BasePage {
   }
 
   async getSortOptions(): Promise<string[]> {
-    return await this.sortSelect.locator('option').evaluateAll(
-      (elements) => elements.map((el) => el.textContent?.trim() || '')
-    );
+    return await this.sortSelect
+      .locator('option')
+      .evaluateAll(elements => elements.map(el => el.textContent?.trim() || ''));
   }
 
   async isUserLoggedIn(): Promise<boolean> {

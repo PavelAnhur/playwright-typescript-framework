@@ -1,10 +1,10 @@
 /**
  * Detects the spec file path from the call stack.
  * Looks for files matching the pattern: file://.../src/tests/...spec.ts
- * 
+ *
  * @returns The detected spec file path
  * @throws {Error} If no spec file path can be detected
- * 
+ *
  * @example
  * // In a test file:
  * const specPath = detectSpecPath();

@@ -1,6 +1,5 @@
 import * as allure from 'allure-js-commons';
 
-
 /**
  * Wraps an async class method in an Allure step.
  *
@@ -26,9 +25,7 @@ export function Step(template?: string) {
     const methodName = String(context.name);
 
     return async function (this: object, ...args: A): Promise<R> {
-      const stepName = template
-        ? interpolate(template, args)
-        : defaultStepName(methodName, args);
+      const stepName = template ? interpolate(template, args) : defaultStepName(methodName, args);
 
       return allure.step(stepName, async () => {
         return target.apply(this, args);

@@ -1,11 +1,10 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page UI -- Catalogue Toolbar', () => {
   test.beforeEach(async ({ homePage }) => {
     await homePage.open();
   });
-  
+
   test('search input is visible', async ({ homePage }) => {
     await expect(homePage.searchInput).toBeVisible();
   });
@@ -13,8 +12,7 @@ test.describe('Home Page UI -- Catalogue Toolbar', () => {
   test('category filter options are correct', async ({ homePage, csvData }) => {
     const categories = csvData<{ category: string }>('categories.csv');
     await expect(homePage.categorySelect).toBeVisible();
-    const options = await homePage.categorySelect.locator('option')
-      .allTextContents();
+    const options = await homePage.categorySelect.locator('option').allTextContents();
     const expectedOpts = categories.map(row => row.category);
     expect(options).toEqual(expectedOpts);
   });

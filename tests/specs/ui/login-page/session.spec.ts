@@ -1,7 +1,6 @@
 import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 
-
 test.describe('Login Page UI -- Session Management', () => {
   const buyer = getTestUser('buyer');
 

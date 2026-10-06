@@ -2,9 +2,11 @@ import { expect, test } from '@fixtures';
 import type { CsvRow } from '@src/types/csv';
 import type { Product, ProductFields } from '@src/types/product';
 
-
 test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
-  test('should return all products with correct shape - parameterized', async ({ api, csvData }) => {
+  test('should return all products with correct shape - parameterized', async ({
+    api,
+    csvData,
+  }) => {
     type ProductCsvRow = ProductFields & CsvRow;
     const productData = csvData<ProductCsvRow>('products.csv');
     const response = await api.get('products');
@@ -49,9 +51,9 @@ test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
     const data = await response.json();
     const products = data.products;
     expect(products.length).toBeGreaterThan(0);
-    expect(products.some((p: Product) =>
-      p.category?.toLowerCase().includes('watches')
-    )).toBeTruthy();
+    expect(
+      products.some((p: Product) => p.category?.toLowerCase().includes('watches'))
+    ).toBeTruthy();
   });
 
   test('should sort products by price ascending', async ({ api }) => {
@@ -95,15 +97,13 @@ test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
   test('should combine price filters', async ({ api }) => {
     const minPrice = 50000;
     const maxPrice = 150000;
-    const response = await api.get(
-      `products?minPrice=${minPrice}&maxPrice=${maxPrice}`
-    );
+    const response = await api.get(`products?minPrice=${minPrice}&maxPrice=${maxPrice}`);
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
     const products = data.products;
-    expect(products.every((p: Product) =>
-      p.priceCents! >= minPrice && p.priceCents! <= maxPrice
-    )).toBeTruthy();
+    expect(
+      products.every((p: Product) => p.priceCents! >= minPrice && p.priceCents! <= maxPrice)
+    ).toBeTruthy();
   });
 
   test('should handle invalid sort parameter', async ({ api }) => {

@@ -1,4 +1,4 @@
-import setupAllure from "./allure-setup";
+import setupAllure from './allure-setup';
 
 export default function globalSetup(): void {
   setupAllure();

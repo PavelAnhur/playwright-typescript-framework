@@ -2,7 +2,6 @@ import { expect, test } from '@fixtures';
 import type { Cart } from '@src/types/cart';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Buyer API -- Cart Operations', () => {
   let testProduct: Product;
 
@@ -30,16 +29,14 @@ test.describe('Buyer API -- Cart Operations', () => {
     expect(addResponse.ok()).toBeTruthy();
     const cartResponse = await authedBuyer.get('cart');
     expect(cartResponse.ok()).toBeTruthy();
-    const cart: Cart = await cartResponse.json()
-      .then(responseData => responseData.cart);
+    const cart: Cart = await cartResponse.json().then(responseData => responseData.cart);
     expect(cart.items).toHaveLength(1);
     expect(cart.items[0]).toBeDefined();
     const itemId = cart.items[0]?.itemId;
     expect(itemId).toBeDefined();
     const response = await authedBuyer.delete(`cart/items/${itemId}`);
     expect(response.ok()).toBeTruthy();
-    const updatedCart: Cart = await response.json()
-      .then(resData => resData.cart);
+    const updatedCart: Cart = await response.json().then(resData => resData.cart);
     expect(updatedCart.items).toHaveLength(0);
     expect(updatedCart.subtotalCents).toBe(0);
   });
@@ -74,12 +71,11 @@ test.describe('Buyer API -- Cart Operations', () => {
 
   test('should clear entire cart', async ({ authedBuyer }) => {
     await authedBuyer.post('cart/items', {
-      data: { productId: testProduct.id, quantity: 2 }
+      data: { productId: testProduct.id, quantity: 2 },
     });
     const response = await authedBuyer.delete('cart');
     expect(response.ok()).toBeTruthy();
-    const cart: Cart = await response.json()
-      .then(resData => resData.cart);
+    const cart: Cart = await response.json().then(resData => resData.cart);
     expect(cart.items).toHaveLength(0);
     expect(cart.subtotalCents).toBe(0);
   });
@@ -105,14 +101,12 @@ test.describe('Buyer API -- Cart Operations', () => {
   test('should handle cart with discount correctly', async ({ api, authedBuyer }) => {
     // Get product with discount (product 1 has 15% discount)
     const response = await api.get('products/1');
-    const product: Product = await response.json()
-      .then(resData => resData.product);
+    const product: Product = await response.json().then(resData => resData.product);
     const cartResponse = await authedBuyer.post('cart/items', {
       data: { productId: product.id, quantity: 1 },
     });
     expect(cartResponse.ok()).toBeTruthy();
-    const cart: Cart = await cartResponse.json()
-      .then(resData => resData.cart);
+    const cart: Cart = await cartResponse.json().then(resData => resData.cart);
     expect(cart.items[0]?.unitCents).toBe(product.effectiveCents);
     expect(cart.subtotalCents).toBe(product.effectiveCents);
   });

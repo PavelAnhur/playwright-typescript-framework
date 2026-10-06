@@ -1,0 +1,144 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+import { aiConfig } from '../config';
+import { callModel } from '../dshClient';
+import {
+  buildFailureAnalystUser,
+  failureAnalystSystem,
+  type FailureContext,
+} from '../prompts/failureAnalyst';
+import { FailureHypothesisSchema, type FailureHypothesis } from '../schemas';
+
+const AGENT = 'failure-analyst';
+
+/**
+ * Parses a Playwright failure fixture: extracts "Test title", "Test file",
+ * "--- ERROR MESSAGE ---", "--- STACK TRACE ---", "--- EXTRA CONTEXT ---".
+ * Anything missing is left undefined.
+ */
+function parseFixture(raw: string): FailureContext {
+  const lines = raw.split('\n');
+  let testTitle = '';
+  let testFile = '';
+  const errorMessage: string[] = [];
+  const stackTrace: string[] = [];
+  const extraContext: string[] = [];
+  type Section = 'errorMessage' | 'stackTrace' | 'extraContext';
+  let current: Section | null = null;
+  const sectionMap: Record<string, Section> = {
+    '--- ERROR MESSAGE ---': 'errorMessage',
+    '--- STACK TRACE ---': 'stackTrace',
+    '--- EXTRA CONTEXT ---': 'extraContext',
+  };
+  const push = (section: Section, line: string): void => {
+    if (section === 'errorMessage') errorMessage.push(line);
+    else if (section === 'stackTrace') stackTrace.push(line);
+    else extraContext.push(line);
+  };
+  for (const line of lines) {
+    if (line.startsWith('Test title:')) {
+      testTitle = line.replace('Test title:', '').trim();
+      continue;
+    }
+    if (line.startsWith('Test file:')) {
+      testFile = line.replace('Test file:', '').trim();
+      continue;
+    }
+    const key = line.trim();
+    const section = sectionMap[key];
+    if (section !== undefined) {
+      current = section;
+      continue;
+    }
+    if (current !== null) {
+      push(current, line);
+    }
+  }
+  const stack = stackTrace.join('\n').trim();
+  const extra = extraContext.join('\n').trim();
+  return {
+    testTitle,
+    testFile,
+    errorMessage: errorMessage.join('\n').trim(),
+    ...(stack !== '' && { stackTrace: stack }),
+    ...(extra !== '' && { extraContext: extra }),
+  };
+}
+
+export async function analyzeFailure(
+  ctx: FailureContext,
+  metadata: Record<string, unknown> = {}
+): Promise<{ hypothesis: FailureHypothesis; outputPath: string | null }> {
+  if (!ctx.errorMessage) {
+    throw new Error('FailureContext is missing errorMessage');
+  }
+  const result = await callModel({
+    agent: AGENT,
+    messages: [
+      { role: 'system', content: failureAnalystSystem },
+      { role: 'user', content: buildFailureAnalystUser(ctx) },
+    ],
+    metadata: { ...metadata, testTitle: ctx.testTitle },
+  });
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(result.content);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`,
+      { cause: error }
+    );
+  }
+  const validated = FailureHypothesisSchema.safeParse(parsed);
+  if (!validated.success) {
+    throw new Error(
+      `Model output failed schema validation: ${validated.error.message}\n\nRaw:\n${result.content.slice(0, 500)}`
+    );
+  }
+  const outputName = typeof metadata['outputName'] === 'string' ? metadata['outputName'] : null;
+  let outputPath: string | null = null;
+  if (outputName !== null) {
+    await mkdir(aiConfig.generatedCasesDir, { recursive: true });
+    outputPath = join(aiConfig.generatedCasesDir, outputName);
+    const enriched = {
+      ...validated.data,
+      sourceContext: [
+        `Test title: ${ctx.testTitle}`,
+        `Test file: ${ctx.testFile}`,
+        '',
+        '--- ERROR MESSAGE ---',
+        ctx.errorMessage,
+        ...(ctx.stackTrace ? ['', '--- STACK TRACE ---', ctx.stackTrace] : []),
+        ...(ctx.extraContext ? ['', '--- EXTRA CONTEXT ---', ctx.extraContext] : []),
+      ].join('\n'),
+    };
+    await writeFile(outputPath, JSON.stringify(enriched, null, 2), 'utf8');
+  }
+  return { hypothesis: validated.data, outputPath };
+}
+
+async function analyzeFailureFromFile(fixtureFile: string) {
+  const raw = await readFile(fixtureFile, 'utf8');
+  const ctx = parseFixture(raw);
+  const outputName = basename(fixtureFile).replace(/\.txt$/, '.triage.json');
+  return analyzeFailure(ctx, { fixtureFile: basename(fixtureFile), outputName });
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const target =
+    process.argv[2] ??
+    join(aiConfig.projectRoot, 'fixtures', 'failures', 'checkout-button-disabled.txt');
+
+  analyzeFailureFromFile(target)
+    .then(({ hypothesis, outputPath }) => {
+      console.log(`✅ category: ${hypothesis.category}, confidence: ${hypothesis.confidence}`);
+      if (outputPath) console.log(`📄 written: ${outputPath}`);
+      console.log('');
+      console.log(hypothesis.hypothesis);
+    })
+    .catch(error => {
+      console.error('❌', error instanceof Error ? error.message : error);
+      process.exit(1);
+    });
+}

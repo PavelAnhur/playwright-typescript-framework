@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Certificate } from '@src/types/certificate';
 
-
 test.describe('Home Page API -- GET /api/v1/products/:id/certificate', () => {
   test('should return certificate for product owned by seller1', async ({ api }) => {
     const productId = 1;

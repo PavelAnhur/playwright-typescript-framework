@@ -1,14 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 
-
 /**
  * Build the file path for a CSV file
- * 
+ *
  * @param fileName - The CSV file name (e.g., 'products.csv')
  * @param specFilePath - The path of the calling spec file
  * @returns The resolved file path (environment-specific if available)
- * 
+ *
  * @example
  * buildCsvFilePath('products.csv', 'src/tests/ui/home-page/catalog-toolbar.spec.ts')
  * // Returns: 'src/test-data/ui/home-page/catalog-toolbar/products-local.csv'
@@ -37,27 +36,27 @@ export function buildCsvFilePath(fileName: string, specFilePath: string): string
   if (!fs.existsSync(absoluteDefaultPath)) {
     throw new Error(
       `CSV file not found:\n` +
-      `  - Tried: ${envFilePath}\n` +
-      `  - Tried: ${defaultPath}\n` +
-      `Please ensure the CSV file exists in src/test-data/${dataFolder}/`
+        `  - Tried: ${envFilePath}\n` +
+        `  - Tried: ${defaultPath}\n` +
+        `Please ensure the CSV file exists in src/test-data/${dataFolder}/`
     );
   }
   return defaultPath;
 }
 
 /**
-* Extracts the data folder path from a spec file path.
-* 
-* @param specFilePath - The full path to the spec file
-* @returns The folder path relative to 'src/tests/', or undefined if not found
-* 
-* @example
-* extractDataFolder('src/tests/ui/home-page/catalog-toolbar.spec.ts')
-* // Returns: 'ui/home-page/catalog-toolbar'
-* 
-* extractDataFolder('src/tests/api/articles.spec.ts')
-* // Returns: 'api'
-*/
+ * Extracts the data folder path from a spec file path.
+ *
+ * @param specFilePath - The full path to the spec file
+ * @returns The folder path relative to 'src/tests/', or undefined if not found
+ *
+ * @example
+ * extractDataFolder('src/tests/ui/home-page/catalog-toolbar.spec.ts')
+ * // Returns: 'ui/home-page/catalog-toolbar'
+ *
+ * extractDataFolder('src/tests/api/articles.spec.ts')
+ * // Returns: 'api'
+ */
 export function extractDataFolder(specFilePath: string): string | undefined {
   const normalizedPath = specFilePath.replace(/\\/g, '/');
   // Remove the file extension

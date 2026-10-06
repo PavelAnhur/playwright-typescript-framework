@@ -3,7 +3,6 @@ import { readFile } from '@utils/file-utils';
 import { buildCsvFilePath } from '@utils/path-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 vi.mock('@utils/file-utils');
 vi.mock('@utils/path-utils');
 
@@ -90,12 +89,12 @@ describe('unit', () => {
         {
           id: '1',
           metadata: '{"key":"value","nested":{"prop":true}}',
-          tags: '["tag1","tag2"]'
+          tags: '["tag1","tag2"]',
         },
         {
           id: '2',
           metadata: '{"another":"object"}',
-          tags: '["tag3"]'
+          tags: '["tag3"]',
         },
       ];
 
@@ -108,12 +107,12 @@ describe('unit', () => {
         {
           id: 1,
           metadata: { key: 'value', nested: { prop: true } },
-          tags: ['tag1', 'tag2']
+          tags: ['tag1', 'tag2'],
         },
         {
           id: 2,
           metadata: { another: 'object' },
-          tags: ['tag3']
+          tags: ['tag3'],
         },
       ]);
     });
@@ -153,50 +152,38 @@ describe('unit', () => {
     });
 
     it('should handle whitespace trimming', () => {
-      const mockCsvData = [
-        { id: ' 1 ', name: '  John  ', active: '  true  ' },
-      ];
+      const mockCsvData = [{ id: ' 1 ', name: '  John  ', active: '  true  ' }];
 
       vi.mocked(readFile).mockReturnValue(mockCsvData);
       vi.mocked(buildCsvFilePath).mockReturnValue('/path/to/test-data.csv');
 
       const result = getCsvData(mockFileName, mockSpecFilePath);
 
-      expect(result).toEqual([
-        { id: 1, name: 'John', active: true },
-      ]);
+      expect(result).toEqual([{ id: 1, name: 'John', active: true }]);
     });
   });
 
   describe('Edge Cases', () => {
     it('should handle numbers with leading zeros', () => {
-      const mockCsvData = [
-        { id: '001', code: '010', version: '1.0' },
-      ];
+      const mockCsvData = [{ id: '001', code: '010', version: '1.0' }];
 
       vi.mocked(readFile).mockReturnValue(mockCsvData);
       vi.mocked(buildCsvFilePath).mockReturnValue('/path/to/test-data.csv');
 
       const result = getCsvData(mockFileName, mockSpecFilePath);
 
-      expect(result).toEqual([
-        { id: 1, code: 10, version: 1.0 },
-      ]);
+      expect(result).toEqual([{ id: 1, code: 10, version: 1.0 }]);
     });
 
     it('should handle special characters in strings', () => {
-      const mockCsvData = [
-        { name: 'John Doe, Jr.', description: 'This is a "quoted" string' },
-      ];
+      const mockCsvData = [{ name: 'John Doe, Jr.', description: 'This is a "quoted" string' }];
 
       vi.mocked(readFile).mockReturnValue(mockCsvData);
       vi.mocked(buildCsvFilePath).mockReturnValue('/path/to/test-data.csv');
 
       const result = getCsvData(mockFileName, mockSpecFilePath);
 
-      expect(result).toEqual([
-        { name: 'John Doe, Jr.', description: 'This is a "quoted" string' },
-      ]);
+      expect(result).toEqual([{ name: 'John Doe, Jr.', description: 'This is a "quoted" string' }]);
     });
 
     it('should handle null and undefined values', () => {
@@ -225,7 +212,7 @@ describe('unit', () => {
           inStock: 'true',
           tags: '["electronics","sale"]',
           metadata: '{"createdAt":"2024-01-01"}',
-          categories: 'tech,gadgets'
+          categories: 'tech,gadgets',
         },
       ];
 
@@ -242,7 +229,7 @@ describe('unit', () => {
           inStock: true,
           tags: ['electronics', 'sale'],
           metadata: { createdAt: '2024-01-01' },
-          categories: ['tech', 'gadgets']
+          categories: ['tech', 'gadgets'],
         },
       ]);
     });
@@ -268,29 +255,31 @@ describe('unit', () => {
 
       const result = getCsvData<ProductData>(mockFileName, mockSpecFilePath);
 
-      expect(result[0]).toEqual(expect.objectContaining({
-        id: 1,
-        name: 'Product 1',
-        price: 99.99,
-        inStock: true,
-        tags: ['electronics'],
-      }));
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 1,
+          name: 'Product 1',
+          price: 99.99,
+          inStock: true,
+          tags: ['electronics'],
+        })
+      );
 
-      expect(result[1]).toEqual(expect.objectContaining({
-        id: 2,
-        name: 'Product 2',
-        price: 149.99,
-        inStock: false,
-      }));
+      expect(result[1]).toEqual(
+        expect.objectContaining({
+          id: 2,
+          name: 'Product 2',
+          price: 149.99,
+          inStock: false,
+        })
+      );
       expect(result[1]?.tags).toBeUndefined();
     });
   });
 
   describe('Error Handling', () => {
     it('should handle invalid JSON gracefully', () => {
-      const mockCsvData = [
-        { id: '1', metadata: '{invalid json}' },
-      ];
+      const mockCsvData = [{ id: '1', metadata: '{invalid json}' }];
 
       vi.mocked(readFile).mockReturnValue(mockCsvData);
       vi.mocked(buildCsvFilePath).mockReturnValue('/path/to/test-data.csv');
@@ -298,9 +287,7 @@ describe('unit', () => {
       const result = getCsvData(mockFileName, mockSpecFilePath);
 
       // Should treat invalid JSON as a string
-      expect(result).toEqual([
-        { id: 1, metadata: '{invalid json}' },
-      ]);
+      expect(result).toEqual([{ id: 1, metadata: '{invalid json}' }]);
     });
 
     it('should handle missing readFile data', () => {
@@ -361,7 +348,7 @@ describe('unit', () => {
           price: '89.99',
           attributes: '{"color":"brown","material":"leather"}',
           inStock: 'true',
-          tags: 'accessories,wallets,gifts'
+          tags: 'accessories,wallets,gifts',
         },
         {
           id: '102',
@@ -369,7 +356,7 @@ describe('unit', () => {
           price: '45.00',
           attributes: '{"color":"red","pattern":"floral"}',
           inStock: 'false',
-          tags: 'accessories,scarves'
+          tags: 'accessories,scarves',
         },
       ];
 
@@ -390,7 +377,7 @@ describe('unit', () => {
       expect(result[1]).toMatchObject({
         id: 102,
         name: 'Silk Scarf',
-        price: 45.00,
+        price: 45.0,
         attributes: { color: 'red', pattern: 'floral' },
         inStock: false,
         tags: ['accessories', 'scarves'],

@@ -2,7 +2,6 @@ import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
 import type { Account } from '@src/types/account';
 
-
 test.describe('Home Page API -- GET /api/v1/seed-info', () => {
   test('should return demo account information', async ({ api }) => {
     const response = await api.get('seed-info');

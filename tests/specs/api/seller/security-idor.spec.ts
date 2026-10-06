@@ -1,15 +1,9 @@
-import { ENV, expect, test } from '@fixtures';
-import { request } from '@playwright/test';
-
+import { ENV, expect, test, request } from '@fixtures';
 
 test.describe('Seller API -- IDOR and Security Tests', () => {
   let productIds: number[] = [];
 
-  test.beforeEach(async ({
-    createProduct,
-    authedSeller1,
-    authedSeller2
-  }) => {
+  test.beforeEach(async ({ createProduct, authedSeller1, authedSeller2 }) => {
     // Create products with different sellers
     const productIdSeller1 = await createProduct({
       name: 'Seller 1 Product',
@@ -17,7 +11,7 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
       priceCents: 1000,
       category: 'test',
       stock: 5,
-      seller: authedSeller1
+      seller: authedSeller1,
     }).then(product => product.id);
     const productIdSeller2 = await createProduct({
       name: 'Seller 2 Product',
@@ -25,12 +19,12 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
       priceCents: 1000,
       category: 'test',
       stock: 5,
-      seller: authedSeller2
+      seller: authedSeller2,
     }).then(product => product.id);
     productIds = [productIdSeller1, productIdSeller2];
   });
 
-  test('seller cannot access/modify other seller\'s products (IDOR protection)', async ({
+  test("seller cannot access/modify other seller's products (IDOR protection)", async ({
     authedSeller1,
     authedSeller2,
   }) => {
@@ -55,9 +49,7 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
     });
     expect(response4.status()).toBe(403);
     // Try to delete discount from seller2's product as seller1
-    const response5 = await authedSeller1.delete(
-      `products/${productIds[1]}/discount`
-    );
+    const response5 = await authedSeller1.delete(`products/${productIds[1]}/discount`);
     expect(response5.status()).toBe(403);
     // Try to issue certificate for seller2's product as seller1
     const response6 = await authedSeller1.post(`products/${productIds[1]}/certificate`);
@@ -85,7 +77,7 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
 
   test('unauthenticated users cannot access seller routes', async () => {
     const unauthenticatedContext = await request.newContext({
-      baseURL: `${ENV.apiURL}/`
+      baseURL: `${ENV.apiURL}/`,
     });
     try {
       // Test GET

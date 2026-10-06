@@ -1,6 +1,6 @@
 export interface Account {
-  email: string,
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface User {

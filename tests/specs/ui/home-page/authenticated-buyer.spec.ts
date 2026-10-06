@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page UI -- Authenticated Buyer', () => {
   test.describe('Header & Navigation', () => {
     test('should show buyer-specific navigation elements', async ({ buyerHomePage }) => {
@@ -40,7 +39,11 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
   });
 
   test.describe.serial('Cart & Orders Access', () => {
-    test('should show correct cart count when items are added', async ({ buyerHomePage, api, authedBuyer }) => {
+    test('should show correct cart count when items are added', async ({
+      buyerHomePage,
+      api,
+      authedBuyer,
+    }) => {
       await api.post('_reset');
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
@@ -52,7 +55,11 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
       await expect(buyerHomePage.cartCount).toHaveText('2');
     });
 
-    test('should show product in cart when navigating to cart page', async ({ buyerHomePage, api, authedBuyer }) => {
+    test('should show product in cart when navigating to cart page', async ({
+      buyerHomePage,
+      api,
+      authedBuyer,
+    }) => {
       await api.post('_reset');
       const productsResponse = await api.get('products');
       const productsData = await productsResponse.json();
@@ -105,7 +112,9 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
       await expect(currentPrice).toContainText('$2,422.50');
     });
 
-    test('should navigate to product detail when product card is clicked', async ({ buyerHomePage }) => {
+    test('should navigate to product detail when product card is clicked', async ({
+      buyerHomePage,
+    }) => {
       await buyerHomePage.getProductById(1).click();
       buyerHomePage.expectUrlToContain('/#/product/1');
     });
@@ -163,7 +172,10 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
     });
 
     test('should have accessible category filter', async ({ buyerHomePage }) => {
-      await expect(buyerHomePage.categorySelect).toHaveAttribute('aria-label', 'Filter by category');
+      await expect(buyerHomePage.categorySelect).toHaveAttribute(
+        'aria-label',
+        'Filter by category'
+      );
     });
 
     test('should have accessible sort select', async ({ buyerHomePage }) => {
@@ -173,7 +185,10 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
     test('should have product card with accessible labels', async ({ buyerHomePage }) => {
       const firstProduct = buyerHomePage.productCards.first();
       const link = firstProduct.locator('.card__media');
-      await expect(link).toHaveAttribute('aria-label', expect.stringContaining('Noir Saffiano Tote'));
+      await expect(link).toHaveAttribute(
+        'aria-label',
+        expect.stringContaining('Noir Saffiano Tote')
+      );
     });
   });
 

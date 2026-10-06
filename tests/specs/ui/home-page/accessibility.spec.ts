@@ -1,16 +1,15 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@fixtures';
 
-
 test.describe('Home Page UI -- Accessibility', () => {
   test('home page has no serious violations', async ({ page }) => {
     await page.goto('/');
     const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa"])
+      .withTags(['wcag2a', 'wcag2aa'])
       .exclude('.pagination')
       .analyze();
-    const serious = results.violations.filter(v =>
-      v.impact === 'serious' || v.impact === 'critical'
+    const serious = results.violations.filter(
+      v => v.impact === 'serious' || v.impact === 'critical'
     );
     expect(serious).toEqual([]);
   });

@@ -1,4 +1,3 @@
-
 # 🎭 Playwright TypeScript Test Framework
 
 [![Playwright](https://img.shields.io/badge/Playwright-2.0.0+-45ba4b?logo=playwright&logoColor=white)](https://playwright.dev/)
@@ -31,6 +30,24 @@ This comprehensive test automation framework was built to test the [**Maison** A
 - ✅ **Parallel Execution** - Optimized test execution with parallel workers
 - ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
 
+## 🤖 AI-QA Harness
+
+An additional layer that applies LLM agents to the QA workflow around this framework. Three narrow agents, each with a defined input and validated output:
+
+| Agent                    | Input                     | Output                                      |
+| ------------------------ | ------------------------- | ------------------------------------------- |
+| **requirements-analyst** | Requirements document     | Risks + test cases (YAML)                   |
+| **failure-analyst**      | Test failure fixture      | Hypothesis + category + evidence (JSON)     |
+| **judge**                | Triage + original failure | Score + verdict + hallucination list (JSON) |
+
+Run the full pipeline with:
+
+```bash
+npm run ai:demo
+```
+
+Output lands in `generated-cases/`, raw call logs in `logs/ai/`. See [`src/ai/README.md`](src/ai/README.md) for design notes and a frozen sample run in `fixtures/sample-output/`.
+
 ## 📁 Project Structure
 
 <details>
@@ -55,7 +72,7 @@ playwright-typescript-framework/
 │   └── setup/
 ├── tests/
 │   ├── fixtures/
-│   │   ├── api.fuxture.ts
+│   │   ├── api.fixture.ts
 │   │   ├── auth.browser.fixture.ts
 │   │   ├── auth.fixture.ts
 │   │   ├── csv.fixture.ts
@@ -145,6 +162,7 @@ playwright-typescript-framework/
 ├── package-lock.json
 └── eslint.config.js
 ```
+
 </details>
 
 ## 🚀 Getting Started
@@ -199,8 +217,8 @@ npx playwright show-report
 # See test-results/junit.xml
 ```
 
-
 ### 🎯 Key Achievements
+
 ✅ Comprehensive Testing: 250+ tests across three layers\
 ✅ Maintainable Code: Page Object Model and custom fixtures\
 ✅ Type Safety: Full TypeScript coverage\
@@ -209,6 +227,7 @@ npx playwright show-report
 ✅ Cross-Browser: Chrome, Firefox, WebKit, and mobile
 
 ### 🤝 Contributing
+
 Fork the repository\
 Create your feature branch (git checkout -b feature/amazing-feature)\
 Commit your changes (git commit -m 'Add some amazing feature')\
@@ -216,9 +235,11 @@ Push to the branch (git push origin feature/amazing-feature)\
 Open a Pull Request
 
 ### 📝 License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 📬 Connect with Me
+
 LinkedIn: [Pavel Anhur](https://www.linkedin.com/in/pavel-anhur-1917821bb/)\
 Email: pavel.anhur@gmail.com
 

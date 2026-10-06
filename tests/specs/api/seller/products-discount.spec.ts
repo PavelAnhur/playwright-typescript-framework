@@ -1,10 +1,12 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Seller API -- Product Discount Management', () => {
   test.describe('PUT /api/v1/products/:id/discount', () => {
-    test('seller can add percentage discount to their product', async ({ createProduct, authedSeller1 }) => {
+    test('seller can add percentage discount to their product', async ({
+      createProduct,
+      authedSeller1,
+    }) => {
       const productId = await createProduct({
         name: 'Discount Test Product',
         description: 'Product for discount testing',
@@ -20,8 +22,7 @@ test.describe('Seller API -- Product Discount Management', () => {
         data: discountData,
       });
       expect(response.status()).toBe(200);
-      const product: Product = await response.json()
-        .then(resData => resData.product);
+      const product: Product = await response.json().then(resData => resData.product);
       expect(product.onSale).toBe(true);
       expect(product.effectiveCents).toBe(8000); // 20% off 10000
       expect(product.discount).toBeDefined();
@@ -45,15 +46,17 @@ test.describe('Seller API -- Product Discount Management', () => {
         data: discountData,
       });
       expect(response.status()).toBe(200);
-      const product: Product = await response.json()
-        .then(resData => resData.product);
+      const product: Product = await response.json().then(resData => resData.product);
       expect(product.onSale).toBe(true);
       expect(product.effectiveCents).toBe(8500); // 10000 - 1500
       expect(product.discount?.type).toBe('fixed');
       expect(product.discount?.value).toBe(1500);
     });
 
-    test('seller cannot add discount exceeding product price', async ({ createProduct, authedSeller1 }) => {
+    test('seller cannot add discount exceeding product price', async ({
+      createProduct,
+      authedSeller1,
+    }) => {
       test.skip(true, 'Known Bug: discount exceeding product price');
       const productId = await createProduct({
         name: 'Discount Test Product',
@@ -74,7 +77,10 @@ test.describe('Seller API -- Product Discount Management', () => {
       expect(body.error.code).toBe('VALIDATION_ERROR');
     });
 
-    test('seller cannot add discount with invalid percentage', async ({ createProduct, authedSeller1 }) => {
+    test('seller cannot add discount with invalid percentage', async ({
+      createProduct,
+      authedSeller1,
+    }) => {
       const productId = await createProduct({
         name: 'Discount Test Product',
         description: 'Product for discount testing',
@@ -98,7 +104,10 @@ test.describe('Seller API -- Product Discount Management', () => {
       }
     });
 
-    test('seller cannot add discount to another seller\'s product', async ({ createProduct, authedSeller2 }) => {
+    test("seller cannot add discount to another seller's product", async ({
+      createProduct,
+      authedSeller2,
+    }) => {
       const productId = await createProduct({
         name: 'Discount Test Product',
         description: 'Product for discount testing',
@@ -134,14 +143,15 @@ test.describe('Seller API -- Product Discount Management', () => {
     test('seller can remove discount from their product', async ({ authedSeller1 }) => {
       const response = await authedSeller1.delete(`products/${productId}/discount`);
       expect(response.status()).toBe(200);
-      const product = await response.json()
-        .then(resData => resData.product);
+      const product = await response.json().then(resData => resData.product);
       expect(product.onSale).toBe(false);
       expect(product.effectiveCents).toBe(5000);
       expect(product.discount).toBeNull();
     });
 
-    test('seller cannot remove discount from another seller\'s product', async ({ authedSeller2 }) => {
+    test("seller cannot remove discount from another seller's product", async ({
+      authedSeller2,
+    }) => {
       const response = await authedSeller2.delete(`products/${productId}/discount`);
       expect(response.status()).toBe(403);
       const body = await response.json();

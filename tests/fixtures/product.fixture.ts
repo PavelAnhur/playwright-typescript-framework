@@ -40,7 +40,9 @@ export const test = base.extend<ProductFixtures>({
       });
       if (!response.ok()) {
         const error = await response.json();
-        throw new Error(`Failed to create product: ${response.status()} - ${JSON.stringify(error)}`);
+        throw new Error(
+          `Failed to create product: ${response.status()} - ${JSON.stringify(error)}`
+        );
       }
       const data = await response.json();
       return data.product as Product;

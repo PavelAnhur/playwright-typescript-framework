@@ -1,7 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
 
-
 test.describe('Buyer API -- Error Envelope Compliance', () => {
   let testProduct: Product;
 
@@ -46,10 +45,12 @@ test.describe('Buyer API -- Error Envelope Compliance', () => {
     expect(error.error).toHaveProperty('message');
   });
 
-  test('should return consistent error envelope for insufficient stock', async ({ api, authedBuyer }) => {
+  test('should return consistent error envelope for insufficient stock', async ({
+    api,
+    authedBuyer,
+  }) => {
     const productResponse = await api.get('products/1');
-    const stock = await productResponse.json()
-      .then(responseData => responseData.product.stock);
+    const stock = await productResponse.json().then(responseData => responseData.product.stock);
     const response = await authedBuyer.post('cart/items', {
       data: { productId: 1, quantity: stock + 1 },
     });

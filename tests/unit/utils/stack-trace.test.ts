@@ -2,7 +2,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { detectSpecPath } from '../../utils/stack-trace';
 
-
 describe('unit', () => {
   describe('detectSpecPath', () => {
     beforeEach(() => {

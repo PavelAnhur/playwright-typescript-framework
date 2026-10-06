@@ -21,6 +21,9 @@ export interface Discount {
   value: number;
 }
 
-export type ProductFields = Pick<Product, 'id' | 'name' | 'sellerName' | 'category' | 'discount'> & {
+export type ProductFields = Pick<
+  Product,
+  'id' | 'name' | 'sellerName' | 'category' | 'discount'
+> & {
   effectiveCents: number;
 };
