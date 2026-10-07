@@ -39,3 +39,9 @@ generated-cases/
 
 # demo recording artifact
 TITLE.txt
+
+# AI-generated test drafts (review before committing)
+tests/specs/review/
+
+# Playwright MCP artifacts (screenshots, logs)
+.playwright-mcp/
