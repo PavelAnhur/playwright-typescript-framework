@@ -32,21 +32,22 @@ This comprehensive test automation framework was built to test the [**Maison** A
 
 ## 🤖 AI-QA Harness
 
-An additional layer that applies LLM agents to the QA workflow around this framework. Three narrow agents, each with a defined input and validated output:
+An additional layer that applies LLM agents to the QA workflow around this framework. Four narrow agents, each with a defined input and validated output:
 
-| Agent                    | Input                     | Output                                      |
-| ------------------------ | ------------------------- | ------------------------------------------- |
-| **requirements-analyst** | Requirements document     | Risks + test cases (YAML)                   |
-| **failure-analyst**      | Test failure fixture      | Hypothesis + category + evidence (JSON)     |
-| **judge**                | Triage + original failure | Score + verdict + hallucination list (JSON) |
+| Agent                    | Input                              | Output                                      |
+| ------------------------ | ---------------------------------- | ------------------------------------------- |
+| **requirements-analyst** | Requirements document              | Risks + test cases (YAML)                   |
+| **failure-analyst**      | Test failure fixture               | Hypothesis + category + evidence (JSON)     |
+| **judge**                | Triage + original failure          | Score + verdict + hallucination list (JSON) |
+| **spec-generator**       | Test case from a requirements YAML | A passing Playwright test (`*.spec.ts`)     |
 
-Run the full pipeline with:
+The judge scores every triage against a rubric and flags any claim not grounded in the input. The spec-generator runs an iterative refine loop — it generates a test, runs it, reads the Playwright error context, and refines until the test passes. A final validator checks that every `data-testid` in the generated test exists in the app source, so a green test that references a non-existent element is flagged as a hollow pass rather than silently accepted.
 
-```bash
-npm run ai:demo
-```
+Run the full CLI pipeline with:
 
-Output lands in `generated-cases/`, raw call logs in `logs/ai/`. See [`src/ai/README.md`](src/ai/README.md) for design notes and a frozen sample run in `fixtures/sample-output/`.
+    npm run ai:demo
+
+Output lands in `generated-cases/`, raw call logs in `logs/ai/`. Every agent is also exposed through an MCP server — any MCP-compatible AI client (Klepa AI, Claude Desktop, Cursor) can call them directly. See [`src/ai/README.md`](src/ai/README.md) for design notes and a frozen sample run in `fixtures/sample-output/`.
 
 ## 📁 Project Structure
 
