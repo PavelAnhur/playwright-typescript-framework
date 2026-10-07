@@ -13,10 +13,7 @@ export interface ValidationResult {
   checked: SelectorValidation[];
 }
 
-const SOURCE_DIRS = [
-  'maison/web/src',
-  'maison/server/src',
-];
+const SOURCE_DIRS = ['maison/web/src', 'maison/server/src'];
 
 const TEST_ID_REGEX = /data-testid="([^"]+)"/g;
 const GET_BY_TEST_ID_REGEX = /getByTestId\(['"]([^'"]+)['"]\)/g;
@@ -69,7 +66,7 @@ export async function validateTestSelectors(specPath: string): Promise<Validatio
     checked.push({ testId, found: foundIn.length > 0, foundIn });
   }
   return {
-    allValid: checked.every((c) => c.found),
+    allValid: checked.every(c => c.found),
     checked,
   };
 }

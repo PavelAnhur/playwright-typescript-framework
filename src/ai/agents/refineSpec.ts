@@ -6,7 +6,6 @@ import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTes
 import { validateTestSelectors, type ValidationResult } from '../tools/validateTestSelectors';
 import { generateSpec } from './specGenerator';
 
-
 const AGENT = 'spec-refiner';
 
 export interface RefineIteration {
