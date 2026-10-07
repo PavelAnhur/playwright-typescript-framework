@@ -28,7 +28,8 @@
     "ai:requirements": "tsx src/ai/agents/requirementsAnalyst.ts",
     "ai:triage": "tsx src/ai/agents/failureAnalyst.ts",
     "ai:judge": "tsx src/ai/agents/judge.ts",
-    "ai:demo": "npm run ai:requirements && npm run ai:triage && npm run ai:judge"
+    "ai:demo": "npm run ai:requirements && npm run ai:triage && npm run ai:judge",
+    "ai:refine": "tsx src/ai/agents/refineSpecCli.ts"
   },
   "keywords": [],
   "license": "MIT",
