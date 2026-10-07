@@ -1,6 +1,7 @@
 import { callModel } from '../dshClient';
 import type { SpecGeneratorInput } from '../prompts/specGenerator';
 import { buildSpecRefinerUser, specRefinerSystem } from '../prompts/specGenerator';
+import { logRefineAttempt } from '../tools/refineLogger';
 import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTest';
 import { generateSpec } from './specGenerator';
 
@@ -70,6 +71,17 @@ export async function refineSpec(
     code: currentCode,
     testResult,
   });
+  await logRefineAttempt({
+    timestamp: new Date().toISOString(),
+    caseId: input.caseId,
+    attemptNumber: 1,
+    fileName: currentFileName,
+    durationMs: testResult.durationMs,
+    passed: testResult.passed,
+    errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
+    codeLength: currentCode.length,
+    fullCode: currentCode,
+  });
   if (testResult.passed) {
     return {
       passed: true,
@@ -110,6 +122,17 @@ export async function refineSpec(
       outputPath: currentOutputPath,
       code: currentCode,
       testResult,
+    });
+    await logRefineAttempt({
+      timestamp: new Date().toISOString(),
+      caseId: input.caseId,
+      attemptNumber: attempt,
+      fileName: currentFileName,
+      durationMs: testResult.durationMs,
+      passed: testResult.passed,
+      errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
+      codeLength: currentCode.length,
+      fullCode: currentCode,
     });
     if (testResult.passed) {
       return {
