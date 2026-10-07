@@ -41,6 +41,11 @@ export default defineConfig({
       testDir: './tests/specs/api',
     },
     {
+      name: 'review',
+      testDir: './tests/specs/review',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
