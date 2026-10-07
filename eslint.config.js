@@ -14,6 +14,8 @@ export default [
       'test-results/**',
       '.auth/**',
       'maison/**',
+      '.kilo/**',
+      '.playwright-mcp/**',
     ],
   },
   // Use js.configs.recommended as a base
