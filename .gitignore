@@ -45,3 +45,6 @@ tests/specs/review/
 
 # Playwright MCP artifacts (screenshots, logs)
 .playwright-mcp/
+
+# Klepa AI worktrees (local tooling, not part of the project)
+.kilo/

@@ -4,12 +4,12 @@ A small layer that applies LLM agents to the QA workflow around this Playwright 
 
 ## What it does
 
-| Agent                    | Input                                       | Output                                         |
-| ------------------------ | ------------------------------------------- | ---------------------------------------------- |
-| **requirements-analyst** | A requirements document (`.md`)             | Risks + test cases (`.yaml`)                   |
-| **failure-analyst**      | A test failure (`.txt` fixture)             | Hypothesis + category + evidence (`.json`)     |
-| **judge**                | A triage result + the original failure      | Score + verdict + hallucination list (`.json`) |
-| **spec-generator**       | A test case from a requirements YAML        | A passing Playwright test (`.spec.ts`)         |
+| Agent                    | Input                                  | Output                                         |
+| ------------------------ | -------------------------------------- | ---------------------------------------------- |
+| **requirements-analyst** | A requirements document (`.md`)        | Risks + test cases (`.yaml`)                   |
+| **failure-analyst**      | A test failure (`.txt` fixture)        | Hypothesis + category + evidence (`.json`)     |
+| **judge**                | A triage result + the original failure | Score + verdict + hallucination list (`.json`) |
+| **spec-generator**       | A test case from a requirements YAML   | A passing Playwright test (`.spec.ts`)         |
 
 Three things make this different from "call a model and trust the output":
 
