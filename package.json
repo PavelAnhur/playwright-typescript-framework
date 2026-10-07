@@ -28,7 +28,8 @@
     "ai:requirements": "tsx src/ai/agents/requirementsAnalyst.ts",
     "ai:triage": "tsx src/ai/agents/failureAnalyst.ts",
     "ai:judge": "tsx src/ai/agents/judge.ts",
-    "ai:demo": "npm run ai:requirements && npm run ai:triage && npm run ai:judge"
+    "ai:demo": "npm run ai:requirements && npm run ai:triage && npm run ai:judge",
+    "ai:refine": "tsx src/ai/agents/refineSpecCli.ts"
   },
   "keywords": [],
   "license": "MIT",
@@ -37,6 +38,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.4.0",
     "@types/prettier": "^2.7.3",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
@@ -51,12 +53,17 @@
     "dotenv": "^17.4.2",
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
+    "js-yaml": "^5.4.3",
     "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^5.8.3",
     "vitest": "^3.2.7"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "zod": "^4.6.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
