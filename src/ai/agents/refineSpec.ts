@@ -3,7 +3,9 @@ import type { SpecGeneratorInput } from '../prompts/specGenerator';
 import { buildSpecRefinerUser, specRefinerSystem } from '../prompts/specGenerator';
 import { logRefineAttempt } from '../tools/refineLogger';
 import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTest';
+import { validateTestSelectors, type ValidationResult } from '../tools/validateTestSelectors';
 import { generateSpec } from './specGenerator';
+
 
 const AGENT = 'spec-refiner';
 
@@ -17,6 +19,8 @@ export interface RefineIteration {
 
 export interface RefineResult {
   passed: boolean;
+  hollowPass: boolean;
+  selectorValidation: ValidationResult | null;
   iterations: RefineIteration[];
   finalFileName: string;
   finalOutputPath: string;
@@ -53,6 +57,30 @@ function parseRefinerOutput(raw: string): SpecRefinerOutput {
   return { fileName, code };
 }
 
+async function finalizeResult(
+  passed: boolean,
+  iterations: RefineIteration[],
+  fileName: string,
+  outputPath: string,
+  code: string
+): Promise<RefineResult> {
+  let hollowPass = false;
+  let selectorValidation: ValidationResult | null = null;
+  if (passed) {
+    selectorValidation = await validateTestSelectors(outputPath);
+    hollowPass = !selectorValidation.allValid;
+  }
+  return {
+    passed,
+    hollowPass,
+    selectorValidation,
+    iterations,
+    finalFileName: fileName,
+    finalOutputPath: outputPath,
+    finalCode: code,
+  };
+}
+
 export async function refineSpec(
   input: SpecGeneratorInput,
   maxIterations: number = 3
@@ -83,13 +111,7 @@ export async function refineSpec(
     fullCode: currentCode,
   });
   if (testResult.passed) {
-    return {
-      passed: true,
-      iterations,
-      finalFileName: currentFileName,
-      finalOutputPath: currentOutputPath,
-      finalCode: currentCode,
-    };
+    return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
   }
   // Refinement iterations
   for (let attempt = 2; attempt <= maxIterations; attempt++) {
@@ -135,20 +157,8 @@ export async function refineSpec(
       fullCode: currentCode,
     });
     if (testResult.passed) {
-      return {
-        passed: true,
-        iterations,
-        finalFileName: currentFileName,
-        finalOutputPath: currentOutputPath,
-        finalCode: currentCode,
-      };
+      return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
     }
   }
-  return {
-    passed: false,
-    iterations,
-    finalFileName: currentFileName,
-    finalOutputPath: currentOutputPath,
-    finalCode: currentCode,
-  };
+  return finalizeResult(false, iterations, currentFileName, currentOutputPath, currentCode);
 }

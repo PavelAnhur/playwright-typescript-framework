@@ -52,6 +52,19 @@ async function main(): Promise<void> {
     console.log(`❌ final: FAILED after ${result.iterations.length} iteration(s)`);
   }
   console.log(`📄 file: ${result.finalOutputPath}`);
+  if (result.selectorValidation !== null) {
+    console.log('');
+    console.log('--- selector validation ---');
+    for (const s of result.selectorValidation.checked) {
+      const mark = s.found ? '✅' : '❌';
+      const where = s.found ? s.foundIn.join(', ') : '(not found in source)';
+      console.log(`  ${mark} ${s.testId}  ${where}`);
+    }
+    if (result.hollowPass) {
+      console.log('');
+      console.log('⚠️  HOLLOW PASS: test passed but uses test-id(s) not present in the app source');
+    }
+  }
 }
 
 main().catch(error => {
