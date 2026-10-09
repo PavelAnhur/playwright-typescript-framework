@@ -1,0 +1,764 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: ui/home-page/authenticated-buyer.spec.ts >> Home Page UI -- Authenticated Buyer >> Product Catalogue >> should display all product cards
+- Location: tests/specs/ui/home-page/authenticated-buyer.spec.ts:78:5
+
+# Error details
+
+```
+Error: expect(locator).toHaveCount(expected) failed
+
+Locator:  getByTestId('product-card')
+Expected: 22
+Received: 47
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveCount" with timeout 5000ms
+  - waiting for getByTestId('product-card')
+    14 × locator resolved to 47 elements
+       - unexpected value "47"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5] [cursor=pointer]:
+        - text: MAISON
+        - generic [ref=e6]: MAISON DE LUXE
+      - navigation "Primary" [ref=e7]:
+        - link "Shop" [ref=e8] [cursor=pointer]:
+          - /url: "#/"
+        - link "Orders" [ref=e9] [cursor=pointer]:
+          - /url: "#/orders"
+        - link "Cart, 0 items" [ref=e10] [cursor=pointer]:
+          - /url: "#/cart"
+          - text: Cart
+          - generic [ref=e11]: "0"
+        - generic [ref=e12]: Aurelie Dupont
+        - link "Logout" [ref=e13] [cursor=pointer]:
+          - /url: "#"
+  - main [ref=e14]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: The Maison Collection
+        - heading [level=1] [ref=e19]:
+          - text: Quiet luxury,
+          - emphasis [ref=e20]: considered
+          - text: craft.
+        - paragraph [ref=e21]: A curated atelier of leather, timepieces, and rare materials. Each piece numbered, each detail deliberate.
+      - generic [ref=e23]:
+        - searchbox "Search products" [ref=e24]
+        - combobox "Filter by category" [ref=e25]:
+          - option "All categories" [selected]
+          - option "Accessories"
+          - option "Apparel"
+          - option "Bags"
+          - option "Footwear"
+          - option "Fragrance"
+          - option "Jewellery"
+          - option "Watches"
+          - option "accessories"
+          - option "art"
+          - option "furniture"
+          - option "lighting"
+          - option "test"
+        - combobox "Sort products" [ref=e26]:
+          - option "Newest" [selected]
+          - 'option "Price: Low to High"'
+          - 'option "Price: High to Low"'
+          - option "Name"
+        - button "Apply" [ref=e27] [cursor=pointer]
+      - generic [ref=e28]:
+        - article [ref=e29]:
+          - link "Seller 2 Product" [ref=e30] [cursor=pointer]:
+            - /url: "#/product/47"
+            - img "Seller 2 Product" [ref=e31]
+          - generic [ref=e32]:
+            - generic [ref=e33]: test
+            - link [ref=e34] [cursor=pointer]:
+              - /url: "#/product/47"
+              - heading "Seller 2 Product" [level=3] [ref=e35]
+            - generic [ref=e36]: $10.00
+        - article [ref=e38]:
+          - link "Seller 1 Product" [ref=e39] [cursor=pointer]:
+            - /url: "#/product/46"
+            - img "Seller 1 Product" [ref=e40]
+          - generic [ref=e41]:
+            - generic [ref=e42]: test
+            - link [ref=e43] [cursor=pointer]:
+              - /url: "#/product/46"
+              - heading "Seller 1 Product" [level=3] [ref=e44]
+            - generic [ref=e45]: $10.00
+        - article [ref=e47]:
+          - link "Seller 2 Product" [ref=e48] [cursor=pointer]:
+            - /url: "#/product/45"
+            - img "Seller 2 Product" [ref=e49]
+          - generic [ref=e50]:
+            - generic [ref=e51]: test
+            - link [ref=e52] [cursor=pointer]:
+              - /url: "#/product/45"
+              - heading "Seller 2 Product" [level=3] [ref=e53]
+            - generic [ref=e54]: $10.00
+        - article [ref=e56]:
+          - link "Seller 1 Product" [ref=e57] [cursor=pointer]:
+            - /url: "#/product/44"
+            - img "Seller 1 Product" [ref=e58]
+          - generic [ref=e59]:
+            - generic [ref=e60]: test
+            - link [ref=e61] [cursor=pointer]:
+              - /url: "#/product/44"
+              - heading "Seller 1 Product" [level=3] [ref=e62]
+            - generic [ref=e63]: $10.00
+        - article [ref=e65]:
+          - link "Seller 2 Product" [ref=e66] [cursor=pointer]:
+            - /url: "#/product/43"
+            - img "Seller 2 Product" [ref=e67]
+          - generic [ref=e68]:
+            - generic [ref=e69]: test
+            - link [ref=e70] [cursor=pointer]:
+              - /url: "#/product/43"
+              - heading "Seller 2 Product" [level=3] [ref=e71]
+            - generic [ref=e72]: $10.00
+        - article [ref=e74]:
+          - link "Seller 1 Product" [ref=e75] [cursor=pointer]:
+            - /url: "#/product/42"
+            - img "Seller 1 Product" [ref=e76]
+          - generic [ref=e77]:
+            - generic [ref=e78]: test
+            - link [ref=e79] [cursor=pointer]:
+              - /url: "#/product/42"
+              - heading "Seller 1 Product" [level=3] [ref=e80]
+            - generic [ref=e81]: $10.00
+        - article [ref=e83]:
+          - link "Handcrafted Leather Wallet" [ref=e84] [cursor=pointer]:
+            - /url: "#/product/41"
+            - img "Handcrafted Leather Wallet" [ref=e85]
+          - generic [ref=e86]:
+            - generic [ref=e87]: accessories
+            - link [ref=e88] [cursor=pointer]:
+              - /url: "#/product/41"
+              - heading "Handcrafted Leather Wallet" [level=3] [ref=e89]
+            - generic [ref=e90]: $45.00
+        - article [ref=e92]:
+          - link "Update Test Product" [ref=e93] [cursor=pointer]:
+            - /url: "#/product/40"
+            - img "Update Test Product" [ref=e94]
+          - generic [ref=e95]:
+            - generic [ref=e96]: furniture
+            - link [ref=e97] [cursor=pointer]:
+              - /url: "#/product/40"
+              - heading "Update Test Product" [level=3] [ref=e98]
+            - generic [ref=e99]: $50.00
+        - article [ref=e101]:
+          - link "Update Test Product" [ref=e102] [cursor=pointer]:
+            - /url: "#/product/39"
+            - img "Update Test Product" [ref=e103]
+          - generic [ref=e104]:
+            - generic [ref=e105]: furniture
+            - link [ref=e106] [cursor=pointer]:
+              - /url: "#/product/39"
+              - heading "Update Test Product" [level=3] [ref=e107]
+            - generic [ref=e108]: $50.00
+        - article [ref=e110]:
+          - link "Updated Product Name" [ref=e111] [cursor=pointer]:
+            - /url: "#/product/38"
+            - img "Updated Product Name" [ref=e112]
+          - generic [ref=e113]:
+            - generic [ref=e114]: lighting
+            - link [ref=e115] [cursor=pointer]:
+              - /url: "#/product/38"
+              - heading "Updated Product Name" [level=3] [ref=e116]
+            - generic [ref=e117]: $55.00
+        - article [ref=e119]:
+          - link "Image Test Product" [ref=e120] [cursor=pointer]:
+            - /url: "#/product/37"
+            - img "Image Test Product" [ref=e121]
+          - generic [ref=e122]:
+            - generic [ref=e123]: lighting
+            - link [ref=e124] [cursor=pointer]:
+              - /url: "#/product/37"
+              - heading "Image Test Product" [level=3] [ref=e125]
+            - generic [ref=e126]: $30.00
+        - article [ref=e128]:
+          - link "Image Test Product" [ref=e129] [cursor=pointer]:
+            - /url: "#/product/36"
+            - img "Image Test Product" [ref=e130]
+          - generic [ref=e131]:
+            - generic [ref=e132]: lighting
+            - link [ref=e133] [cursor=pointer]:
+              - /url: "#/product/36"
+              - heading "Image Test Product" [level=3] [ref=e134]
+            - generic [ref=e135]: $30.00
+        - article [ref=e137]:
+          - link "Image Test Product" [ref=e138] [cursor=pointer]:
+            - /url: "#/product/35"
+            - img "Image Test Product" [ref=e139]
+          - generic [ref=e140]:
+            - generic [ref=e141]: lighting
+            - link [ref=e142] [cursor=pointer]:
+              - /url: "#/product/35"
+              - heading "Image Test Product" [level=3] [ref=e143]
+            - generic [ref=e144]: $30.00
+        - article [ref=e146]:
+          - link "Remove Discount Test" [ref=e147] [cursor=pointer]:
+            - /url: "#/product/34"
+            - img "Remove Discount Test" [ref=e148]
+            - generic [ref=e149]: Sale
+          - generic [ref=e150]:
+            - generic [ref=e151]: lighting
+            - link [ref=e152] [cursor=pointer]:
+              - /url: "#/product/34"
+              - heading "Remove Discount Test" [level=3] [ref=e153]
+            - generic [ref=e154]:
+              - generic [ref=e155]: $37.50
+              - generic [ref=e156]: $50.00
+        - article [ref=e157]:
+          - link "Remove Discount Test" [ref=e158] [cursor=pointer]:
+            - /url: "#/product/33"
+            - img "Remove Discount Test" [ref=e159]
+            - generic [ref=e160]: Sale
+          - generic [ref=e161]:
+            - generic [ref=e162]: lighting
+            - link [ref=e163] [cursor=pointer]:
+              - /url: "#/product/33"
+              - heading "Remove Discount Test" [level=3] [ref=e164]
+            - generic [ref=e165]:
+              - generic [ref=e166]: $37.50
+              - generic [ref=e167]: $50.00
+        - article [ref=e168]:
+          - link "Discount Test Product" [ref=e169] [cursor=pointer]:
+            - /url: "#/product/32"
+            - img "Discount Test Product" [ref=e170]
+          - generic [ref=e171]:
+            - generic [ref=e172]: furniture
+            - link [ref=e173] [cursor=pointer]:
+              - /url: "#/product/32"
+              - heading "Discount Test Product" [level=3] [ref=e174]
+            - generic [ref=e175]: $100.00
+        - article [ref=e177]:
+          - link "Remove Discount Test" [ref=e178] [cursor=pointer]:
+            - /url: "#/product/31"
+            - img "Remove Discount Test" [ref=e179]
+          - generic [ref=e180]:
+            - generic [ref=e181]: lighting
+            - link [ref=e182] [cursor=pointer]:
+              - /url: "#/product/31"
+              - heading "Remove Discount Test" [level=3] [ref=e183]
+            - generic [ref=e184]: $50.00
+        - article [ref=e186]:
+          - link "Discount Test Product" [ref=e187] [cursor=pointer]:
+            - /url: "#/product/30"
+            - img "Discount Test Product" [ref=e188]
+          - generic [ref=e189]:
+            - generic [ref=e190]: furniture
+            - link [ref=e191] [cursor=pointer]:
+              - /url: "#/product/30"
+              - heading "Discount Test Product" [level=3] [ref=e192]
+            - generic [ref=e193]: $100.00
+        - article [ref=e195]:
+          - link "Discount Test Product" [ref=e196] [cursor=pointer]:
+            - /url: "#/product/29"
+            - img "Discount Test Product" [ref=e197]
+            - generic [ref=e198]: Sale
+          - generic [ref=e199]:
+            - generic [ref=e200]: furniture
+            - link [ref=e201] [cursor=pointer]:
+              - /url: "#/product/29"
+              - heading "Discount Test Product" [level=3] [ref=e202]
+            - generic [ref=e203]:
+              - generic [ref=e204]: $85.00
+              - generic [ref=e205]: $100.00
+        - article [ref=e206]:
+          - link "Discount Test Product" [ref=e207] [cursor=pointer]:
+            - /url: "#/product/28"
+            - img "Discount Test Product" [ref=e208]
+            - generic [ref=e209]: Sale
+          - generic [ref=e210]:
+            - generic [ref=e211]: furniture
+            - link [ref=e212] [cursor=pointer]:
+              - /url: "#/product/28"
+              - heading "Discount Test Product" [level=3] [ref=e213]
+            - generic [ref=e214]:
+              - generic [ref=e215]: $80.00
+              - generic [ref=e216]: $100.00
+        - article [ref=e217]:
+          - link "Certificate Test Product" [ref=e218] [cursor=pointer]:
+            - /url: "#/product/27"
+            - img "Certificate Test Product" [ref=e219]
+          - generic [ref=e220]:
+            - generic [ref=e221]: art
+            - link [ref=e222] [cursor=pointer]:
+              - /url: "#/product/27"
+              - heading "Certificate Test Product" [level=3] [ref=e223]
+            - generic [ref=e224]: $50.00
+        - article [ref=e226]:
+          - link "Certificate Test Product" [ref=e227] [cursor=pointer]:
+            - /url: "#/product/26"
+            - img "Certificate Test Product" [ref=e228]
+          - generic [ref=e229]:
+            - generic [ref=e230]: art
+            - link [ref=e231] [cursor=pointer]:
+              - /url: "#/product/26"
+              - heading "Certificate Test Product" [level=3] [ref=e232]
+            - generic [ref=e233]: $50.00
+        - article [ref=e235]:
+          - link "Certificate Test Product" [ref=e236] [cursor=pointer]:
+            - /url: "#/product/25"
+            - img "Certificate Test Product" [ref=e237]
+          - generic [ref=e238]:
+            - generic [ref=e239]: art
+            - link [ref=e240] [cursor=pointer]:
+              - /url: "#/product/25"
+              - heading "Certificate Test Product" [level=3] [ref=e241]
+            - generic [ref=e242]: $50.00
+        - article [ref=e244]:
+          - link "Stock Test" [ref=e245] [cursor=pointer]:
+            - /url: "#/product/24"
+            - img "Stock Test" [ref=e246]
+          - generic [ref=e247]:
+            - generic [ref=e248]: test
+            - link [ref=e249] [cursor=pointer]:
+              - /url: "#/product/24"
+              - heading "Stock Test" [level=3] [ref=e250]
+            - generic [ref=e251]: $10.00
+        - article [ref=e253]:
+          - link "Certificate Test Product" [ref=e254] [cursor=pointer]:
+            - /url: "#/product/23"
+            - img "Certificate Test Product" [ref=e255]
+          - generic [ref=e256]:
+            - generic [ref=e257]: art
+            - link [ref=e258] [cursor=pointer]:
+              - /url: "#/product/23"
+              - heading "Certificate Test Product" [level=3] [ref=e259]
+            - generic [ref=e260]: $50.00
+        - article [ref=e262]:
+          - link "Pearl Cuff Bracelet" [ref=e263] [cursor=pointer]:
+            - /url: "#/product/22"
+            - img "Pearl Cuff Bracelet" [ref=e264]
+          - generic [ref=e265]:
+            - generic [ref=e266]: Jewellery
+            - link [ref=e267] [cursor=pointer]:
+              - /url: "#/product/22"
+              - heading "Pearl Cuff Bracelet" [level=3] [ref=e268]
+            - generic [ref=e269]: $2,400.00
+        - article [ref=e271]:
+          - link "Gold Signet Ring" [ref=e272] [cursor=pointer]:
+            - /url: "#/product/21"
+            - img "Gold Signet Ring" [ref=e273]
+          - generic [ref=e274]:
+            - generic [ref=e275]: Jewellery
+            - link [ref=e276] [cursor=pointer]:
+              - /url: "#/product/21"
+              - heading "Gold Signet Ring" [level=3] [ref=e277]
+            - generic [ref=e278]: $1,850.00
+        - article [ref=e280]:
+          - link "Stone Wool Trench Coat" [ref=e281] [cursor=pointer]:
+            - /url: "#/product/20"
+            - img "Stone Wool Trench Coat" [ref=e282]
+          - generic [ref=e283]:
+            - generic [ref=e284]: Apparel
+            - link [ref=e285] [cursor=pointer]:
+              - /url: "#/product/20"
+              - heading "Stone Wool Trench Coat" [level=3] [ref=e286]
+            - generic [ref=e287]: $4,200.00
+        - article [ref=e289]:
+          - link "Navy Roll Neck" [ref=e290] [cursor=pointer]:
+            - /url: "#/product/19"
+            - img "Navy Roll Neck" [ref=e291]
+          - generic [ref=e292]:
+            - generic [ref=e293]: Apparel
+            - link [ref=e294] [cursor=pointer]:
+              - /url: "#/product/19"
+              - heading "Navy Roll Neck" [level=3] [ref=e295]
+            - generic [ref=e296]: $1,850.00
+        - article [ref=e298]:
+          - link "Moss Suede Mule" [ref=e299] [cursor=pointer]:
+            - /url: "#/product/18"
+            - img "Moss Suede Mule" [ref=e300]
+          - generic [ref=e301]:
+            - generic [ref=e302]: Footwear
+            - link [ref=e303] [cursor=pointer]:
+              - /url: "#/product/18"
+              - heading "Moss Suede Mule" [level=3] [ref=e304]
+            - generic [ref=e305]: $1,180.00
+        - article [ref=e307]:
+          - link "Tan Grain Loafer" [ref=e308] [cursor=pointer]:
+            - /url: "#/product/17"
+            - img "Tan Grain Loafer" [ref=e309]
+          - generic [ref=e310]:
+            - generic [ref=e311]: Footwear
+            - link [ref=e312] [cursor=pointer]:
+              - /url: "#/product/17"
+              - heading "Tan Grain Loafer" [level=3] [ref=e313]
+            - generic [ref=e314]: $1,650.00
+        - article [ref=e316]:
+          - link "White Rose Cologne" [ref=e317] [cursor=pointer]:
+            - /url: "#/product/16"
+            - img "White Rose Cologne" [ref=e318]
+          - generic [ref=e319]:
+            - generic [ref=e320]: Fragrance
+            - link [ref=e321] [cursor=pointer]:
+              - /url: "#/product/16"
+              - heading "White Rose Cologne" [level=3] [ref=e322]
+            - generic [ref=e323]: $980.00
+        - article [ref=e325]:
+          - link "Cedar Amber Parfum" [ref=e326] [cursor=pointer]:
+            - /url: "#/product/15"
+            - img "Cedar Amber Parfum" [ref=e327]
+          - generic [ref=e328]:
+            - generic [ref=e329]: Fragrance
+            - link [ref=e330] [cursor=pointer]:
+              - /url: "#/product/15"
+              - heading "Cedar Amber Parfum" [level=3] [ref=e331]
+            - generic [ref=e332]: $1,450.00
+        - article [ref=e334]:
+          - link "Navy Silk Pocket Square" [ref=e335] [cursor=pointer]:
+            - /url: "#/product/14"
+            - img "Navy Silk Pocket Square" [ref=e336]
+          - generic [ref=e337]:
+            - generic [ref=e338]: Accessories
+            - link [ref=e339] [cursor=pointer]:
+              - /url: "#/product/14"
+              - heading "Navy Silk Pocket Square" [level=3] [ref=e340]
+            - generic [ref=e341]: $180.00
+        - article [ref=e343]:
+          - link "Alpaca Cable Gloves" [ref=e344] [cursor=pointer]:
+            - /url: "#/product/13"
+            - img "Alpaca Cable Gloves" [ref=e345]
+          - generic [ref=e346]:
+            - generic [ref=e347]: Accessories
+            - link [ref=e348] [cursor=pointer]:
+              - /url: "#/product/13"
+              - heading "Alpaca Cable Gloves" [level=3] [ref=e349]
+            - generic [ref=e350]: $720.00
+        - article [ref=e352]:
+          - link "Bronze Field Watch" [ref=e353] [cursor=pointer]:
+            - /url: "#/product/12"
+            - img "Bronze Field Watch" [ref=e354]
+          - generic [ref=e355]:
+            - generic [ref=e356]: Watches
+            - link [ref=e357] [cursor=pointer]:
+              - /url: "#/product/12"
+              - heading "Bronze Field Watch" [level=3] [ref=e358]
+            - generic [ref=e359]: $5,600.00
+        - article [ref=e361]:
+          - link "Silver Moon Watch" [ref=e362] [cursor=pointer]:
+            - /url: "#/product/11"
+            - img "Silver Moon Watch" [ref=e363]
+          - generic [ref=e364]:
+            - generic [ref=e365]: Watches
+            - link [ref=e366] [cursor=pointer]:
+              - /url: "#/product/11"
+              - heading "Silver Moon Watch" [level=3] [ref=e367]
+            - generic [ref=e368]: $8,900.00
+        - article [ref=e370]:
+          - link "Ivory Croc Clutch" [ref=e371] [cursor=pointer]:
+            - /url: "#/product/10"
+            - img "Ivory Croc Clutch" [ref=e372]
+          - generic [ref=e373]:
+            - generic [ref=e374]: Bags
+            - link [ref=e375] [cursor=pointer]:
+              - /url: "#/product/10"
+              - heading "Ivory Croc Clutch" [level=3] [ref=e376]
+            - generic [ref=e377]: $3,400.00
+        - article [ref=e379]:
+          - link "Stone Calf Bucket Bag" [ref=e380] [cursor=pointer]:
+            - /url: "#/product/9"
+            - img "Stone Calf Bucket Bag" [ref=e381]
+          - generic [ref=e382]:
+            - generic [ref=e383]: Bags
+            - link [ref=e384] [cursor=pointer]:
+              - /url: "#/product/9"
+              - heading "Stone Calf Bucket Bag" [level=3] [ref=e385]
+            - generic [ref=e386]: $1,950.00
+        - article [ref=e388]:
+          - link "Celeste Pearl Drop Earrings" [ref=e389] [cursor=pointer]:
+            - /url: "#/product/8"
+            - img "Celeste Pearl Drop Earrings" [ref=e390]
+          - generic [ref=e391]:
+            - generic [ref=e392]: Jewellery
+            - link [ref=e393] [cursor=pointer]:
+              - /url: "#/product/8"
+              - heading "Celeste Pearl Drop Earrings" [level=3] [ref=e394]
+            - generic [ref=e395]: $3,200.00
+        - article [ref=e397]:
+          - link "Provence Linen Blazer" [ref=e398] [cursor=pointer]:
+            - /url: "#/product/7"
+            - img "Provence Linen Blazer" [ref=e399]
+          - generic [ref=e400]:
+            - generic [ref=e401]: Apparel
+            - link [ref=e402] [cursor=pointer]:
+              - /url: "#/product/7"
+              - heading "Provence Linen Blazer" [level=3] [ref=e403]
+            - generic [ref=e404]: $2,150.00
+        - article [ref=e406]:
+          - link "Marble Atelier Sunglasses" [ref=e407] [cursor=pointer]:
+            - /url: "#/product/6"
+            - img "Marble Atelier Sunglasses" [ref=e408]
+            - generic [ref=e409]: Sold Out
+          - generic [ref=e410]:
+            - generic [ref=e411]: Accessories
+            - link [ref=e412] [cursor=pointer]:
+              - /url: "#/product/6"
+              - heading "Marble Atelier Sunglasses" [level=3] [ref=e413]
+            - generic [ref=e414]: $680.00
+        - article [ref=e416]:
+          - link "Onyx Leather Derby" [ref=e417] [cursor=pointer]:
+            - /url: "#/product/5"
+            - img "Onyx Leather Derby" [ref=e418]
+            - generic [ref=e419]: Sale
+          - generic [ref=e420]:
+            - generic [ref=e421]: Footwear
+            - link [ref=e422] [cursor=pointer]:
+              - /url: "#/product/5"
+              - heading "Onyx Leather Derby" [level=3] [ref=e423]
+            - generic [ref=e424]:
+              - generic [ref=e425]: $1,220.00
+              - generic [ref=e426]: $1,420.00
+        - article [ref=e427]:
+          - link "Veluto Silk Eau de Parfum" [ref=e428] [cursor=pointer]:
+            - /url: "#/product/4"
+            - img "Veluto Silk Eau de Parfum" [ref=e429]
+          - generic [ref=e430]:
+            - generic [ref=e431]: Fragrance
+            - link [ref=e432] [cursor=pointer]:
+              - /url: "#/product/4"
+              - heading "Veluto Silk Eau de Parfum" [level=3] [ref=e433]
+            - generic [ref=e434]: $1,780.00
+        - article [ref=e436]:
+          - link "Cashmere Opera Scarf" [ref=e437] [cursor=pointer]:
+            - /url: "#/product/3"
+            - img "Cashmere Opera Scarf" [ref=e438]
+          - generic [ref=e439]:
+            - generic [ref=e440]: Accessories
+            - link [ref=e441] [cursor=pointer]:
+              - /url: "#/product/3"
+              - heading "Cashmere Opera Scarf" [level=3] [ref=e442]
+            - generic [ref=e443]: $960.00
+        - article [ref=e445]:
+          - link "Aurum Chronograph Watch" [ref=e446] [cursor=pointer]:
+            - /url: "#/product/2"
+            - img "Aurum Chronograph Watch" [ref=e447]
+          - generic [ref=e448]:
+            - generic [ref=e449]: Watches
+            - link [ref=e450] [cursor=pointer]:
+              - /url: "#/product/2"
+              - heading "Aurum Chronograph Watch" [level=3] [ref=e451]
+            - generic [ref=e452]: $12,400.00
+        - article [ref=e454]:
+          - link "Noir Saffiano Tote" [ref=e455] [cursor=pointer]:
+            - /url: "#/product/1"
+            - img "Noir Saffiano Tote" [ref=e456]
+            - generic [ref=e457]: Sale
+          - generic [ref=e458]:
+            - generic [ref=e459]: Bags
+            - link [ref=e460] [cursor=pointer]:
+              - /url: "#/product/1"
+              - heading "Noir Saffiano Tote" [level=3] [ref=e461]
+            - generic [ref=e462]:
+              - generic [ref=e463]: $2,422.50
+              - generic [ref=e464]: $2,850.00
+  - contentinfo [ref=e465]:
+    - generic [ref=e466]:
+      - generic [ref=e467]: MAISON · Maison de Luxe
+      - generic [ref=e468]: A demonstration storefront · No real transactions
+```
+
+# Test source
+
+```ts
+  1   | import { expect, test } from '@fixtures';
+  2   | 
+  3   | test.describe('Home Page UI -- Authenticated Buyer', () => {
+  4   |   test.describe('Header & Navigation', () => {
+  5   |     test('should show buyer-specific navigation elements', async ({ buyerHomePage }) => {
+  6   |       // Verify buyer is logged in
+  7   |       await expect(buyerHomePage.currentUser).toBeVisible();
+  8   |       // Verify cart link with count
+  9   |       await expect(buyerHomePage.navCart).toBeVisible();
+  10  |       await expect(buyerHomePage.navCart).toContainText('Cart');
+  11  |       await expect(buyerHomePage.cartCount).toBeVisible();
+  12  |       // Verify orders link is visible for buyer
+  13  |       await expect(buyerHomePage.ordersLink).toBeVisible();
+  14  |       await expect(buyerHomePage.ordersLink).toHaveText('Orders');
+  15  |       // Verify logout link
+  16  |       await expect(buyerHomePage.logoutLink).toBeVisible();
+  17  |       await expect(buyerHomePage.logoutLink).toHaveText('Logout');
+  18  |     });
+  19  | 
+  20  |     test('should show correct user role in data attribute', async ({ buyerHomePage }) => {
+  21  |       await expect(buyerHomePage.currentUser).toHaveAttribute('data-role', 'buyer');
+  22  |     });
+  23  | 
+  24  |     test('should navigate to cart when cart link is clicked', async ({ buyerHomePage }) => {
+  25  |       await buyerHomePage.navCart.click();
+  26  |       await buyerHomePage.expectUrlToContain('/#/cart');
+  27  |     });
+  28  | 
+  29  |     test('should navigate to orders when orders link is clicked', async ({ buyerHomePage }) => {
+  30  |       await buyerHomePage.ordersLink.click();
+  31  |       await buyerHomePage.expectUrlToContain('/#/orders');
+  32  |     });
+  33  | 
+  34  |     test('should logout successfully', async ({ buyerHomePage }) => {
+  35  |       await buyerHomePage.logout();
+  36  |       await expect(buyerHomePage.navLogin).toBeVisible();
+  37  |       await expect(buyerHomePage.navCart).toBeHidden();
+  38  |     });
+  39  |   });
+  40  | 
+  41  |   test.describe.serial('Cart & Orders Access', () => {
+  42  |     test('should show correct cart count when items are added', async ({
+  43  |       buyerHomePage,
+  44  |       api,
+  45  |       authedBuyer,
+  46  |     }) => {
+  47  |       await api.post('_reset');
+  48  |       const productsResponse = await api.get('products');
+  49  |       const productsData = await productsResponse.json();
+  50  |       const product = productsData.products[0];
+  51  |       await authedBuyer.post('cart/items', {
+  52  |         data: { productId: product.id, quantity: 2 },
+  53  |       });
+  54  |       await buyerHomePage.reload();
+  55  |       await expect(buyerHomePage.cartCount).toHaveText('2');
+  56  |     });
+  57  | 
+  58  |     test('should show product in cart when navigating to cart page', async ({
+  59  |       buyerHomePage,
+  60  |       api,
+  61  |       authedBuyer,
+  62  |     }) => {
+  63  |       await api.post('_reset');
+  64  |       const productsResponse = await api.get('products');
+  65  |       const productsData = await productsResponse.json();
+  66  |       const product = productsData.products[0];
+  67  |       await authedBuyer.post('cart/items', {
+  68  |         data: { productId: product.id, quantity: 1 },
+  69  |       });
+  70  |       await buyerHomePage.navCart.click();
+  71  |       await expect(buyerHomePage.getElement('[data-testId="cart-line"]')).toBeVisible();
+  72  |       await expect(buyerHomePage.getElement('[data-testId="line-name"]')).toHaveText(product.name);
+  73  |       await expect(buyerHomePage.getElement('[data-testId="line-qty"]')).toHaveText('Qty 1');
+  74  |     });
+  75  |   });
+  76  | 
+  77  |   test.describe('Product Catalogue', () => {
+  78  |     test('should display all product cards', async ({ buyerHomePage }) => {
+  79  |       await buyerHomePage.waitForCatalogue();
+> 80  |       await expect(buyerHomePage.productCards).toHaveCount(22);
+      |                                                ^ Error: expect(locator).toHaveCount(expected) failed
+  81  |     });
+  82  | 
+  83  |     test('should show sale badges for discounted products', async ({ buyerHomePage }) => {
+  84  |       const productCard = buyerHomePage.getProductById(1);
+  85  |       const saleBadge = productCard.getByTestId('sale-badge');
+  86  |       await expect(saleBadge).toBeVisible();
+  87  |       await expect(productCard).toContainText('Sale');
+  88  |     });
+  89  | 
+  90  |     test('should show sold out badge for out of stock products', async ({ buyerHomePage }) => {
+  91  |       const productCard = buyerHomePage.getProductById(6);
+  92  |       const soldOutBadge = productCard.getByTestId('soldout-badge');
+  93  |       await expect(soldOutBadge).toBeVisible();
+  94  |       await expect(soldOutBadge).toContainText('Sold Out');
+  95  |     });
+  96  | 
+  97  |     test('should show price was for discounted products', async ({ buyerHomePage }) => {
+  98  |       const productCard = buyerHomePage.getProductById(1);
+  99  |       const priceWas = productCard.getByTestId('price-was');
+  100 |       await expect(priceWas).toBeVisible();
+  101 |       await expect(priceWas).toContainText('$2,850.00');
+  102 | 
+  103 |       const productCard5 = buyerHomePage.getProductById(5);
+  104 |       const priceWasProduct5 = productCard5.getByTestId('price-was');
+  105 |       await expect(priceWasProduct5).toBeVisible();
+  106 |       await expect(priceWasProduct5).toContainText('$1,420.00');
+  107 |     });
+  108 | 
+  109 |     test('should show correct discounted price for product 1', async ({ buyerHomePage }) => {
+  110 |       const productCard = buyerHomePage.getProductById(1);
+  111 |       const currentPrice = productCard.getByTestId('price');
+  112 |       await expect(currentPrice).toContainText('$2,422.50');
+  113 |     });
+  114 | 
+  115 |     test('should navigate to product detail when product card is clicked', async ({
+  116 |       buyerHomePage,
+  117 |     }) => {
+  118 |       await buyerHomePage.getProductById(1).click();
+  119 |       buyerHomePage.expectUrlToContain('/#/product/1');
+  120 |     });
+  121 |   });
+  122 | 
+  123 |   test.describe('Catalogue Toolbar', () => {
+  124 |     test('should filter products by search', async ({ buyerHomePage }) => {
+  125 |       await buyerHomePage.searchFor('Tote');
+  126 |       await expect(buyerHomePage.productCards).toHaveCount(1);
+  127 |       await expect(buyerHomePage.productName).toHaveText('Noir Saffiano Tote');
+  128 |     });
+  129 | 
+  130 |     test('should filter products by category', async ({ buyerHomePage }) => {
+  131 |       await buyerHomePage.filterByCategory('Bags');
+  132 |       await expect(buyerHomePage.productCards).toHaveCount(3);
+  133 |       const categories = await buyerHomePage.getElement('.card__cat').allTextContents();
+  134 |       expect(categories.every(cat => cat === 'Bags')).toBe(true);
+  135 |     });
+  136 | 
+  137 |     test('should sort products by price low to high', async ({ buyerHomePage }) => {
+  138 |       await buyerHomePage.sortBy('price_asc');
+  139 |       const prices = await buyerHomePage.priceList.allTextContents();
+  140 |       const numericPrices = prices.map(p => parseFloat(p.replace(/[^0-9.]/g, '')));
+  141 |       const sorted = [...numericPrices].sort((a, b) => a - b);
+  142 |       expect(numericPrices).toEqual(sorted);
+  143 |     });
+  144 | 
+  145 |     test('should sort products by price high to low', async ({ buyerHomePage }) => {
+  146 |       await buyerHomePage.sortBy('price_desc');
+  147 |       const prices = await buyerHomePage.priceList.allTextContents();
+  148 |       const numericPrices = prices.map(p => parseFloat(p.replace(/[^0-9.]/g, '')));
+  149 |       const sorted = [...numericPrices].sort((a, b) => b - a);
+  150 |       expect(numericPrices).toEqual(sorted);
+  151 |     });
+  152 |   });
+  153 | 
+  154 |   test.describe('Accessibility', () => {
+  155 |     test('should have aria-live region for catalogue updates', async ({ buyerHomePage }) => {
+  156 |       await expect(buyerHomePage.catalogue).toHaveAttribute('aria-live', 'polite');
+  157 |     });
+  158 | 
+  159 |     test('should have skip link', async ({ buyerHomePage }) => {
+  160 |       await expect(buyerHomePage.skipLink).toBeVisible();
+  161 |       await expect(buyerHomePage.skipLink).toHaveText('Skip to content');
+  162 |     });
+  163 | 
+  164 |     test('should have accessible nav toggle', async ({ buyerHomePage }) => {
+  165 |       await expect(buyerHomePage.navToggle).toHaveAttribute('aria-controls', 'primary-nav');
+  166 |       await expect(buyerHomePage.navToggle).toHaveAttribute('aria-expanded', 'false');
+  167 |       await expect(buyerHomePage.navToggle).toHaveAttribute('aria-label', 'Open navigation');
+  168 |     });
+  169 | 
+  170 |     test('should have accessible search input', async ({ buyerHomePage }) => {
+  171 |       await expect(buyerHomePage.searchInput).toHaveAttribute('aria-label', 'Search products');
+  172 |     });
+  173 | 
+  174 |     test('should have accessible category filter', async ({ buyerHomePage }) => {
+  175 |       await expect(buyerHomePage.categorySelect).toHaveAttribute(
+  176 |         'aria-label',
+  177 |         'Filter by category'
+  178 |       );
+  179 |     });
+  180 | 
+```
