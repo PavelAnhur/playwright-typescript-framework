@@ -33,7 +33,7 @@ test.describe('Login Page UI -- Edge Cases', () => {
   });
 
   test('should handle unicode characters in email', async ({ loginPage }) => {
-    test.skip(true, 'Known Bug: unicode characters in email');
+    test.fixme(true, 'Tracked in maison#5 — unicode characters in email');
     const unicodeEmail = 'test@éxample.com';
     await loginPage.fillLoginForm(unicodeEmail, buyer.password);
     const value = await loginPage.emailInput.inputValue();
