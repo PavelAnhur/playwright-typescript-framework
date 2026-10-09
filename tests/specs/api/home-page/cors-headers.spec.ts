@@ -12,7 +12,7 @@ test.describe('Home Page API -- CORS Headers', () => {
   });
 
   test('should not include CORS headers for disallowed origin', async ({ api }) => {
-    test.skip(true, 'Known Bug: CORS headers for disallowed origin');
+    test.fixme(true, 'Tracked in maison#2 — CORS headers for disallowed origin');
     const response = await api.get('products', {
       headers: {
         Origin: 'https://evil.com',
