@@ -39,7 +39,8 @@
       "@utils/*": ["./tests/utils/*"],
       "@data/*": ["./src/test-data/*"],
       "@config/*": ["./src/config/*"],
-      "@src/*": ["./src/*"]
+      "@src/*": ["./src/*"],
+      "@ai/*": ["./src/ai/*"]
     }
   },
   "include": ["src/**/*.ts", "playwright.config.ts", "tests/**/*.ts", "*.ts", "reporters/**/*.ts"],
