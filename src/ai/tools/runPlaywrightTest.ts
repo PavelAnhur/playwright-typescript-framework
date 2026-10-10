@@ -12,6 +12,12 @@ export interface TestRunResult {
   stdout: string;
 }
 
+export interface RunOptions {
+  project?: string;
+  workers?: number;
+  repeatEach?: number;
+}
+
 const ERROR_CONTEXT_MAX_AGE_MS = 30_000;
 
 function runProcess(
@@ -74,17 +80,11 @@ function extractErrorMessage(stdout: string): string | null {
   return block.trim();
 }
 
-export interface RunOptions {
-  project?: string;
-  workers?: number;
-  grep?: string;
-}
-
 export async function runPlaywrightTest(
   specFile: string,
   options: RunOptions = {}
 ): Promise<TestRunResult> {
-  const { project = 'review', workers, grep } = options;
+  const { project = 'review', workers, repeatEach } = options;
   const args = [
     'playwright',
     'test',
@@ -95,8 +95,8 @@ export async function runPlaywrightTest(
   if (workers !== undefined) {
     args.push(`--workers=${workers}`);
   }
-  if (grep !== undefined) {
-    args.push(`--grep=${grep}`);
+  if (repeatEach !== undefined && repeatEach > 1) {
+    args.push(`--repeat-each=${repeatEach}`);
   }
   const start = Date.now();
   const { code, stdout } = await runProcess('npx', args, aiConfig.projectRoot);
