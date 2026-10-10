@@ -33,10 +33,7 @@ const FILE_PARALLEL_PHASES = [
   { label: 'file-parallel-w2-r5', workers: 2, repeatEach: 5 },
 ];
 
-const SUITE_PARALLEL_PHASES = [
-  { label: 'suite-parallel-w2-r1', workers: 2, repeatEach: 1 },
-  { label: 'suite-parallel-w2-r3', workers: 2, repeatEach: 3 },
-];
+const SUITE_PHASE = { label: 'suite-parallel-w2-r1', workers: 2, repeatEach: 1 };
 
 const MAX_SERIAL_ATTEMPTS = 2;
 
@@ -81,7 +78,7 @@ function recommend(classification: FlakeClassification): string {
     case 'flake_parallel':
       return 'Parallel-isolation flake detected at the file level. Options: (1) add test.describe.configure({ mode: "serial" }) if the suite shares state; (2) refactor tests to use unique per-test data (own users, own products); (3) investigate server-side global state, especially POST /_reset. See the failedTestNames in the parallel phase for which tests are affected.';
     case 'flake_parallel_suite':
-      return 'File is clean in isolation but flaky when run as part of the suite. The interfering test lives in another file. Options: (1) find the sibling file that shares global state; (2) isolate tests in this file so they do not depend on global state; (3) run the whole suite serially as a workaround.';
+      return 'File is clean in isolation but flaky when run as part of the suite. The interfering test lives in another file. Options: (1) find the sibling file that shares global state (look for tests that mutate shared resources); (2) isolate tests in this file so they do not depend on global state; (3) if the flake is rare, correlate with CI history rather than trying to reproduce locally.';
     case 'flake_serial_only':
       return 'File fails serially but passes in parallel. Unusual — likely test ordering or data leakage between tests in the same file. Inspect beforeEach/afterEach and shared fixtures.';
     case 'deterministic_fail':
@@ -156,28 +153,26 @@ export async function detectFlake(
       };
     }
   }
-  // Phase 3: suite-level escalation (optional)
+  // Phase 3: single suite-level run (optional)
   if (suitePath !== undefined) {
-    for (const phaseSpec of SUITE_PARALLEL_PHASES) {
-      const phase = await runPhase(
-        suitePath,
-        'suite',
-        project,
-        phaseSpec.workers,
-        phaseSpec.repeatEach,
-        phaseSpec.label
-      );
-      phases.push(phase);
-      if (!phase.passed) {
-        return {
-          spec: specPath,
-          suite: suitePath,
-          classification: 'flake_parallel_suite',
-          recommendation: recommend('flake_parallel_suite'),
-          phases,
-          totalDurationMs: Date.now() - start,
-        };
-      }
+    const phase = await runPhase(
+      suitePath,
+      'suite',
+      project,
+      SUITE_PHASE.workers,
+      SUITE_PHASE.repeatEach,
+      SUITE_PHASE.label
+    );
+    phases.push(phase);
+    if (!phase.passed) {
+      return {
+        spec: specPath,
+        suite: suitePath,
+        classification: 'flake_parallel_suite',
+        recommendation: recommend('flake_parallel_suite'),
+        phases,
+        totalDurationMs: Date.now() - start,
+      };
     }
   }
   return {
