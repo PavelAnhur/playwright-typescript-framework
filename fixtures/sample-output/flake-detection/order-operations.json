@@ -1,0 +1,47 @@
+{
+  "spec": "tests/specs/api/buyer/order-operations.spec.ts",
+  "suite": null,
+  "classification": "flake_parallel",
+  "recommendation": "Parallel-isolation flake detected at the file level. Options: (1) add test.describe.configure({ mode: \"serial\" }) if the suite shares state; (2) refactor tests to use unique per-test data (own users, own products); (3) investigate server-side global state, especially POST /_reset. See the failedTestNames in the parallel phase for which tests are affected.",
+  "phases": [
+    {
+      "label": "file-serial-w1-r1-attempt1",
+      "scope": "file",
+      "workers": 1,
+      "repeatEach": 1,
+      "passed": true,
+      "durationMs": 2914,
+      "failedTestNames": []
+    },
+    {
+      "label": "file-serial-w1-r1-attempt2",
+      "scope": "file",
+      "workers": 1,
+      "repeatEach": 1,
+      "passed": true,
+      "durationMs": 2865,
+      "failedTestNames": []
+    },
+    {
+      "label": "file-parallel-w2-r1",
+      "scope": "file",
+      "workers": 2,
+      "repeatEach": 1,
+      "passed": true,
+      "durationMs": 2736,
+      "failedTestNames": []
+    },
+    {
+      "label": "file-parallel-w2-r3",
+      "scope": "file",
+      "workers": 2,
+      "repeatEach": 3,
+      "passed": false,
+      "durationMs": 4125,
+      "failedTestNames": [
+        "api/buyer/order-operations.spec.ts:60:3 › Buyer API -- Order Operations › should get single order by reference"
+      ]
+    }
+  ],
+  "totalDurationMs": 12646
+}
