@@ -3,6 +3,7 @@ import type { Cart } from '@src/types/cart';
 import type { Order } from '@src/types/order';
 import type { Product } from '@src/types/product';
 
+test.describe.configure({ mode: 'serial' });
 test.describe('Buyer API -- Order Operations', () => {
   test.beforeEach(async ({ api }) => {
     await api.post('_reset');
