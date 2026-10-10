@@ -9,7 +9,10 @@ export class FlakeDecisionGate {
     private readonly maxRuns: number
   ) {}
 
-  async maybeDetect(test: TestCase, hypothesis: FailureHypothesis): Promise<{
+  async maybeDetect(
+    test: TestCase,
+    hypothesis: FailureHypothesis
+  ): Promise<{
     result: FlakeDetectionResult | null;
     error: string | null;
   }> {

@@ -4,12 +4,12 @@ A small layer that applies LLM agents to the QA workflow around this Playwright 
 
 ## What it does
 
-| Agent                    | Input                                  | Output                                         |
-| ------------------------ | -------------------------------------- | ---------------------------------------------- |
-| **requirements-analyst** | A requirements document (`.md`)        | Risks + test cases (`.yaml`)                   |
-| **failure-analyst**      | One or more test failures (`.txt` fixture) | Hypothesis + category + evidence (`.json`)  |
-| **judge**                | A triage result + the original failure | Score + verdict + hallucination list (`.json`) |
-| **spec-generator**       | A test case from a requirements YAML   | A passing Playwright test (`.spec.ts`)         |
+| Agent                    | Input                                      | Output                                         |
+| ------------------------ | ------------------------------------------ | ---------------------------------------------- |
+| **requirements-analyst** | A requirements document (`.md`)            | Risks + test cases (`.yaml`)                   |
+| **failure-analyst**      | One or more test failures (`.txt` fixture) | Hypothesis + category + evidence (`.json`)     |
+| **judge**                | A triage result + the original failure     | Score + verdict + hallucination list (`.json`) |
+| **spec-generator**       | A test case from a requirements YAML       | A passing Playwright test (`.spec.ts`)         |
 
 Three things make this different from "call a model and trust the output":
 
@@ -63,6 +63,7 @@ Each script accepts optional arguments:
 The AI triage reporter runs automatically after every Playwright test run. It's configured in `playwright.config.ts` and requires no manual invocation.
 
 When failures occur, the reporter:
+
 1. Collects all failed tests (up to a cap of 10)
 2. Sends them to the failure-analyst agent as a **single batch call**
 3. For each hypothesis that looks like a flake, optionally runs `detectFlake()`
@@ -70,10 +71,12 @@ When failures occur, the reporter:
 5. Prints a summary table to the console
 
 Control it via environment variables:
+
 - `DSH_API_KEY` — omit this entirely to disable AI triage in CI (no API key = no calls)
 - `ENABLE_AI_TRIAGE=true` — explicitly enable it
 
 Example output:
+
 ```
 🤖 ai-triage: analyzing 8 failure(s)...
 

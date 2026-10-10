@@ -1,6 +1,13 @@
 import { aiConfig } from '@ai/config';
 import { FlakeDecisionGate } from '@ai/tools/flakeDecisionGate';
-import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestResult } from '@playwright/test/reporter';
+import type {
+  FullConfig,
+  FullResult,
+  Reporter,
+  Suite,
+  TestCase,
+  TestResult,
+} from '@playwright/test/reporter';
 import type { RawFailure } from './aiTriageTypes';
 import { OutputFormatter } from './outputFormatter';
 import { SummaryEngine } from './summaryEngine';

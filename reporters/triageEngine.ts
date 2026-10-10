@@ -6,9 +6,7 @@ import type { ContextInput, RawFailure, TriagedFailure } from './aiTriageTypes';
 const MAX_TRIAGE = 10;
 
 export class TriageEngine {
-  constructor(
-    private readonly flakeGate: FlakeDecisionGate
-  ) {}
+  constructor(private readonly flakeGate: FlakeDecisionGate) {}
 
   async run(rawFailures: RawFailure[]): Promise<TriagedFailure[]> {
     const { toTriage } = this.prepareInput(rawFailures);

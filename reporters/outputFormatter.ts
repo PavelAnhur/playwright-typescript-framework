@@ -20,7 +20,16 @@ export class OutputFormatter {
     return counts;
   }
 
-  private printHeader(byCategory: { product_bug: number; flake: number; test_issue: number; environment: number; unavailable: number }, skipped: number): void {
+  private printHeader(
+    byCategory: {
+      product_bug: number;
+      flake: number;
+      test_issue: number;
+      environment: number;
+      unavailable: number;
+    },
+    skipped: number
+  ): void {
     console.log('\n─── ai-triage summary ───');
     console.log(`  product_bug:  ${byCategory.product_bug}`);
     console.log(`  flake:        ${byCategory.flake}`);
