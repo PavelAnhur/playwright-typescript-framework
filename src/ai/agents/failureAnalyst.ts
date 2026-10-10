@@ -3,6 +3,8 @@ import { basename, join } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
 import {
+  batchFailureAnalystSystem,
+  buildBatchFailureAnalystUser,
   buildFailureAnalystUser,
   failureAnalystSystem,
   type FailureContext,
@@ -80,29 +82,14 @@ export async function analyzeFailure(
     ],
     metadata: { ...metadata, testTitle: ctx.testTitle },
   });
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(result.content);
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Model returned non-JSON output: ${msg}\n\nRaw:\n${result.content.slice(0, 500)}`,
-      { cause: error }
-    );
-  }
-  const validated = FailureHypothesisSchema.safeParse(parsed);
-  if (!validated.success) {
-    throw new Error(
-      `Model output failed schema validation: ${validated.error.message}\n\nRaw:\n${result.content.slice(0, 500)}`
-    );
-  }
+  const validated = validateSingleHypothesis(result.content, result.content);
   const outputName = typeof metadata['outputName'] === 'string' ? metadata['outputName'] : null;
   let outputPath: string | null = null;
   if (outputName !== null) {
     await mkdir(aiConfig.generatedCasesDir, { recursive: true });
     outputPath = join(aiConfig.generatedCasesDir, outputName);
     const enriched = {
-      ...validated.data,
+      ...validated,
       sourceContext: [
         `Test title: ${ctx.testTitle}`,
         `Test file: ${ctx.testFile}`,
@@ -115,7 +102,59 @@ export async function analyzeFailure(
     };
     await writeFile(outputPath, JSON.stringify(enriched, null, 2), 'utf8');
   }
-  return { hypothesis: validated.data, outputPath };
+  return { hypothesis: validated, outputPath };
+}
+
+export async function analyzeFailures(
+  contexts: FailureContext[]
+): Promise<{ hypotheses: FailureHypothesis[] }> {
+  if (contexts.length === 0) {
+    throw new Error('analyzeFailures requires at least one FailureContext');
+  }
+  const result = await callModel({
+    agent: AGENT,
+    messages: [
+      { role: 'system', content: batchFailureAnalystSystem },
+      { role: 'user', content: buildBatchFailureAnalystUser(contexts) },
+    ],
+  });
+  const parsed = parseJsonResult(result.content);
+  if (!Array.isArray(parsed)) {
+    throw new Error(
+      `Model output is not an array. Expected array of FailureHypothesis objects.\n\nRaw:\n${result.content.slice(0, 500)}`
+    );
+  }
+  const validated = parsed.map((item, index) => {
+    try {
+      return validateSingleHypothesis(item, JSON.stringify(item, null, 2).slice(0, 500));
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Item #${index + 1}: ${msg}`, { cause: error });
+    }
+  });
+  return { hypotheses: validated };
+}
+
+function parseJsonResult(content: string): unknown {
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${content.slice(0, 500)}`, {
+      cause: error,
+    });
+  }
+}
+
+function validateSingleHypothesis(parsed: unknown, rawContext?: string): FailureHypothesis {
+  const result = FailureHypothesisSchema.safeParse(parsed);
+  if (!result.success) {
+    const raw = rawContext ?? JSON.stringify(parsed, null, 2).slice(0, 500);
+    throw new Error(
+      `Model output failed schema validation: ${result.error.message}\n\nRaw:\n${raw}`
+    );
+  }
+  return result.data;
 }
 
 async function analyzeFailureFromFile(fixtureFile: string) {

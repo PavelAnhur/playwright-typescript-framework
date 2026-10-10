@@ -23,7 +23,7 @@ export default defineConfig({
       },
     ],
     [
-      './reporters/ai-triage-reporter.ts',
+      './reporters/aiTriageReporter.ts',
       {
         enableFlakeDetection: true,
         maxFlakeDetections: 3,

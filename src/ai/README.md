@@ -7,7 +7,7 @@ A small layer that applies LLM agents to the QA workflow around this Playwright 
 | Agent                    | Input                                  | Output                                         |
 | ------------------------ | -------------------------------------- | ---------------------------------------------- |
 | **requirements-analyst** | A requirements document (`.md`)        | Risks + test cases (`.yaml`)                   |
-| **failure-analyst**      | A test failure (`.txt` fixture)        | Hypothesis + category + evidence (`.json`)     |
+| **failure-analyst**      | One or more test failures (`.txt` fixture) | Hypothesis + category + evidence (`.json`)  |
 | **judge**                | A triage result + the original failure | Score + verdict + hallucination list (`.json`) |
 | **spec-generator**       | A test case from a requirements YAML   | A passing Playwright test (`.spec.ts`)         |
 
@@ -15,9 +15,13 @@ Three things make this different from "call a model and trust the output":
 
 **The judge.** Every failure-analyst hypothesis is scored against a rubric by a second model call. Any claim not grounded in the input is flagged as a hallucination and listed explicitly.
 
+**Batch triage.** The reporter sends all failures in a single LLM call instead of one per failure, reducing cost by ~70-85%. The `failureAnalyst.ts` exports both `analyzeFailure()` (single) and `analyzeFailures()` (batch).
+
 **The refine loop.** spec-generator doesn't just generate a test — it runs it, reads the Playwright error context (including a DOM snapshot), sends it back to the model, and iterates up to maxIterations until the test passes.
 
 **Hollow-pass detection.** When the refine loop reports a passing test, the harness validates every data-testid referenced in the test against the app source. A test that passes because it references a non-existent element is flagged as hollowPass: true — not silently accepted.
+
+**CI integration.** The AI triage reporter (`reporters/aiTriageReporter.ts`) hooks into Playwright's lifecycle and runs automatically after every test run. It batches all failures, classifies them via the failure-analyst agent, optionally runs flake detection on promising candidates, writes `test-results/ai-triage-summary.json`, and prints a summary to the console. Set `ENABLE_AI_TRIAGE=true` in CI or skip entirely by omitting DSH_API_KEY.
 
 ## Quick start
 
@@ -54,6 +58,41 @@ Each script accepts optional arguments:
     npx tsx src/ai/agents/judge.ts generated-cases/other.triage.json fixtures/failures/other.txt
     npx tsx src/ai/agents/refineSpecCli.ts generated-cases/checkout.yaml C2 3
 
+## CI reporter (automatic)
+
+The AI triage reporter runs automatically after every Playwright test run. It's configured in `playwright.config.ts` and requires no manual invocation.
+
+When failures occur, the reporter:
+1. Collects all failed tests (up to a cap of 10)
+2. Sends them to the failure-analyst agent as a **single batch call**
+3. For each hypothesis that looks like a flake, optionally runs `detectFlake()`
+4. Writes `test-results/ai-triage-summary.json` with full details
+5. Prints a summary table to the console
+
+Control it via environment variables:
+- `DSH_API_KEY` — omit this entirely to disable AI triage in CI (no API key = no calls)
+- `ENABLE_AI_TRIAGE=true` — explicitly enable it
+
+Example output:
+```
+🤖 ai-triage: analyzing 8 failure(s)...
+
+  ✅ Checkout > button is disabled when cart is empty → product_bug (high)
+  🔍 Checkout > button is disabled when cart is empty → running flake detection...
+     deterministic_fail (20235ms)
+  ✅ Cart > should add item to cart → test_issue (medium)
+  ⏭️  Order > should create order from cart → flake detection skipped (cap 3)
+
+─── ai-triage summary ───
+  product_bug:  1
+  flake:        0
+  test_issue:   1
+  environment:  0
+  skipped:      6
+  full summary: test-results/ai-triage-summary.json
+─── end ai-triage ───
+```
+
 ## MCP server
 
 Every agent is also exposed as an MCP (Model Context Protocol) tool. Any MCP-compatible client — Klepa AI, Claude Desktop, Cursor, or a self-hosted setup — can call them.
@@ -89,6 +128,8 @@ Client wiring is documented in kilo.jsonc (Klepa AI) and .vscode/mcp.json (VS Co
         specGeneratorCli.ts
         refineSpecCli.ts
       tools/
+        detectFlake.ts              # runs Playwright tests serial/parallel/suite to classify flakes
+        flakeDecisionGate.ts        # decision gate: checks enabled/maxRuns/hypothesis before calling detectFlake
         runPlaywrightTest.ts        # runs a spec, returns pass/fail + error context
         loadProjectContext.ts       # loads AGENTS.md, fixtures, page objects for the prompt
         validateTestSelectors.ts    # checks each data-testid in a spec against the app source
