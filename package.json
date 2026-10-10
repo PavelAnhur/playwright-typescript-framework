@@ -29,7 +29,8 @@
     "ai:triage": "tsx src/ai/agents/failureAnalyst.ts",
     "ai:judge": "tsx src/ai/agents/judge.ts",
     "ai:demo": "npm run ai:requirements && npm run ai:triage && npm run ai:judge",
-    "ai:refine": "tsx src/ai/agents/refineSpecCli.ts"
+    "ai:refine": "tsx src/ai/agents/refineSpecCli.ts",
+    "ai:flake-detect": "tsx src/ai/agents/flakeDetectorCli.ts"
   },
   "keywords": [],
   "license": "MIT",

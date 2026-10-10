@@ -8,6 +8,7 @@ export interface TestRunResult {
   exitCode: number;
   errorMessage: string | null;
   errorContext: string | null;
+  failedTestNames: string[];
   durationMs: number;
   stdout: string;
 }
@@ -16,6 +17,32 @@ export interface RunOptions {
   project?: string;
   workers?: number;
   repeatEach?: number;
+}
+
+interface PlaywrightJsonTestResult {
+  status: string;
+  error?: { message?: string };
+}
+
+interface PlaywrightJsonTest {
+  results: PlaywrightJsonTestResult[];
+}
+
+interface PlaywrightJsonSpec {
+  title: string;
+  file?: string;
+  line?: number;
+  tests: PlaywrightJsonTest[];
+}
+
+interface PlaywrightJsonSuite {
+  title: string;
+  specs?: PlaywrightJsonSpec[];
+  suites?: PlaywrightJsonSuite[];
+}
+
+interface PlaywrightJsonReport {
+  suites?: PlaywrightJsonSuite[];
 }
 
 const ERROR_CONTEXT_MAX_AGE_MS = 30_000;
@@ -71,13 +98,61 @@ async function findLatestErrorContext(): Promise<string | null> {
   }
 }
 
-function extractErrorMessage(stdout: string): string | null {
-  const idx = stdout.indexOf('Error:');
+function parseJsonReport(stdout: string): PlaywrightJsonReport | null {
+  const idx = stdout.indexOf('{\n  "config":');
   if (idx === -1) return null;
-  const fromError = stdout.slice(idx);
-  const endIdx = fromError.search(/\n\n\s*\n/);
-  const block = endIdx === -1 ? fromError.slice(0, 2000) : fromError.slice(0, endIdx);
-  return block.trim();
+  try {
+    return JSON.parse(stdout.slice(idx)) as PlaywrightJsonReport;
+  } catch {
+    return null;
+  }
+}
+
+function collectFailures(
+  suite: PlaywrightJsonSuite,
+  prefix: string,
+  out: { title: string; message: string | null }[]
+): void {
+  const isFilePathSuite = suite.title.endsWith('.spec.ts') || suite.title.endsWith('.test.ts');
+  const currentPath = isFilePathSuite
+    ? prefix
+    : prefix
+      ? `${prefix} › ${suite.title}`
+      : suite.title;
+  if (suite.specs) {
+    for (const spec of suite.specs) {
+      const failedResult = spec.tests
+        .flatMap(t => t.results)
+        .find(r => r.status === 'failed' || r.status === 'timedOut');
+      if (failedResult) {
+        const location = spec.file && spec.line ? `${spec.file}:${spec.line}:3` : spec.file ?? '';
+        const describePath = currentPath ? `${currentPath} › ${spec.title}` : spec.title;
+        out.push({
+          title: location ? `${location} › ${describePath}` : describePath,
+          message: failedResult.error?.message ?? null,
+        });
+      }
+    }
+  }
+  if (suite.suites) {
+    for (const child of suite.suites) {
+      collectFailures(child, currentPath, out);
+    }
+  }
+}
+
+function extractFailures(
+  report: PlaywrightJsonReport
+): { names: string[]; firstMessage: string | null } {
+  const failures: { title: string; message: string | null }[] = [];
+  if (report.suites) {
+    for (const suite of report.suites) {
+      collectFailures(suite, '', failures);
+    }
+  }
+  const names = failures.map(f => f.title);
+  const firstMessage = failures.find(f => f.message !== null)?.message ?? null;
+  return { names, firstMessage };
 }
 
 export async function runPlaywrightTest(
@@ -90,7 +165,7 @@ export async function runPlaywrightTest(
     'test',
     specFile,
     `--project=${project}`,
-    '--reporter=line',
+    '--reporter=json',
   ];
   if (workers !== undefined) {
     args.push(`--workers=${workers}`);
@@ -102,11 +177,25 @@ export async function runPlaywrightTest(
   const { code, stdout } = await runProcess('npx', args, aiConfig.projectRoot);
   const durationMs = Date.now() - start;
   const passed = code === 0;
+  if (passed) {
+    return {
+      passed: true,
+      exitCode: code,
+      errorMessage: null,
+      errorContext: null,
+      failedTestNames: [],
+      durationMs,
+      stdout,
+    };
+  }
+  const report = parseJsonReport(stdout);
+  const failures = report ? extractFailures(report) : { names: [], firstMessage: null };
   return {
-    passed,
+    passed: false,
     exitCode: code,
-    errorMessage: passed ? null : extractErrorMessage(stdout),
-    errorContext: passed ? null : await findLatestErrorContext(),
+    errorMessage: failures.firstMessage,
+    errorContext: await findLatestErrorContext(),
+    failedTestNames: failures.names,
     durationMs,
     stdout,
   };
