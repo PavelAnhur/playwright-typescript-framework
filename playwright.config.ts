@@ -22,7 +22,13 @@ export default defineConfig({
         suiteTitle: true,
       },
     ],
-    ['./reporters/ai-triage-reporter.ts'],
+    [
+      './reporters/ai-triage-reporter.ts',
+      {
+        enableFlakeDetection: true,
+        maxFlakeDetections: 3,
+      },
+    ],
   ],
   globalSetup: './src/setup/global-setup.ts',
   use: {

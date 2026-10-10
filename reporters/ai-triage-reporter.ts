@@ -9,9 +9,10 @@ import type {
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { analyzeFailure } from '../src/ai/agents/failureAnalyst';
+import { aiConfig } from '../src/ai/config';
 import type { FailureContext } from '../src/ai/prompts/failureAnalyst.ts';
 import type { FailureHypothesis } from '../src/ai/schemas.ts';
-import { aiConfig } from '../src/ai/config';
+import { detectFlake, type FlakeDetectionResult } from '../src/ai/tools/detectFlake';
 
 interface TriagedFailure {
   testTitle: string;
@@ -19,6 +20,8 @@ interface TriagedFailure {
   errorMessage: string;
   hypothesis: FailureHypothesis | null;
   triageError: string | null;
+  flake: FlakeDetectionResult | null;
+  flakeError: string | null;
 }
 
 interface SummaryFile {
@@ -26,7 +29,15 @@ interface SummaryFile {
   totalFailed: number;
   triaged: number;
   skipped: number;
+  flakeDetectionsRun: number;
+  flakeDetectionsFailed: number;
+  flakeDetectionsSkipped: number;
   failures: TriagedFailure[];
+}
+
+interface ReporterOptions {
+  enableFlakeDetection?: boolean;
+  maxFlakeDetections?: number;
 }
 
 const MAX_TRIAGE = 10;
@@ -35,9 +46,18 @@ class AiTriageReporter implements Reporter {
   private failures: Array<{ test: TestCase; result: TestResult }> = [];
   private outputDir = 'test-results';
   private rootDir = process.cwd();
+  private enableFlakeDetection: boolean;
+  private maxFlakeDetections: number;
+  private flakeRunsSoFar = 0;
+
+  constructor(options: ReporterOptions = {}) {
+    this.enableFlakeDetection = options.enableFlakeDetection ?? true;
+    this.maxFlakeDetections = options.maxFlakeDetections ?? 3;
+  }
 
   onBegin(_config: FullConfig, _suite: Suite): void {
     this.failures = [];
+    this.flakeRunsSoFar = 0;
   }
 
   onTestEnd(test: TestCase, result: TestResult): void {
@@ -62,50 +82,107 @@ class AiTriageReporter implements Reporter {
     );
     const triaged: TriagedFailure[] = [];
     for (const { test, result } of toTriage) {
-      const errorMessage = result.error?.message ?? 'Unknown error';
-      const stackTrace = result.error?.stack ?? undefined;
-      const ctx: FailureContext = {
-        testTitle: test.title,
-        testFile: test.location.file,
-        errorMessage,
-        stackTrace,
-      };
-      try {
-        const { hypothesis } = await analyzeFailure(ctx, {
-          source: 'playwright-reporter',
-          testFile: test.location.file,
-        });
-        triaged.push({
-          testTitle: test.title,
-          testFile: test.location.file,
-          errorMessage,
-          hypothesis,
-          triageError: null,
-        });
-        console.log(`  ✅ ${test.title} → ${hypothesis.category} (${hypothesis.confidence})`);
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        triaged.push({
-          testTitle: test.title,
-          testFile: test.location.file,
-          errorMessage,
-          hypothesis: null,
-          triageError: msg,
-        });
-        console.log(`  ⚠️  ${test.title} → triage unavailable (${msg.slice(0, 80)})`);
-      }
+      const entry = await this.triageOne(test, result);
+      triaged.push(entry);
     }
+    const flakeDetectionsRun = triaged.filter(t => t.flake !== null).length;
+    const flakeDetectionsFailed = triaged.filter(t => t.flakeError !== null).length;
+    const flakeDetectionsSkipped = triaged.filter(
+      t =>
+        t.hypothesis !== null &&
+        t.flake === null &&
+        t.flakeError === null &&
+        this.shouldConsiderFlake(t.hypothesis)
+    ).length;
     const summary: SummaryFile = {
       generatedAt: new Date().toISOString(),
       totalFailed: this.failures.length,
       triaged: triaged.length,
       skipped,
+      flakeDetectionsRun,
+      flakeDetectionsFailed,
+      flakeDetectionsSkipped,
       failures: triaged,
     };
     await mkdir(join(this.rootDir, this.outputDir), { recursive: true });
     const summaryPath = join(this.rootDir, this.outputDir, 'ai-triage-summary.json');
     await writeFile(summaryPath, JSON.stringify(summary, null, 2), 'utf8');
     this.printSummary(triaged, skipped, summaryPath);
+  }
+
+  private shouldConsiderFlake(hypothesis: FailureHypothesis): boolean {
+    const isFlakeCategory = hypothesis.category === 'test_issue' || hypothesis.category === 'flake';
+    const isLowConfidenceProductBug =
+      hypothesis.category === 'product_bug' &&
+      (hypothesis.confidence === 'low' || hypothesis.confidence === 'medium');
+    return isFlakeCategory || isLowConfidenceProductBug;
+  }
+
+  private async triageOne(test: TestCase, result: TestResult): Promise<TriagedFailure> {
+    const errorMessage = result.error?.message ?? 'Unknown error';
+    const stackTrace = result.error?.stack ?? undefined;
+    const ctx: FailureContext = {
+      testTitle: test.title,
+      testFile: test.location.file,
+      errorMessage,
+      stackTrace,
+    };
+    try {
+      const { hypothesis } = await analyzeFailure(ctx, {
+        source: 'playwright-reporter',
+        testFile: test.location.file,
+      });
+      console.log(`  ✅ ${test.title} → ${hypothesis.category} (${hypothesis.confidence})`);
+      const flake = await this.maybeDetectFlake(test, hypothesis);
+      return {
+        testTitle: test.title,
+        testFile: test.location.file,
+        errorMessage,
+        hypothesis,
+        triageError: null,
+        flake: flake.result,
+        flakeError: flake.error,
+      };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.log(`  ⚠️  ${test.title} → triage unavailable (${msg.slice(0, 80)})`);
+      return {
+        testTitle: test.title,
+        testFile: test.location.file,
+        errorMessage,
+        hypothesis: null,
+        triageError: msg,
+        flake: null,
+        flakeError: null,
+      };
+    }
+  }
+
+  private async maybeDetectFlake(
+    test: TestCase,
+    hypothesis: FailureHypothesis
+  ): Promise<{ result: FlakeDetectionResult | null; error: string | null }> {
+    if (!this.enableFlakeDetection) return { result: null, error: null };
+    if (!this.shouldConsiderFlake(hypothesis)) {
+      return { result: null, error: null };
+    }
+    if (this.flakeRunsSoFar >= this.maxFlakeDetections) {
+      console.log(`  ⏭️  ${test.title} → flake detection skipped (cap ${this.maxFlakeDetections})`);
+      return { result: null, error: null };
+    }
+    this.flakeRunsSoFar++;
+    const project = test.parent.project()?.name ?? 'api';
+    const suitePath = test.parent.project()?.testDir;
+    try {
+      console.log(`  🔍 ${test.title} → running flake detection...`);
+      const result = await detectFlake(test.location.file, project, suitePath);
+      console.log(`     ${result.classification} (${result.totalDurationMs}ms)`);
+      return { result, error: null };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.log(`     flake detection failed: ${msg.slice(0, 80)}`);
+      return { result: null, error: msg };
+    }
   }
 
   private printSummary(triaged: TriagedFailure[], skipped: number, summaryPath: string): void {
@@ -125,8 +202,28 @@ class AiTriageReporter implements Reporter {
     if (suspects.length > 0) {
       console.log('\n  product bug suspects:');
       for (const s of suspects) {
-        console.log(`    • ${s.testTitle}`);
+        const flakeNote =
+          s.flake !== null && s.flake.classification !== 'not_reproduced'
+            ? ` (flake detected: ${s.flake.classification} — likely not a product bug)`
+            : '';
+        console.log(`    • ${s.testTitle}${flakeNote}`);
         console.log(`      ${s.hypothesis?.hypothesis.slice(0, 140)}...`);
+      }
+    }
+    const withFlake = triaged.filter(t => t.flake !== null);
+    if (withFlake.length > 0) {
+      console.log('\n  flake detection results:');
+      for (const f of withFlake) {
+        console.log(
+          `    • ${f.testTitle} → ${f.flake?.classification} (${f.flake?.totalDurationMs}ms)`
+        );
+      }
+    }
+    const flakeFailed = triaged.filter(t => t.flakeError !== null);
+    if (flakeFailed.length > 0) {
+      console.log('\n  flake detection failures:');
+      for (const f of flakeFailed) {
+        console.log(`    • ${f.testTitle} → ${f.flakeError?.slice(0, 100)}`);
       }
     }
     console.log(`\n  full summary: ${summaryPath}`);
