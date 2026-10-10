@@ -37,18 +37,6 @@ const SUITE_PHASE = { label: 'suite-parallel-w2-r1', workers: 2, repeatEach: 1 }
 
 const MAX_SERIAL_ATTEMPTS = 2;
 
-function extractFailedTestNames(stdout: string): string[] {
-  const lines = stdout.split('\n');
-  const failed: string[] = [];
-  for (const line of lines) {
-    const match = line.match(/\[\d+\/\d+\]\s+\[[\w-]+\]\s+›\s+(.+)$/);
-    if (match && match[1] !== undefined) {
-      failed.push(match[1].trim());
-    }
-  }
-  return failed;
-}
-
 async function runPhase(
   targetPath: string,
   scope: 'file' | 'suite',
@@ -69,7 +57,7 @@ async function runPhase(
     repeatEach,
     passed: result.passed,
     durationMs: result.durationMs,
-    failedTestNames: result.passed ? [] : extractFailedTestNames(result.stdout),
+    failedTestNames: result.failedTestNames,
   };
 }
 
