@@ -37,7 +37,6 @@ test.describe('Seller API -- POST /api/v1/products/:id/certificate', () => {
   });
 
   test('seller cannot issue duplicate certificate for same product', async ({ authedSeller1 }) => {
-    test.fixme(true, 'Tracked in maison#4 — duplicate certificate');
     // First certificate
     await authedSeller1.post(`products/${productId}/certificate`);
     // Second certificate (should fail)
