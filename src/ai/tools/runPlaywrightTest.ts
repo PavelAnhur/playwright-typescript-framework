@@ -74,13 +74,32 @@ function extractErrorMessage(stdout: string): string | null {
   return block.trim();
 }
 
-export async function runPlaywrightTest(specFile: string): Promise<TestRunResult> {
+export interface RunOptions {
+  project?: string;
+  workers?: number;
+  grep?: string;
+}
+
+export async function runPlaywrightTest(
+  specFile: string,
+  options: RunOptions = {}
+): Promise<TestRunResult> {
+  const { project = 'review', workers, grep } = options;
+  const args = [
+    'playwright',
+    'test',
+    specFile,
+    `--project=${project}`,
+    '--reporter=line',
+  ];
+  if (workers !== undefined) {
+    args.push(`--workers=${workers}`);
+  }
+  if (grep !== undefined) {
+    args.push(`--grep=${grep}`);
+  }
   const start = Date.now();
-  const { code, stdout } = await runProcess(
-    'npx',
-    ['playwright', 'test', specFile, '--project=review', '--reporter=line'],
-    aiConfig.projectRoot
-  );
+  const { code, stdout } = await runProcess('npx', args, aiConfig.projectRoot);
   const durationMs = Date.now() - start;
   const passed = code === 0;
   return {
