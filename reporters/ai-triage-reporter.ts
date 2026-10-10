@@ -8,11 +8,11 @@ import type {
 } from '@playwright/test/reporter';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { analyzeFailure } from '../src/ai/agents/failureAnalyst';
-import { aiConfig } from '../src/ai/config';
-import type { FailureContext } from '../src/ai/prompts/failureAnalyst.ts';
-import type { FailureHypothesis } from '../src/ai/schemas.ts';
-import { detectFlake, type FlakeDetectionResult } from '../src/ai/tools/detectFlake';
+import { analyzeFailure } from '@ai/agents/failureAnalyst';
+import { aiConfig } from '@ai/config';
+import type { FailureContext } from '@ai/prompts/failureAnalyst';
+import type { FailureHypothesis } from '@ai/schemas';
+import { detectFlake, type FlakeDetectionResult } from '@ai/tools/detectFlake';
 
 interface TriagedFailure {
   testTitle: string;
