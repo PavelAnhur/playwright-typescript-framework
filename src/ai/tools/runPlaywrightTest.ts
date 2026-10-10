@@ -125,7 +125,7 @@ function collectFailures(
         .flatMap(t => t.results)
         .find(r => r.status === 'failed' || r.status === 'timedOut');
       if (failedResult) {
-        const location = spec.file && spec.line ? `${spec.file}:${spec.line}:3` : spec.file ?? '';
+        const location = spec.file && spec.line ? `${spec.file}:${spec.line}:3` : (spec.file ?? '');
         const describePath = currentPath ? `${currentPath} › ${spec.title}` : spec.title;
         out.push({
           title: location ? `${location} › ${describePath}` : describePath,
@@ -141,9 +141,10 @@ function collectFailures(
   }
 }
 
-function extractFailures(
-  report: PlaywrightJsonReport
-): { names: string[]; firstMessage: string | null } {
+function extractFailures(report: PlaywrightJsonReport): {
+  names: string[];
+  firstMessage: string | null;
+} {
   const failures: { title: string; message: string | null }[] = [];
   if (report.suites) {
     for (const suite of report.suites) {
@@ -160,13 +161,7 @@ export async function runPlaywrightTest(
   options: RunOptions = {}
 ): Promise<TestRunResult> {
   const { project = 'review', workers, repeatEach } = options;
-  const args = [
-    'playwright',
-    'test',
-    specFile,
-    `--project=${project}`,
-    '--reporter=json',
-  ];
+  const args = ['playwright', 'test', specFile, `--project=${project}`, '--reporter=json'];
   if (workers !== undefined) {
     args.push(`--workers=${workers}`);
   }

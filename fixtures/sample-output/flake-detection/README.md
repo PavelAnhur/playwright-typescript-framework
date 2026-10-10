@@ -10,12 +10,12 @@ This folder contains a frozen output of the `flake-detector` (`src/ai/tools/dete
 
 The detector ran five phases against `tests/specs/api/buyer/order-operations.spec.ts`:
 
-| Phase | Scope | Workers | Repeat-each | Result | Duration |
-|-------|-------|---------|-------------|--------|----------|
-| file-serial-w1-r1-attempt1 | file | 1 | 1 | PASSED | 2914ms |
-| file-serial-w1-r1-attempt2 | file | 1 | 1 | PASSED | 2865ms |
-| file-parallel-w2-r1 | file | 2 | 1 | PASSED | 2736ms |
-| file-parallel-w2-r3 | file | 2 | 3 | **FAILED** | 4125ms |
+| Phase                      | Scope | Workers | Repeat-each | Result     | Duration |
+| -------------------------- | ----- | ------- | ----------- | ---------- | -------- |
+| file-serial-w1-r1-attempt1 | file  | 1       | 1           | PASSED     | 2914ms   |
+| file-serial-w1-r1-attempt2 | file  | 1       | 1           | PASSED     | 2865ms   |
+| file-parallel-w2-r1        | file  | 2       | 1           | PASSED     | 2736ms   |
+| file-parallel-w2-r3        | file  | 2       | 3           | **FAILED** | 4125ms   |
 
 Final classification: `flake_parallel`.
 
@@ -41,6 +41,5 @@ In the framework we chose option 1 as an immediate fix. The underlying issue is 
 ## Reproducing
 
 `npm run ai:flake-detect -- tests/specs/api/buyer/order-operations.spec.ts`
-
 
 The flake is probabilistic — it fires roughly 1 in 40 runs at `--repeat-each=3`. If the detector reports `not_reproduced`, retry.
