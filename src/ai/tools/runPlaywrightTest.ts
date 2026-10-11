@@ -17,7 +17,9 @@ export interface RunOptions {
   project?: string;
   workers?: number;
   repeatEach?: number;
+  /** Timeout in milliseconds for each attempt. With retries > 0, total elapsed time can be up to timeoutMs × (retries + 1). */
   timeoutMs?: number;
+  retries?: number;
 }
 
 interface PlaywrightJsonTestResult {
@@ -171,7 +173,7 @@ export async function runPlaywrightTest(
   specFile: string,
   options: RunOptions = {}
 ): Promise<TestRunResult> {
-  const { project = 'review', workers, repeatEach, timeoutMs } = options;
+  const { project = 'review', workers, repeatEach, timeoutMs, retries = 0 } = options;
   const args = ['playwright', 'test', specFile, `--project=${project}`, '--reporter=json'];
   if (workers !== undefined) {
     args.push(`--workers=${workers}`);
@@ -179,33 +181,42 @@ export async function runPlaywrightTest(
   if (repeatEach !== undefined && repeatEach > 1) {
     args.push(`--repeat-each=${repeatEach}`);
   }
-  const start = Date.now();
-  const { code, stdout, timedOut } = await runProcess('npx', args, aiConfig.projectRoot, timeoutMs);
-  const durationMs = Date.now() - start;
-  const passed = code === 0;
-  if (passed) {
-    return {
-      passed: true,
-      exitCode: code,
-      errorMessage: null,
-      errorContext: null,
-      failedTestNames: [],
-      durationMs,
-      stdout,
-    };
+  let lastResult: TestRunResult | null = null;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const start = Date.now();
+    const { code, stdout, timedOut } = await runProcess('npx', args, aiConfig.projectRoot, timeoutMs);
+    const durationMs = Date.now() - start;
+    const passed = code === 0;
+    if (passed) {
+      return {
+        passed: true,
+        exitCode: code,
+        errorMessage: null,
+        errorContext: null,
+        failedTestNames: [],
+        durationMs,
+        stdout,
+      };
+    }
+    const report = parseJsonReport(stdout);
+    const failures = report ? extractFailures(report) : { names: [], firstMessage: null };
+    const isTestFailure = !timedOut && code === 1 && failures.names.length > 0;
+    const hasParsedEmptyReport = report !== null && failures.names.length === 0;
+    if (isTestFailure || hasParsedEmptyReport || attempt === retries) {
+      const errorMessage = timedOut
+        ? `Test timed out after ${durationMs}ms (limit: ${timeoutMs}ms)`
+        : failures.firstMessage;
+      lastResult = {
+        passed: false,
+        exitCode: code,
+        errorMessage,
+        errorContext: await findLatestErrorContext(),
+        failedTestNames: failures.names,
+        durationMs,
+        stdout,
+      };
+      break;
+    }
   }
-  const report = parseJsonReport(stdout);
-  const failures = report ? extractFailures(report) : { names: [], firstMessage: null };
-  const errorMessage = timedOut
-    ? `Test timed out after ${durationMs}ms (limit: ${timeoutMs}ms)`
-    : failures.firstMessage;
-  return {
-    passed: false,
-    exitCode: code,
-    errorMessage,
-    errorContext: await findLatestErrorContext(),
-    failedTestNames: failures.names,
-    durationMs,
-    stdout,
-  };
+  return lastResult!;
 }
