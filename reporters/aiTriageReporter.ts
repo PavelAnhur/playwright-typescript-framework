@@ -18,21 +18,23 @@ const ROOT_DIR = process.cwd();
 
 class AiTriageReporter implements Reporter {
   private failures: RawFailure[] = [];
+  private flakeGate: FlakeDecisionGate;
   private triageEngine: TriageEngine;
   private summaryEngine: SummaryEngine;
   private outputFormatter = new OutputFormatter();
 
   constructor(options?: { enableFlakeDetection?: boolean; maxFlakeDetections?: number }) {
-    const flakeGate = new FlakeDecisionGate(
+    this.flakeGate = new FlakeDecisionGate(
       options?.enableFlakeDetection ?? true,
       options?.maxFlakeDetections ?? 3
     );
-    this.triageEngine = new TriageEngine(flakeGate);
+    this.triageEngine = new TriageEngine(this.flakeGate);
     this.summaryEngine = new SummaryEngine(ROOT_DIR, OUTPUT_DIR, 0);
   }
 
   onBegin(_config: FullConfig, _suite: Suite): void {
     this.failures = [];
+    this.flakeGate.reset();
   }
 
   onTestEnd(test: TestCase, result: TestResult): void {
