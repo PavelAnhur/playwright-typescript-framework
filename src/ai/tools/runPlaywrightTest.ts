@@ -17,6 +17,7 @@ export interface RunOptions {
   project?: string;
   workers?: number;
   repeatEach?: number;
+  timeoutMs?: number;
 }
 
 interface PlaywrightJsonTestResult {
@@ -50,9 +51,11 @@ const ERROR_CONTEXT_MAX_AGE_MS = 30_000;
 function runProcess(
   command: string,
   args: string[],
-  cwd: string
-): Promise<{ code: number; stdout: string }> {
+  cwd: string,
+  timeout?: number
+): Promise<{ code: number; stdout: string; timedOut: boolean }> {
   return new Promise((resolve, reject) => {
+    let timedOut = false;
     const child = spawn(command, args, { cwd, shell: false });
     let stdout = '';
     child.stdout.on('data', chunk => {
@@ -62,8 +65,16 @@ function runProcess(
       stdout += chunk.toString();
     });
     child.on('error', reject);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    if (timeout !== undefined) {
+      timer = setTimeout(() => {
+        timedOut = true;
+        child.kill('SIGKILL');
+      }, timeout);
+    }
     child.on('close', code => {
-      resolve({ code: code ?? 1, stdout });
+      if (timer !== null) clearTimeout(timer);
+      resolve({ code: code ?? 1, stdout, timedOut });
     });
   });
 }
@@ -160,7 +171,7 @@ export async function runPlaywrightTest(
   specFile: string,
   options: RunOptions = {}
 ): Promise<TestRunResult> {
-  const { project = 'review', workers, repeatEach } = options;
+  const { project = 'review', workers, repeatEach, timeoutMs } = options;
   const args = ['playwright', 'test', specFile, `--project=${project}`, '--reporter=json'];
   if (workers !== undefined) {
     args.push(`--workers=${workers}`);
@@ -169,7 +180,7 @@ export async function runPlaywrightTest(
     args.push(`--repeat-each=${repeatEach}`);
   }
   const start = Date.now();
-  const { code, stdout } = await runProcess('npx', args, aiConfig.projectRoot);
+  const { code, stdout, timedOut } = await runProcess('npx', args, aiConfig.projectRoot, timeoutMs);
   const durationMs = Date.now() - start;
   const passed = code === 0;
   if (passed) {
@@ -185,10 +196,13 @@ export async function runPlaywrightTest(
   }
   const report = parseJsonReport(stdout);
   const failures = report ? extractFailures(report) : { names: [], firstMessage: null };
+  const errorMessage = timedOut
+    ? `Test timed out after ${durationMs}ms (limit: ${timeoutMs}ms)`
+    : failures.firstMessage;
   return {
     passed: false,
     exitCode: code,
-    errorMessage: failures.firstMessage,
+    errorMessage,
     errorContext: await findLatestErrorContext(),
     failedTestNames: failures.names,
     durationMs,
