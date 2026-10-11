@@ -37,17 +37,19 @@ An additional layer that applies LLM agents to the QA workflow around this frame
 | Agent                    | Input                              | Output                                      |
 | ------------------------ | ---------------------------------- | ------------------------------------------- |
 | **requirements-analyst** | Requirements document              | Risks + test cases (YAML)                   |
-| **failure-analyst**      | Test failure fixture               | Hypothesis + category + evidence (JSON)     |
+| **failure-analyst**      | One or more test failures          | Hypothesis + category + evidence (JSON)     |
 | **judge**                | Triage + original failure          | Score + verdict + hallucination list (JSON) |
 | **spec-generator**       | Test case from a requirements YAML | A passing Playwright test (`*.spec.ts`)     |
 
-The judge scores every triage against a rubric and flags any claim not grounded in the input. The spec-generator runs an iterative refine loop — it generates a test, runs it, reads the Playwright error context, and refines until the test passes. A final validator checks that every `data-testid` in the generated test exists in the app source, so a green test that references a non-existent element is flagged as a hollow pass rather than silently accepted.
+Three design decisions make this different from "call a model and trust the output":
 
-Run the full CLI pipeline with:
+**The judge is adversarial.** Every failure-analyst hypothesis is scored against a rubric by a second model call. Any claim not grounded in the input is flagged as a hallucination and listed explicitly.
 
-    npm run ai:demo
+**Triage is batched and self-corrected.** `failure-analyst` sends all failures in a single model call (~70–85% cost reduction vs. one-per-failure), then a flake detector re-runs the failing file in serial, parallel, and suite modes to check whether the analyst's classification was wrong. Low-confidence `product_bug` results are the most common correction target.
 
-Output lands in `generated-cases/`, raw call logs in `logs/ai/`. Every agent is also exposed through an MCP server — any MCP-compatible AI client (Klepa AI, Claude Desktop, Cursor) can call them directly. See [`src/ai/README.md`](src/ai/README.md) for design notes and a frozen sample run in `fixtures/sample-output/`.
+**CI integrates automatically.** A Playwright reporter hooks into the lifecycle and runs the batch triage after every test run. Flake detection is triggered only for promising candidates, with a per-run cap. Output: `test-results/ai-triage-summary.json` plus a terminal summary.
+
+Every agent is also exposed through an MCP server — any MCP-compatible AI client (Klepa AI, Claude Desktop, Cursor) can call them directly. Run the full CLI pipeline with `npm run ai:demo`. Design notes in [`src/ai/README.md`](src/ai/README.md) and frozen sample runs in `fixtures/sample-output/`.
 
 ## 📁 Project Structure
 

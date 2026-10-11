@@ -36,6 +36,12 @@ Test layers: Vitest (unit), Playwright API, Playwright UI.
 - Commit `.env.local` or any secrets
 - Refactor code unrelated to the current task
 
+## Tool Usage Policy
+
+- For AI-QA tasks (requirements analysis, failure triage, test generation), always use the `ai-qa-harness` MCP tools. Do not attempt to replicate their logic manually.
+- For browser automation tasks, use the `playwright` MCP tools.
+- Never call the AI-QA harness via bash (`npm run ai:triage`) when the MCP tools are available — use the MCP tools directly.
+
 ## Code Style
 
 - ES modules (`import`/`export`), no CommonJS
