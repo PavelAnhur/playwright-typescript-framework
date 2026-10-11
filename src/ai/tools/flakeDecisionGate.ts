@@ -9,6 +9,10 @@ export class FlakeDecisionGate {
     private readonly maxRuns: number
   ) {}
 
+  reset(): void {
+    this.runs = 0;
+  }
+
   async maybeDetect(
     test: TestCase,
     hypothesis: FailureHypothesis

@@ -1,16 +1,38 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
+  "agent": {
+    "build": {
+      "steps": 15,
+      "temperature": 0.1,
+      "model": "opencode-zen-free-provider/qwen-flash-latest"
+    },
+    "review": {
+      "description": "Reviews code changes for logic bugs, error handling gaps, and edge cases",
+      "mode": "all",
+      "model": "aiai-deepseek/deepseek-v3.2",
+      "temperature": 0.2,
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow"
+      },
+      "prompt": "You are a senior code reviewer. Analyze the provided diff or file for:\n- Logic bugs and edge cases\n- Error handling gaps (unhandled rejections, missing cleanup)\n- Race conditions and timing issues\n- Incorrect assumptions in process handling\n\nReport findings with file, line, severity (critical/warning/info), and rationale. Do not modify any files."
+    }
+  },
   "mcp": {
     "playwright": {
       "type": "local",
       "command": ["npx", "-y", "@playwright/mcp@latest"],
-      "enabled": true,
+      "enabled": true
     },
     "ai-qa-harness": {
       "type": "local",
       "command": ["/home/pavel/.nvm/versions/node/v24.19.0/bin/npx", "tsx", "src/ai/mcp-server.ts"],
       "enabled": true,
-      "timeout": 120000,
-    },
-  },
+      "timeout": 120000
+    }
+  }
 }

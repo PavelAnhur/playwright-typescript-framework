@@ -9,3 +9,4 @@ allure-report/
 .venv/
 .env*
 maison/
+kilo.jsonc
