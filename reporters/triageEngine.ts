@@ -70,7 +70,9 @@ export class TriageEngine {
       try {
         const { hypothesis } = await analyzeFailure(ctx);
         const flake = await this.flakeGate.maybeDetect(failure.test, hypothesis);
-        console.log(`  ✅ ${failure.test.title} → ${hypothesis.category} (${hypothesis.confidence})`);
+        console.log(
+          `  ✅ ${failure.test.title} → ${hypothesis.category} (${hypothesis.confidence})`
+        );
         triaged.push({
           testTitle: failure.test.title,
           testFile: failure.test.location.file,
@@ -82,7 +84,9 @@ export class TriageEngine {
         });
       } catch (singleError) {
         const singleMsg = singleError instanceof Error ? singleError.message : String(singleError);
-        console.log(`  ⚠️  ${failure.test.title} → single triage failed: ${singleMsg.slice(0, 80)}`);
+        console.log(
+          `  ⚠️  ${failure.test.title} → single triage failed: ${singleMsg.slice(0, 80)}`
+        );
         triaged.push(this.createFallbackEntry(failure, singleMsg));
       }
     }

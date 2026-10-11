@@ -184,7 +184,12 @@ export async function runPlaywrightTest(
   let lastResult: TestRunResult | null = null;
   for (let attempt = 0; attempt <= retries; attempt++) {
     const start = Date.now();
-    const { code, stdout, timedOut } = await runProcess('npx', args, aiConfig.projectRoot, timeoutMs);
+    const { code, stdout, timedOut } = await runProcess(
+      'npx',
+      args,
+      aiConfig.projectRoot,
+      timeoutMs
+    );
     const durationMs = Date.now() - start;
     const passed = code === 0;
     if (passed) {
