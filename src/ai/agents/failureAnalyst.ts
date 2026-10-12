@@ -82,7 +82,8 @@ export async function analyzeFailure(
     ],
     metadata: { ...metadata, testTitle: ctx.testTitle },
   });
-  const validated = validateSingleHypothesis(result.content, result.content);
+  const parsed = parseJsonResult(result.content);
+  const validated = validateSingleHypothesis(parsed, result.content);
   const outputName = typeof metadata['outputName'] === 'string' ? metadata['outputName'] : null;
   let outputPath: string | null = null;
   if (outputName !== null) {
