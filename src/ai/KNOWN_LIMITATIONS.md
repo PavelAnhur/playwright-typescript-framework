@@ -76,6 +76,14 @@ Missing capabilities that a production harness would have.
 - **Fix:** extend `SpecRefinerInput` with the original case fields (`caseTitle`, `steps`, `expected`) and pass them through. Update `refineSpec.ts` to thread them from the case into the refiner. The prompt gains a section `--- ORIGINAL CASE ---` and a rule: "the fixed test must still verify what the case describes."
 - **Priority:** medium
 
+### No retry on schema validation failure
+
+- **Where:** `src/ai/agents/requirementsAnalyst.ts` (and the other agents that call `callModel` directly)
+- **What:** if the model returns valid JSON that fails zod validation, the agent throws immediately. The retry loop in `callModel` only covers HTTP-level failures (network, 5xx, timeouts). A model that returns `{"risks": "not an array"}` gets exactly one shot — no re-prompt with feedback about what was wrong.
+- **Why:** validation was placed in the agent, not in `callModel`. This keeps the client simple (it doesn't know about schemas) but means the model never sees its own validation errors.
+- **Fix:** add a retry-with-feedback wrapper. On `safeParse` failure, append the validation error to the conversation as a new user message ("your previous output failed validation: <error>. Return corrected JSON.") and call again, up to 1–2 extra attempts. Cap the cost so a stubborn model does not loop indefinitely.
+- **Priority:** medium
+
 ## Inconsistencies
 
 Places where similar tasks are handled differently.
@@ -118,6 +126,14 @@ Places where similar tasks are handled differently.
 - **What:** the two builder functions use different patterns. `buildSpecGeneratorUser` constructs an array literal with spread syntax (`.map(...)` unpacked with `...`). `buildSpecRefinerUser` uses `parts.push()` calls. Both produce correct output, but the file has two idioms for the same job.
 - **Why:** they were written at different times, and neither pattern was declared a standard.
 - **Fix:** pick one style and apply it to both. The `parts.push()` form handles conditional sections more cleanly; the array literal form is more compact when all sections are unconditional. Document the choice in the file's comment header, or in AGENTS.md.
+- **Priority:** low
+
+### JSDoc comment only on one function in requirementsAnalyst.ts
+
+- **Where:** `src/ai/agents/requirementsAnalyst.ts`
+- **What:** `stripFences` has a JSDoc block explaining its purpose. `toYaml`, `clean`, and `analyzeRequirements` — the other three functions in the same file — have no comments at all. A reader cannot tell whether the missing comments were deliberate or forgotten.
+- **Why:** `stripFences` was written during a debugging session where the reason for its existence needed explaining. The others were written earlier, when the codebase was smaller and the conventions less defined.
+- **Fix:** either remove the JSDoc from `stripFences` (consistency with the rest of the project — most files are comment-light), or add short one-line comments to the other three. The project style leans toward minimal comments, so removal is probably the right call. Check the other agent files for the same pattern before deciding.
 - **Priority:** low
 
 ## Technical Debt
