@@ -68,6 +68,22 @@ Missing capabilities that a production harness would have.
 - **Fix:** either convert to a git submodule (`git submodule add https://github.com/PavelAnhur/maison.git maison`), or add a script that clones the current main branch into `maison/` before the test run. Submodule is cleaner for local development; the script is simpler for CI.
 - **Priority:** medium
 
+### specRefiner does not receive the original case description
+
+- **Where:** `src/ai/prompts/specGenerator.ts`, `SpecRefinerInput`
+- **What:** the refiner prompt receives the current test code, the error, the error context, and the project context — but not the original test case (title, steps, expected result). To fix the test, the model has to infer the intent from the code alone. If the code has drifted from the case (e.g. an earlier refinement weakened an assertion), the refiner cannot detect the drift.
+- **Why:** the refiner was designed as a minimal input — everything it needs to fix the current failure. The original case was considered out of scope.
+- **Fix:** extend `SpecRefinerInput` with the original case fields (`caseTitle`, `steps`, `expected`) and pass them through. Update `refineSpec.ts` to thread them from the case into the refiner. The prompt gains a section `--- ORIGINAL CASE ---` and a rule: "the fixed test must still verify what the case describes."
+- **Priority:** medium
+
+### No retry on schema validation failure
+
+- **Where:** `src/ai/agents/requirementsAnalyst.ts` (and the other agents that call `callModel` directly)
+- **What:** if the model returns valid JSON that fails zod validation, the agent throws immediately. The retry loop in `callModel` only covers HTTP-level failures (network, 5xx, timeouts). A model that returns `{"risks": "not an array"}` gets exactly one shot — no re-prompt with feedback about what was wrong.
+- **Why:** validation was placed in the agent, not in `callModel`. This keeps the client simple (it doesn't know about schemas) but means the model never sees its own validation errors.
+- **Fix:** add a retry-with-feedback wrapper. On `safeParse` failure, append the validation error to the conversation as a new user message ("your previous output failed validation: <error>. Return corrected JSON.") and call again, up to 1–2 extra attempts. Cap the cost so a stubborn model does not loop indefinitely.
+- **Priority:** medium
+
 ## Inconsistencies
 
 Places where similar tasks are handled differently.
@@ -102,6 +118,22 @@ Places where similar tasks are handled differently.
 - **What:** the gate tracks `runs` internally and is reset in `onBegin`. The reporter does not track its own count. This is not a bug, but the responsibility for "how many flake detections have we run this session?" is spread across two layers.
 - **Why:** the gate was extracted from the reporter during the refactor. The counter moved with it, but reset stayed on the reporter.
 - **Fix:** make the gate fully self-contained — including the reset. The reporter would just call `flakeGate.onBegin()` instead of `flakeGate.reset()`.
+- **Priority:** low
+
+### Two builder styles in specGenerator.ts
+
+- **Where:** `src/ai/prompts/specGenerator.ts`, `buildSpecGeneratorUser` vs. `buildSpecRefinerUser`
+- **What:** the two builder functions use different patterns. `buildSpecGeneratorUser` constructs an array literal with spread syntax (`.map(...)` unpacked with `...`). `buildSpecRefinerUser` uses `parts.push()` calls. Both produce correct output, but the file has two idioms for the same job.
+- **Why:** they were written at different times, and neither pattern was declared a standard.
+- **Fix:** pick one style and apply it to both. The `parts.push()` form handles conditional sections more cleanly; the array literal form is more compact when all sections are unconditional. Document the choice in the file's comment header, or in AGENTS.md.
+- **Priority:** low
+
+### JSDoc comment only on one function in requirementsAnalyst.ts
+
+- **Where:** `src/ai/agents/requirementsAnalyst.ts`
+- **What:** `stripFences` has a JSDoc block explaining its purpose. `toYaml`, `clean`, and `analyzeRequirements` — the other three functions in the same file — have no comments at all. A reader cannot tell whether the missing comments were deliberate or forgotten.
+- **Why:** `stripFences` was written during a debugging session where the reason for its existence needed explaining. The others were written earlier, when the codebase was smaller and the conventions less defined.
+- **Fix:** either remove the JSDoc from `stripFences` (consistency with the rest of the project — most files are comment-light), or add short one-line comments to the other three. The project style leans toward minimal comments, so removal is probably the right call. Check the other agent files for the same pattern before deciding.
 - **Priority:** low
 
 ## Technical Debt
@@ -154,6 +186,14 @@ Working code that should be rewritten or reconfigured.
 - **What:** configures only the Playwright MCP server for VS Code Copilot, not `ai-qa-harness`. Not currently used — the active client config is `kilo.jsonc`. Its presence suggests harness support in VS Code that does not exist.
 - **Why:** created during early exploration before Klepa AI became the primary client.
 - **Fix:** delete the file, or update to mirror `kilo.jsonc` if VS Code Copilot support is wanted.
+- **Priority:** low
+
+### Triple-backslash escaping in prompt templates
+
+- **Where:** `src/ai/prompts/specGenerator.ts` (and to a lesser degree the other prompt files)
+- **What:** backticks inside the system prompt template literals are escaped as `\\\`` (three backslashes) rather than the single `\`` that a template literal requires. The output renders correctly to the model, but the source is noisy and hard to scan. This happened because the prompt text was pasted from another context where escaping was already applied, and the extra layer was never stripped.
+- **Why:** the prompt was assembled outside the codebase and pasted in as a string. The escaping was preserved.
+- **Fix:** replace every `\\\`` with `\`` in the prompt template literals. Run typecheck and format after, since template literals are sensitive. Verify by logging the final prompt once: the rendered text should be identical.
 - **Priority:** low
 
 ## Open Questions
