@@ -1,0 +1,205 @@
+# Known Limitations
+
+An honest inventory of what this harness does not do, does inconsistently, or does in a way that will need rework. Written for three audiences:
+
+- **Future me** — when I return to the code after months away, I want to know where the rough edges are before I trip over them.
+- **Reviewers** — what a reader should know about this project beyond what the README advertises.
+- **Interviews** — the honest answer to "what would you improve" starts here, not in a marketing pitch.
+
+Each entry follows the same shape: where it is, what the issue is, why it exists, how to fix it, and how urgent it is.
+
+## Gaps
+
+Missing capabilities that a production harness would have.
+
+### No fetch timeout in dshClient
+
+- **Where:** `src/ai/dshClient.ts`, `callOnce`
+- **What:** `fetch` has no `AbortSignal.timeout()`. If the provider accepts the connection and then hangs, the script hangs until the CI job times out.
+- **Why:** the local provider has been reliable enough at demo scale that this has not triggered.
+- **Fix:** add `signal: AbortSignal.timeout(60_000)` to the fetch options in `callOnce`. Consider making it configurable via `aiConfig`.
+- **Priority:** high
+
+### No quality metrics aggregation
+
+- **Where:** not implemented
+- **What:** the judge produces scores per triage, but nothing aggregates them. There is no answer to "what is our triage accuracy over the last month?" or "has the prompt change improved or degraded results?"
+- **Why:** the harness was built bottom-up. Metrics were deferred until the agents stabilized.
+- **Fix:** parse `logs/ai/*.jsonl` into a monthly report. Track: total triages, category distribution, average judge score, count of hallucination flags. A simple CLI + HTML dashboard.
+- **Priority:** medium
+
+### No few-shot examples
+
+- **Where:** all prompts in `src/ai/prompts/`
+- **What:** every prompt is zero-shot — instructions only, no examples of correct outputs.
+- **Why:** starting from zero-shot keeps prompts small and cheap, and the schemas enforce the output shape anyway.
+- **Fix:** assemble 5–10 hand-labeled triages and add them as `user`/`assistant` message pairs before the real input. Measure accuracy delta before and after.
+- **Priority:** medium
+
+### No human feedback loop
+
+- **Where:** not implemented
+- **What:** when the analyst classifies a failure incorrectly, there is no mechanism to record "this was wrong, it should have been X." Feedback does not accumulate.
+- **Why:** no UI for it, and the demo scale does not justify the effort yet.
+- **Fix:** a CLI command `npm run ai:feedback -- <triage-id> <correct-category>`. Store under `fixtures/triage-feedback/`. Compare against agent output in the metrics report.
+- **Priority:** medium
+
+### No cost tracking across runs
+
+- **Where:** token counts are logged per call, but not aggregated
+- **What:** no running total of how much a project has spent on model calls over time.
+- **Why:** the cost at demo scale is trivial (fractions of a BYN per run).
+- **Fix:** extend the metrics aggregator to sum `totalTokens` from the logs, multiply by the current price per million, and report weekly totals.
+- **Priority:** low
+
+### No tests for the harness itself
+
+- **Where:** not implemented
+- **What:** the agents, tools, and reporter engines are not covered by automated tests. `detectFlake`, `flakeDecisionGate`, `runPlaywrightTest`, and the reporter engines have no unit or integration tests in the repository. The CLI scripts have been exercised by hand, and frozen artifacts exist in `fixtures/sample-output/`, but there is no regression suite that runs on commit.
+- **Why:** the harness grew bottom-up during demo preparation. Each piece was validated interactively, and the frozen artifacts served as informal baselines. Formal tests were deferred and never added.
+- **Fix:** start with the pure functions — `detectFlake` (mock `runPlaywrightTest` and assert classification logic), `flakeDecisionGate.shouldConsider` (table-driven tests over category/confidence combos), `runPlaywrightTest` JSON parsing (feed fixed JSON, assert extracted fields). Then add a snapshot test for the reporter summary output. Prompt regression testing is a separate, larger effort — see the "No prompt A/B testing" entry.
+- **Priority:** high
+
+### maison/ is a vendored copy, rebuilt manually
+
+- **Where:** `maison/` (at the repository root of the framework)
+- **What:** the AUT lives in a separate repository (`github.com/PavelAnhur/maison`). The copy under `maison/` in the framework is vendored — it is not a git submodule, not a symlink, and not tied to a specific upstream commit. When the upstream Maison repository changes, the vendored copy has to be refreshed by hand. If it is not refreshed, the framework tests a stale version of the AUT.
+- **Why:** the initial setup copied the AUT once to have a self-contained working tree. There was no requirement at the time to track upstream changes automatically.
+- **Fix:** either convert to a git submodule (`git submodule add https://github.com/PavelAnhur/maison.git maison`), or add a script that clones the current main branch into `maison/` before the test run. Submodule is cleaner for local development; the script is simpler for CI.
+- **Priority:** medium
+
+## Inconsistencies
+
+Places where similar tasks are handled differently.
+
+### specGenerator validates by hand, other agents use zod
+
+- **Where:** `src/ai/agents/specGenerator.ts` vs. `src/ai/agents/failureAnalyst.ts`, `judge.ts`, `requirementsAnalyst.ts`
+- **What:** the first three agents parse the model output with `SomeSchema.safeParse()`. `specGenerator` parses JSON and does manual `typeof x === 'string'` checks.
+- **Why:** `specGenerator` returns `{ fileName, code }` — a two-field object — and it seemed simpler at the time to check inline.
+- **Fix:** create `SpecGeneratorOutputSchema` and `SpecRefinerOutputSchema` in `schemas.ts`. Refactor `specGenerator.ts` and `refineSpec.ts` to use them.
+- **Priority:** medium
+
+### Batch result has no schema
+
+- **Where:** `src/ai/agents/failureAnalyst.ts`, `analyzeFailures`
+- **What:** the function returns `FailureHypothesis[]` but validates each entry individually inside a loop, not with a batch schema. There is no single schema expressing "an array of hypotheses."
+- **Why:** zod's `z.array(FailureHypothesisSchema)` was not introduced because the batch prompt returns the whole structure in one field, and it was easier to iterate.
+- **Fix:** define `FailureHypothesisListSchema = z.array(FailureHypothesisSchema).min(1)` and validate the parsed batch response against it once.
+- **Priority:** low
+
+### Failure path logs durationMs: 0
+
+- **Where:** `src/ai/dshClient.ts`, `callModel` error branch
+- **What:** on success, `durationMs` reflects real elapsed time. On failure, it is hardcoded to `0`. This makes the log less useful for diagnosing slow failures (timeouts vs. immediate 401s look identical).
+- **Why:** `callOnce` throws on failure, so there is no result object to read duration from.
+- **Fix:** catch inside `callOnce`, return duration alongside the error, or use a `finally` block that records elapsed time.
+- **Priority:** low
+
+### Two different flake-detection counters
+
+- **Where:** `src/ai/tools/flakeDecisionGate.ts` and `reporters/aiTriageReporter.ts`
+- **What:** the gate tracks `runs` internally and is reset in `onBegin`. The reporter does not track its own count. This is not a bug, but the responsibility for "how many flake detections have we run this session?" is spread across two layers.
+- **Why:** the gate was extracted from the reporter during the refactor. The counter moved with it, but reset stayed on the reporter.
+- **Fix:** make the gate fully self-contained — including the reset. The reporter would just call `flakeGate.onBegin()` instead of `flakeGate.reset()`.
+- **Priority:** low
+
+## Technical Debt
+
+Working code that should be rewritten or reconfigured.
+
+### projectRoot = process.cwd() in config
+
+- **Where:** `src/ai/config.ts`
+- **What:** the project root is assumed to be the current working directory. If the process is launched from a different cwd — for example, an MCP client that spawns the server from its own directory — all paths break.
+- **Why:** the original design assumed CLI execution from the repo root.
+- **Fix:** derive `projectRoot` from `import.meta.url` — two levels up from `src/ai/config.ts`. This makes the module location-independent.
+- **Priority:** high
+
+### MAX_TRIAGE is hardcoded
+
+- **Where:** `reporters/triageEngine.ts`
+- **What:** the cap on how many failures are triaged per run is a module-level `const MAX_TRIAGE = 10`. It cannot be changed without editing the file.
+- **Why:** the value was set during initial design and never revisited.
+- **Fix:** move to `ReporterOptions` in `aiTriageReporter.ts`. Default 10, configurable in `playwright.config.ts`.
+- **Priority:** medium
+
+### No circuit breaker on the provider
+
+- **Where:** `src/ai/dshClient.ts`
+- **What:** if the provider is down for a long stretch, every call in a run makes 3 attempts with backoff. That is bounded but wasteful when the provider is reliably failing.
+- **Why:** at demo scale, provider outages are rare and short.
+- **Fix:** track recent failure rate in memory. After N consecutive failures, skip retries for the remainder of the process.
+- **Priority:** low
+
+### Two log formats with different lifecycles
+
+- **Where:** `src/ai/logger.ts` (`run-<timestamp>.jsonl`) and `src/ai/tools/refineLogger.ts` (`refine-<caseId>-<timestamp>.jsonl`)
+- **What:** two separate logging modules, similar shape, different naming. Not a bug, but the log directory has mixed purposes.
+- **Why:** the refine logger was added later to support per-iteration refinement history.
+- **Fix:** either merge into one logger with a "kind" field, or document the split in `src/ai/README.md`.
+- **Priority:** low
+
+### No npm script for the flake detector in CI mode
+
+- **Where:** `package.json`
+- **What:** `npm run ai:flake-detect` runs the CLI. There is no script that runs it with `--fail-on-flake` for use as a CI gate.
+- **Why:** the flag was added recently. No CI use case yet.
+- **Fix:** add `ai:flake-gate` script with the flag. Document the use case in the README.
+- **Priority:** low
+
+### .vscode/mcp.json is stale
+
+- **Where:** `.vscode/mcp.json`
+- **What:** configures only the Playwright MCP server for VS Code Copilot, not `ai-qa-harness`. Not currently used — the active client config is `kilo.jsonc`. Its presence suggests harness support in VS Code that does not exist.
+- **Why:** created during early exploration before Klepa AI became the primary client.
+- **Fix:** delete the file, or update to mirror `kilo.jsonc` if VS Code Copilot support is wanted.
+- **Priority:** low
+
+## Open Questions
+
+Decisions I have not made yet.
+
+### Should detectFlake be exposed as an MCP tool?
+
+- **Context:** flake detection is available via CLI (`npm run ai:flake-detect`) and via the reporter (`FlakeDecisionGate`). It is not exposed as an MCP tool.
+- **Tension:** exposing it as an MCP tool lets an AI client call it directly, but flake detection is slow (12–60 seconds depending on the phase that fails). A long-running tool call may time out on the client side.
+- **Decision needed:** whether the value of manual triggering from an AI client outweighs the risk of timeout.
+
+### Should there be a judge for the judge?
+
+- **Context:** the judge scores the analyst's triages. If the judge itself is wrong (as happened in the session where it flagged `ctx` as dead code), nothing catches that.
+- **Tension:** adding a second-level judge doubles cost and adds complexity. The human-in-the-loop already covers this today.
+- **Decision needed:** whether to formalize a "human review required" flag when the judge's confidence is low, or leave the review entirely manual.
+
+### Should batch mode fall back to single-triaged failure when the batch count mismatches?
+
+- **Context:** `analyzeFailures` returns an array. If the model returns fewer hypotheses than there were failures, the loop in `triageEngine.ts` silently skips the extras.
+- **Tension:** skipping silently is the current behavior. Alternatively, the mismatch could trigger the fallback-to-single path per unmatched failure.
+- **Decision needed:** whether a count mismatch is a rare edge case (skip) or a symptom of a batch prompt problem (fall back).
+
+### Should prompts live in code or in Markdown files?
+
+- **Context:** prompts are TypeScript constants in `src/ai/prompts/`. They could also live in `.md` files loaded at runtime.
+- **Tension:** TypeScript keeps everything in one place, type-checked. Markdown is easier to edit and to version-control diff by diff, and non-developers (a QA lead) could review them.
+- **Decision needed:** whether prompt editing is ever a non-developer activity in this project.
+
+## Not Planned
+
+Deliberate exclusions. Not gaps — choices.
+
+### No RAG / vector store
+
+The harness operates on single documents (a spec, a failure, a test case). Retrieval over a large corpus is a different problem, solved by a different tool.
+
+### No fine-tuning
+
+The schemas, prompts, and judge give sufficient control at this scale. Fine-tuning would lock us to a specific model and contradict the provider-agnostic design.
+
+### No autonomous UI exploration
+
+The agents analyze text and code. They do not drive a browser on their own to discover scenarios. Adding that would trade stability for a demo that only works half the time.
+
+### No custom agent framework
+
+No LangChain, no CrewAI, no AutoGen. Four functions, one HTTP client, three zod schemas. The total surface is small enough to reason about without abstractions.

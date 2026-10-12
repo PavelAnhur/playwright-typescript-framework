@@ -169,3 +169,5 @@ fixtures/sample-output/ contains frozen examples:
 - **No autonomous browser exploration.** The refine loop runs a test and reacts to its output, but the agents do not explore the UI on their own to discover new scenarios. Adding that would trade stability for a demo that only works half the time.
 - **No RAG / vector store.** If a task needs retrieval over a large corpus, that's a separate concern — this layer stays small on purpose.
 - **No fine-tuning, no agent framework.** Prompts and zod schemas are enough at this scale.
+
+For a fuller inventory — including gaps, inconsistencies, technical debt, and open questions that this README does not list — see `KNOWN_LIMITATIONS.md` in this folder.
