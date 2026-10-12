@@ -37,11 +37,17 @@ async function loadTriage(
   return { hypothesis: parsed, errorContext: parsed.sourceContext ?? parsed.sourceError ?? '' };
 }
 
-export async function judgeTriage(
+interface JudgeInputs {
+  analysis: FailureHypothesis;
+  errorContext: string;
+  testSource: string | undefined;
+}
+
+async function loadJudgeInputs(
   triageFile: string,
   errorContextFile: string | null,
-  testSourceFile: string | null = null
-): Promise<{ verdict: JudgeVerdict; outputPath: string }> {
+  testSourceFile: string | null
+): Promise<JudgeInputs> {
   const { hypothesis: rawHypothesis, errorContext: summaryError } = await loadTriage(triageFile);
   const validated = FailureHypothesisSchema.safeParse(rawHypothesis);
   if (!validated.success) {
@@ -70,13 +76,17 @@ export async function judgeTriage(
       testSource = undefined;
     }
   }
+  return { analysis: validated.data, errorContext, testSource };
+}
+
+async function requestVerdict(inputs: JudgeInputs, triageFile: string): Promise<JudgeVerdict> {
   const userPrompt = buildJudgeUser({
-    errorContext,
-    ...(testSource !== undefined && { testSource }),
-    hypothesis: validated.data.hypothesis,
-    category: validated.data.category,
-    confidence: validated.data.confidence,
-    evidence: validated.data.evidence,
+    errorContext: inputs.errorContext,
+    ...(inputs.testSource !== undefined && { testSource: inputs.testSource }),
+    hypothesis: inputs.analysis.hypothesis,
+    category: inputs.analysis.category,
+    confidence: inputs.analysis.confidence,
+    evidence: inputs.analysis.evidence,
   });
   const result = await callModel({
     agent: AGENT,
@@ -102,10 +112,25 @@ export async function judgeTriage(
       `Judge output failed schema validation: ${verdict.error.message}\n\nRaw:\n${result.content.slice(0, 500)}`
     );
   }
+  return verdict.data;
+}
+
+async function writeVerdict(triageFile: string, verdict: JudgeVerdict): Promise<string> {
   const outputName = basename(triageFile).replace(/\.(triage|summary)\.json$/, '.judge.json');
   const outputPath = join(aiConfig.generatedCasesDir, outputName);
-  await writeFile(outputPath, JSON.stringify(verdict.data, null, 2), 'utf8');
-  return { verdict: verdict.data, outputPath };
+  await writeFile(outputPath, JSON.stringify(verdict, null, 2), 'utf8');
+  return outputPath;
+}
+
+export async function judgeTriage(
+  triageFile: string,
+  errorContextFile: string | null,
+  testSourceFile: string | null = null
+): Promise<{ verdict: JudgeVerdict; outputPath: string }> {
+  const inputs = await loadJudgeInputs(triageFile, errorContextFile, testSourceFile);
+  const verdict = await requestVerdict(inputs, triageFile);
+  const outputPath = await writeVerdict(triageFile, verdict);
+  return { verdict, outputPath };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
