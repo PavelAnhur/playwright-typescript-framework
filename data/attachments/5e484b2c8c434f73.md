@@ -1,0 +1,140 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: api/buyer/cart-operations.spec.ts >> Buyer API -- Cart Operations >> should get empty cart for new user
+- Location: tests/specs/api/buyer/cart-operations.spec.ts:15:3
+
+# Error details
+
+```
+Error: expect(received).toHaveLength(expected)
+
+Expected length: 0
+Received length: 1
+Received array:  [{"image": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22800%22%20height%3D%22800%22%20viewBox%3D%220%200%20800%20800%22%3E%0A%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23dedad4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230c0b0a%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22800%22%20height%3D%22800%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22400%22%20cy%3D%22320%22%20r%3D%22150%22%20fill%3D%22none%22%20stroke%3D%22%23c8a96a%22%20stroke-width%3D%221.5%22%20opacity%3D%220.5%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22400%22%20y%3D%22360%22%20font-family%3D%22Georgia%2C%20serif%22%20font-size%3D%22160%22%20fill%3D%22%23c8a96a%22%0A%20%20%20%20%20%20text-anchor%3D%22middle%22%20opacity%3D%220.9%22%3EPC%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22400%22%20y%3D%22620%22%20font-family%3D%22Georgia%2C%20serif%22%20font-size%3D%2234%22%20fill%3D%22%23e8e2d6%22%0A%20%20%20%20%20%20text-anchor%3D%22middle%22%20letter-spacing%3D%226%22%20opacity%3D%220.85%22%3EMAISON%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E", "itemId": 1, "lineCents": 720000, "name": "Pearl Cuff Bracelet", "productId": 22, "quantity": 3, "stock": 5, "unitCents": 240000}]
+```
+
+# Test source
+
+```ts
+  1   | import { expect, test } from '@fixtures';
+  2   | import type { Cart } from '@src/types/cart';
+  3   | import type { Product } from '@src/types/product';
+  4   | 
+  5   | test.describe('Buyer API -- Cart Operations', () => {
+  6   |   let testProduct: Product;
+  7   | 
+  8   |   test.beforeEach(async ({ api }) => {
+  9   |     await api.post('_reset');
+  10  |     const response = await api.get('products');
+  11  |     const data = await response.json();
+  12  |     testProduct = data.products[0];
+  13  |   });
+  14  | 
+  15  |   test('should get empty cart for new user', async ({ authedBuyer }) => {
+  16  |     const response = await authedBuyer.get('cart');
+  17  |     expect(response.ok()).toBeTruthy();
+  18  |     const responseData = await response.json();
+  19  |     const cart: Cart = responseData.cart;
+> 20  |     expect(cart.items).toHaveLength(0);
+      |                        ^ Error: expect(received).toHaveLength(expected)
+  21  |     expect(cart.subtotalCents).toBe(0);
+  22  |     expect(cart.count).toBe(0);
+  23  |   });
+  24  | 
+  25  |   test('should remove item from cart', async ({ authedBuyer }) => {
+  26  |     const addResponse = await authedBuyer.post('cart/items', {
+  27  |       data: { productId: testProduct.id, quantity: 3 },
+  28  |     });
+  29  |     expect(addResponse.ok()).toBeTruthy();
+  30  |     const cartResponse = await authedBuyer.get('cart');
+  31  |     expect(cartResponse.ok()).toBeTruthy();
+  32  |     const cart: Cart = await cartResponse.json().then(responseData => responseData.cart);
+  33  |     expect(cart.items).toHaveLength(1);
+  34  |     expect(cart.items[0]).toBeDefined();
+  35  |     const itemId = cart.items[0]?.itemId;
+  36  |     expect(itemId).toBeDefined();
+  37  |     const response = await authedBuyer.delete(`cart/items/${itemId}`);
+  38  |     expect(response.ok()).toBeTruthy();
+  39  |     const updatedCart: Cart = await response.json().then(resData => resData.cart);
+  40  |     expect(updatedCart.items).toHaveLength(0);
+  41  |     expect(updatedCart.subtotalCents).toBe(0);
+  42  |   });
+  43  | 
+  44  |   test('should add item to cart', async ({ authedBuyer }) => {
+  45  |     const response = await authedBuyer.post('cart/items', {
+  46  |       data: {
+  47  |         productId: testProduct.id,
+  48  |         quantity: 2,
+  49  |       },
+  50  |     });
+  51  |     expect(response.ok()).toBeTruthy();
+  52  |     const responseData = await response.json();
+  53  |     const cart: Cart = responseData.cart;
+  54  |     expect(cart.items).toHaveLength(1);
+  55  |     expect(cart.items[0]?.productId).toBe(testProduct.id);
+  56  |     expect(cart.items[0]?.quantity).toBe(2);
+  57  |     expect(cart.items[0]?.unitCents).toBe(testProduct.effectiveCents || testProduct.priceCents);
+  58  |     expect(cart.subtotalCents).toBe(testProduct.priceCents! * 2);
+  59  |   });
+  60  | 
+  61  |   test('should update item quantity in cart', async ({ authedBuyer }) => {
+  62  |     const response = await authedBuyer.post('cart/items', {
+  63  |       data: { productId: testProduct.id, quantity: 5 },
+  64  |     });
+  65  |     expect(response.ok()).toBeTruthy();
+  66  |     const responseData = await response.json();
+  67  |     const cart: Cart = responseData.cart;
+  68  |     expect(cart.items[0]?.quantity).toBe(5);
+  69  |     expect(cart.subtotalCents).toBe(testProduct.priceCents! * 5);
+  70  |   });
+  71  | 
+  72  |   test('should clear entire cart', async ({ authedBuyer }) => {
+  73  |     await authedBuyer.post('cart/items', {
+  74  |       data: { productId: testProduct.id, quantity: 2 },
+  75  |     });
+  76  |     const response = await authedBuyer.delete('cart');
+  77  |     expect(response.ok()).toBeTruthy();
+  78  |     const cart: Cart = await response.json().then(resData => resData.cart);
+  79  |     expect(cart.items).toHaveLength(0);
+  80  |     expect(cart.subtotalCents).toBe(0);
+  81  |   });
+  82  | 
+  83  |   test('should return 400 when adding product with invalid quantity', async ({ authedBuyer }) => {
+  84  |     const response = await authedBuyer.post('cart/items', {
+  85  |       data: { productId: testProduct.id, quantity: 0 },
+  86  |     });
+  87  |     expect(response.status()).toBe(400);
+  88  |     const error = await response.json();
+  89  |     expect(error.error.code).toBe('INVALID_QUANTITY');
+  90  |   });
+  91  | 
+  92  |   test('should return 404 when adding non-existent product to cart', async ({ authedBuyer }) => {
+  93  |     const response = await authedBuyer.post('cart/items', {
+  94  |       data: { productId: 99999, quantity: 1 },
+  95  |     });
+  96  |     expect(response.status()).toBe(404);
+  97  |     const error = await response.json();
+  98  |     expect(error.error.code).toBe('PRODUCT_NOT_FOUND');
+  99  |   });
+  100 | 
+  101 |   test('should handle cart with discount correctly', async ({ api, authedBuyer }) => {
+  102 |     // Get product with discount (product 1 has 15% discount)
+  103 |     const response = await api.get('products/1');
+  104 |     const product: Product = await response.json().then(resData => resData.product);
+  105 |     const cartResponse = await authedBuyer.post('cart/items', {
+  106 |       data: { productId: product.id, quantity: 1 },
+  107 |     });
+  108 |     expect(cartResponse.ok()).toBeTruthy();
+  109 |     const cart: Cart = await cartResponse.json().then(resData => resData.cart);
+  110 |     expect(cart.items[0]?.unitCents).toBe(product.effectiveCents);
+  111 |     expect(cart.subtotalCents).toBe(product.effectiveCents);
+  112 |   });
+  113 | });
+  114 | 
+```
