@@ -26,7 +26,7 @@ async function loadTriage(
   triageFile: string
 ): Promise<{ hypothesis: unknown; errorContext: string }> {
   const raw = await readFile(triageFile, 'utf8');
-  const parsed = JSON.parse(raw) as TriageSummary & { sourceError?: string };
+  const parsed = JSON.parse(raw) as TriageSummary;
   if (parsed.failures && parsed.failures.length > 0 && parsed.failures[0]) {
     const first = parsed.failures[0];
     if (!first.hypothesis) {
@@ -113,8 +113,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.argv[2] ?? join(aiConfig.generatedCasesDir, 'checkout-button-disabled.triage.json');
   const errorContextFile = process.argv[3] ?? null;
   const testSourceFile = process.argv[4] ?? null;
-  judgeTriage(triageFile, errorContextFile, testSourceFile);
-  judgeTriage(triageFile, errorContextFile)
+  judgeTriage(triageFile, errorContextFile, testSourceFile)
     .then(({ verdict, outputPath }) => {
       console.log(`✅ score: ${verdict.score}/10, verdict: ${verdict.verdict}`);
       if (verdict.hallucinations.length > 0) {
