@@ -128,6 +128,15 @@ Places where similar tasks are handled differently.
 - **Fix:** pick one style and apply it to both. The `parts.push()` form handles conditional sections more cleanly; the array literal form is more compact when all sections are unconditional. Document the choice in the file's comment header, or in AGENTS.md.
 - **Priority:** low
 
+### Judge output-name transform is a single undocumented convention
+
+- **Where:** `src/ai/agents/judge.ts`, `writeVerdict`
+- **What:** the output name is derived by `/\.triage\.json$/ -> '.judge.json'`. This is the repo's only triage naming convention — `failureAnalyst.ts` writes it, the judge CLI defaults to it. The regex previously also handled `.summary.json` and `-summary.json`; both were removed after confirming no producer emits them.
+- **Soft behavior change:** the reporter's batch file `test-results/ai-triage-summary.json` was transformed to `ai-triage.judge.json` by the old regex (`[.-](triage|summary)\.json$`) and is no longer transformed by the new one (`/\.(triage)\.json$/`). No automated path feeds that file to `judgeTriage` today, so nothing breaks now — but a manual caller relying on the old transform would see the name unchanged. A future reporter extension that pipes batch failures into `judgeTriage` would make this a live concern.
+- **Guard:** `writeVerdict` refuses to write when the resolved output path equals the input path (non-conforming names inside `generated-cases/`). The guard is cwd-dependent and does not resolve symlinks, so a symlinked `generated-cases/` accessed via its target path would bypass it — unverified, no known symlinked paths in the repo.
+- **Why:** the convention is defined only by the regex, with no written contract. A future change could silently break it.
+- **Priority:** low
+
 ### JSDoc comment only on one function in requirementsAnalyst.ts
 
 - **Where:** `src/ai/agents/requirementsAnalyst.ts`
