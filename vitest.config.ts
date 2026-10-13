@@ -17,13 +17,14 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
-          include: ['./tests/unit/utils/**/*.test.ts'],
+          include: ['./tests/unit/utils/**/*.test.ts', './tests/unit/ai/**/*.test.ts'],
         },
         resolve: {
           alias: {
             '@utils': path.resolve(__dirname, './tests/utils'),
             '@config': path.resolve(__dirname, './src/config'),
             '@types': path.resolve(__dirname, './src/types'),
+            '@ai': path.resolve(__dirname, './src/ai'),
           },
         },
       },
