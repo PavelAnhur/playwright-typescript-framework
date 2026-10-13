@@ -21,16 +21,11 @@ export interface GeneratedSpec {
   code: string;
 }
 
-export function assertPathInsideTargetDir(
-  resolvedOutput: string,
-  resolvedTarget: string
-): void {
+export function assertPathInsideTargetDir(resolvedOutput: string, resolvedTarget: string): void {
   const rel = relative(resolvedTarget, resolvedOutput);
   const normalizedRel = rel.replace(/\\/g, '/');
   if (!normalizedRel || normalizedRel.startsWith('../') || normalizedRel === '..') {
-    throw new Error(
-      `Refusing to write outside target directory: ${resolvedOutput}`
-    );
+    throw new Error(`Refusing to write outside target directory: ${resolvedOutput}`);
   }
 }
 

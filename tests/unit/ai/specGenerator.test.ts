@@ -11,7 +11,7 @@ vi.mock('node:fs/promises');
 
 const validSpec = {
   fileName: 'checkout-button-disabled.spec.ts',
-  code: 'import { test, expect } from \'@playwright/test\';\ntest(\'should disable button\', async ({ page }) => {});',
+  code: "import { test, expect } from '@playwright/test';\ntest('should disable button', async ({ page }) => {});",
 };
 
 function createMockResult(content?: string): CallResult {

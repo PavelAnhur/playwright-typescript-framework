@@ -252,3 +252,26 @@ The agents analyze text and code. They do not drive a browser on their own to di
 ### No custom agent framework
 
 No LangChain, no CrewAI, no AutoGen. Four functions, one HTTP client, three zod schemas. The total surface is small enough to reason about without abstractions.
+
+### specGenerator path containment — defense-in-depth, unreachable by design
+
+`src/ai/agents/specGenerator.ts` enforces spec-file writes with two layers:
+
+1. **Policy (`parseOutput`)** — rejects any model-supplied `fileName` containing
+   `/`, `\`, or `..`, and requires a `.spec.ts` suffix. This is the _authoritative_
+   policy: spec output is flat only — no subdirectories under `tests/specs/review/`.
+2. **Defense-in-depth (`assertPathInsideTargetDir`)** — asserts the resolved output
+   path is inside the resolved target dir (rejects `../` and `..`).
+
+**Scope note:** under the flat-only policy, layer 2 is **unreachable via
+`generateSpec`** — layer 1 rejects every input that could escape, so no
+policy-passing `fileName` ever triggers the containment throw. The isolation tests
+in `tests/unit/ai/specGenerator.test.ts` call `assertPathInsideTargetDir` directly
+to cover its logic. Do **not** delete layer 2 as dead code: it exists so that if
+layer 1 is ever loosened (e.g. to allow nested spec paths), writes remain confined.
+Its escape branch is covered only by direct unit tests, not by any `generateSpec`
+integration test — a `generateSpec`-level mutation test for it is impossible while
+the policy is flat-only.
+
+Origin: traversal write outside `tests/specs/review/` (reproduced by execution,
+2026-10-13), fixed in commit `1b290b6a`.
