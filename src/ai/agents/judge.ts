@@ -116,6 +116,7 @@ async function requestVerdict(inputs: JudgeInputs, triageFile: string): Promise<
 }
 
 async function writeVerdict(triageFile: string, verdict: JudgeVerdict): Promise<string> {
+  // foo.triage.json -> foo.judge.json — the repo's only triage naming convention
   const outputName = basename(triageFile).replace(/\.triage\.json$/, '.judge.json');
   const outputPath = join(aiConfig.generatedCasesDir, outputName);
   const resolvedInput = resolve(dirname(resolve(triageFile)), basename(resolve(triageFile)));
