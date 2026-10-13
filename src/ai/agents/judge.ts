@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
 import { buildJudgeUser, judgeSystem } from '../prompts/judge';
@@ -116,8 +116,12 @@ async function requestVerdict(inputs: JudgeInputs, triageFile: string): Promise<
 }
 
 async function writeVerdict(triageFile: string, verdict: JudgeVerdict): Promise<string> {
-  const outputName = basename(triageFile).replace(/\.(triage|summary)\.json$/, '.judge.json');
+  const outputName = basename(triageFile).replace(/\.triage\.json$/, '.judge.json');
   const outputPath = join(aiConfig.generatedCasesDir, outputName);
+  const resolvedInput = resolve(dirname(resolve(triageFile)), basename(resolve(triageFile)));
+  if (resolvedInput === outputPath) {
+    throw new Error(`Refusing to overwrite the input file: ${outputPath}`);
+  }
   await writeFile(outputPath, JSON.stringify(verdict, null, 2), 'utf8');
   return outputPath;
 }
