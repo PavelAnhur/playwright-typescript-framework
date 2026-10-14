@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { callModel } from '../dshClient';
 import type { SpecGeneratorInput } from '../prompts/specGenerator';
 import { buildSpecRefinerUser, specRefinerSystem } from '../prompts/specGenerator';
@@ -5,7 +7,6 @@ import { logRefineAttempt } from '../tools/refineLogger';
 import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTest';
 import { validateTestSelectors, type ValidationResult } from '../tools/validateTestSelectors';
 import { generateSpec } from './specGenerator';
-import { basename } from 'node:path';
 
 const AGENT = 'spec-refiner';
 
@@ -140,7 +141,6 @@ export async function refineSpec(
     currentCode = parsed.code;
     currentFileName = basename(currentOutputPath);
     // Write the updated code to the same file the first iteration produced
-    const { writeFile } = await import('node:fs/promises');
     await writeFile(currentOutputPath, currentCode, 'utf8');
     testResult = await runPlaywrightTest(currentOutputPath);
     iterations.push({
