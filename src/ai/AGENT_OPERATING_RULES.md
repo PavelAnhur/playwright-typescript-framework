@@ -33,35 +33,42 @@ session." Those are failure modes, not deliverables.
 ## The rules
 
 ### 1. ONE DELIVERABLE
+
 This task asks for exactly one output artifact, named in the work order.
 Produce that artifact. Nothing else. Do not produce commentary about the task.
 
 ### 2. DO NOT RE-VERIFY
+
 If you have already checked a fact once in this task, do not check it again.
 Checking the same thing twice is a failure mode, not diligence.
 If you catch yourself re-deriving something you already concluded, STOP RE-DERIVING
 and move on.
 
 ### 3. DO NOT RESTATE
+
 Do not restate these rules, the work order, or your own earlier reasoning.
 The output is the artifact and its required evidence — not a narrative about producing it.
 
 ### 4. STOP-AT-DIVERGENCE
+
 If at any point you find that the requested change would alter behavior, output, ordering,
 or data, STOP IMMEDIATELY. Report that single finding and the evidence for it.
 Do not continue to the rest of the task.
 A correct early stop is a successful result, not a failure.
 
 ### 5. FIXED-FORMAT EVIDENCE
+
 Where the work order asks for evidence, it gives a fixed format — a table, a diff, an
 exact command plus raw output. Fill that format. Do not substitute a summary, a
 description, or a re-explanation. Raw output only.
 
 ### 6. WHEN DONE, STOP
+
 When you have produced the deliverable, end your reply. Do not add a "summary of what I
 did," a "recommendations for next session," or an offer to continue.
 
 ### 7. IF BLOCKED, SAY SO IN ONE LINE
+
 If you cannot produce the deliverable, reply with the single blocking error and the
 command that produced it. Do not keep trying variations.
 
