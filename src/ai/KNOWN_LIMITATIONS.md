@@ -314,4 +314,4 @@ It is kept as an explicit invariant, not a fix.
 This mirrors the specGenerator unreachable-guard entry: a real code property
 that cannot be exercised in production.
 
-Origin: refinement decomposition, commit `81703eb4`.
+Origin: refinement decomposition, commit `9ded8184`.
