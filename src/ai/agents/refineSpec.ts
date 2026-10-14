@@ -20,6 +20,7 @@ export interface RefineIteration {
 
 export interface RefineResult {
   passed: boolean;
+  /** Only meaningful when passed is true. On a failed run this is false and carries no signal — it does not mean a clean pass. */
   hollowPass: boolean;
   selectorValidation: ValidationResult | null;
   iterations: RefineIteration[];

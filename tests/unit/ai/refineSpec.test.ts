@@ -161,3 +161,23 @@ describe('refineSpec - parser policy rejects dangerous fileName (Item 1)', () =>
     expect(result.finalFileName).toBe(basename(result.finalOutputPath));
   });
 });
+
+describe('refineSpec - hollowPass invariant', () => {
+  it('should have hollowPass === false when all attempts failed', async () => {
+    vi.mocked(callModel).mockResolvedValue(
+      createMockResult(JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'code' }))
+    );
+    vi.mocked(runPlaywrightTest).mockResolvedValue({
+      passed: false,
+      exitCode: 1,
+      errorMessage: 'test failed',
+      errorContext: null,
+      failedTestNames: [],
+      durationMs: 100,
+      stdout: '',
+    });
+    const result = await refineSpec(mockInput);
+    expect(result.passed).toBe(false);
+    expect(result.hollowPass).toBe(false);
+  });
+});
