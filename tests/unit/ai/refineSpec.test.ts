@@ -49,18 +49,40 @@ afterEach(() => {
 describe('refineSpec - finalFileName matches written file (Item 2)', () => {
   it('should report the same fileName as the file written on disk', async () => {
     const cmCalls: CallResult[] = [
-      createMockResult(JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'initial code' })),
-      createMockResult(JSON.stringify({ fileName: 'some-other-name.spec.ts', code: 'refined code' })),
+      createMockResult(
+        JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'initial code' })
+      ),
+      createMockResult(
+        JSON.stringify({ fileName: 'some-other-name.spec.ts', code: 'refined code' })
+      ),
     ];
     let cmIndex = 0;
     vi.mocked(callModel).mockImplementation(async () => cmCalls[cmIndex++] as CallResult);
 
     const rpwtCalls: TestRunResult[] = [
-      { passed: false, exitCode: 1, errorMessage: 'test failed', errorContext: null, failedTestNames: [], durationMs: 100, stdout: '' },
-      { passed: true, exitCode: 0, errorMessage: null, errorContext: null, failedTestNames: [], durationMs: 100, stdout: '' },
+      {
+        passed: false,
+        exitCode: 1,
+        errorMessage: 'test failed',
+        errorContext: null,
+        failedTestNames: [],
+        durationMs: 100,
+        stdout: '',
+      },
+      {
+        passed: true,
+        exitCode: 0,
+        errorMessage: null,
+        errorContext: null,
+        failedTestNames: [],
+        durationMs: 100,
+        stdout: '',
+      },
     ];
     let rpwtIndex = 0;
-    vi.mocked(runPlaywrightTest).mockImplementation(async () => rpwtCalls[rpwtIndex++] as TestRunResult);
+    vi.mocked(runPlaywrightTest).mockImplementation(
+      async () => rpwtCalls[rpwtIndex++] as TestRunResult
+    );
 
     const result = await refineSpec(mockInput);
 
@@ -78,18 +100,38 @@ describe('refineSpec - finalFileName matches written file (Item 2)', () => {
 describe('refineSpec - parser policy rejects dangerous fileName (Item 1)', () => {
   function setupMocks(badFileName: string) {
     const cmCalls: CallResult[] = [
-      createMockResult(JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'initial code' })),
+      createMockResult(
+        JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'initial code' })
+      ),
       createMockResult(JSON.stringify({ fileName: badFileName, code: 'refined code' })),
     ];
     let cmIndex = 0;
     vi.mocked(callModel).mockImplementation(async () => cmCalls[cmIndex++] as CallResult);
 
     const rpwtCalls: TestRunResult[] = [
-      { passed: false, exitCode: 1, errorMessage: 'test failed', errorContext: null, failedTestNames: [], durationMs: 100, stdout: '' },
-      { passed: true, exitCode: 0, errorMessage: null, errorContext: null, failedTestNames: [], durationMs: 100, stdout: '' },
+      {
+        passed: false,
+        exitCode: 1,
+        errorMessage: 'test failed',
+        errorContext: null,
+        failedTestNames: [],
+        durationMs: 100,
+        stdout: '',
+      },
+      {
+        passed: true,
+        exitCode: 0,
+        errorMessage: null,
+        errorContext: null,
+        failedTestNames: [],
+        durationMs: 100,
+        stdout: '',
+      },
     ];
     let rpwtIndex = 0;
-    vi.mocked(runPlaywrightTest).mockImplementation(async () => rpwtCalls[rpwtIndex++] as TestRunResult);
+    vi.mocked(runPlaywrightTest).mockImplementation(
+      async () => rpwtCalls[rpwtIndex++] as TestRunResult
+    );
   }
 
   it('should reject fileName with ../ traversal sequence', async () => {
