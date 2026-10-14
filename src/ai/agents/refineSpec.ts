@@ -87,6 +87,68 @@ async function finalizeResult(
   };
 }
 
+async function recordAndLogAttempt(
+  iterations: RefineIteration[],
+  caseId: string,
+  attemptNumber: number,
+  fileName: string,
+  outputPath: string,
+  code: string,
+  testResult: TestRunResult
+): Promise<void> {
+  iterations.push({
+    attemptNumber,
+    fileName,
+    outputPath,
+    code,
+    testResult,
+  });
+  await logRefineAttempt({
+    timestamp: new Date().toISOString(),
+    caseId,
+    attemptNumber,
+    fileName,
+    durationMs: testResult.durationMs,
+    passed: testResult.passed,
+    errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
+    codeLength: code.length,
+    fullCode: code,
+  });
+}
+
+async function runRefinementIteration(
+  input: SpecGeneratorInput,
+  attempt: number,
+  currentCode: string,
+  currentOutputPath: string,
+  testResult: TestRunResult,
+  iterations: RefineIteration[],
+  caseId: string
+): Promise<{ code: string; passed: boolean; fileName: string }> {
+  const userPrompt = buildSpecRefinerUser({
+    currentCode,
+    errorMessage: testResult.errorMessage,
+    errorContext: testResult.errorContext,
+    projectContext: input.projectContext,
+    attemptNumber: attempt,
+  });
+  const modelResult = await callModel({
+    agent: AGENT,
+    messages: [
+      { role: 'system', content: specRefinerSystem },
+      { role: 'user', content: userPrompt },
+    ],
+    metadata: { caseId, attempt },
+  });
+  const parsed = parseRefinerOutput(modelResult.content);
+  const newCode = parsed.code;
+  const fileName = basename(currentOutputPath);
+  await writeFile(currentOutputPath, newCode, 'utf8');
+  const newTestResult = await runPlaywrightTest(currentOutputPath);
+  recordAndLogAttempt(iterations, caseId, attempt, fileName, currentOutputPath, newCode, newTestResult);
+  return { code: newCode, passed: newTestResult.passed, fileName };
+}
+
 export async function refineSpec(
   input: SpecGeneratorInput,
   maxIterations: number = 3
@@ -98,70 +160,22 @@ export async function refineSpec(
   let currentFileName = generated.fileName;
   let currentOutputPath = generated.outputPath;
   let testResult = await runPlaywrightTest(currentOutputPath);
-  iterations.push({
-    attemptNumber: 1,
-    fileName: currentFileName,
-    outputPath: currentOutputPath,
-    code: currentCode,
-    testResult,
-  });
-  await logRefineAttempt({
-    timestamp: new Date().toISOString(),
-    caseId: input.caseId,
-    attemptNumber: 1,
-    fileName: currentFileName,
-    durationMs: testResult.durationMs,
-    passed: testResult.passed,
-    errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
-    codeLength: currentCode.length,
-    fullCode: currentCode,
-  });
+  recordAndLogAttempt(iterations, input.caseId, 1, currentFileName, currentOutputPath, currentCode, testResult);
   if (testResult.passed) {
     return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
   }
   // Refinement iterations
   for (let attempt = 2; attempt <= maxIterations; attempt++) {
-    const userPrompt = buildSpecRefinerUser({
-      currentCode,
-      errorMessage: testResult.errorMessage,
-      errorContext: testResult.errorContext,
-      projectContext: input.projectContext,
-      attemptNumber: attempt,
-    });
-    const modelResult = await callModel({
-      agent: AGENT,
-      messages: [
-        { role: 'system', content: specRefinerSystem },
-        { role: 'user', content: userPrompt },
-      ],
-      metadata: { caseId: input.caseId, attempt },
-    });
-    const parsed = parseRefinerOutput(modelResult.content);
-    // Same file, updated content — report name from the actual write path
-    currentCode = parsed.code;
-    currentFileName = basename(currentOutputPath);
-    // Write the updated code to the same file the first iteration produced
-    await writeFile(currentOutputPath, currentCode, 'utf8');
-    testResult = await runPlaywrightTest(currentOutputPath);
-    iterations.push({
-      attemptNumber: attempt,
-      fileName: currentFileName,
-      outputPath: currentOutputPath,
-      code: currentCode,
-      testResult,
-    });
-    await logRefineAttempt({
-      timestamp: new Date().toISOString(),
-      caseId: input.caseId,
-      attemptNumber: attempt,
-      fileName: currentFileName,
-      durationMs: testResult.durationMs,
-      passed: testResult.passed,
-      errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
-      codeLength: currentCode.length,
-      fullCode: currentCode,
-    });
-    if (testResult.passed) {
+    const result = await runRefinementIteration(
+      input, attempt, currentCode, currentOutputPath, testResult, iterations, input.caseId
+    );
+    currentCode = result.code;
+    // Invariant: keep the reported name in sync with the written file. In production
+    // basename(outputPath) === fileName (generateSpec derives one from the other), so this
+    // reassignment is a no-op there; it is kept so the loop explicitly preserves the
+    // invariant rather than relying on that coincidence. See KNOWN_LIMITATIONS.md.
+    currentFileName = result.fileName;
+    if (result.passed) {
       return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
     }
   }

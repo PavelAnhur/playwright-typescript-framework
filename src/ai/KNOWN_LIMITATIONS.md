@@ -299,3 +299,19 @@ and not vacuous.
 
 Origin: consistency alignment with `specGenerator` parser policy, commit
 `db25e74e`.
+
+### refineSpec name invariant — unobservable in production
+
+The refactor (commit `81703eb4`) moved the loop's name assignment into
+`runRefinementIteration` and re-establishes it in the loop via
+`currentFileName = result.fileName`. In production this reassignment is
+unobservable: `generateSpec` derives `outputPath` from `fileName`
+(`specGenerator.ts` line 74) and validates `fileName` as a flat basename
+(line 51), so `basename(outputPath)` always equals `fileName`. No test can
+distinguish the reassignment present vs absent; a revert-proof is impossible.
+It is kept as an explicit invariant, not a fix.
+
+This mirrors the specGenerator unreachable-guard entry: a real code property
+that cannot be exercised in production.
+
+Origin: refinement decomposition, commit `81703eb4`.
