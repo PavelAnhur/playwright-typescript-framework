@@ -5,6 +5,7 @@ import { logRefineAttempt } from '../tools/refineLogger';
 import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTest';
 import { validateTestSelectors, type ValidationResult } from '../tools/validateTestSelectors';
 import { generateSpec } from './specGenerator';
+import { basename } from 'node:path';
 
 const AGENT = 'spec-refiner';
 
@@ -49,6 +50,11 @@ function parseRefinerOutput(raw: string): SpecRefinerOutput {
   const code = obj['code'];
   if (typeof fileName !== 'string' || !fileName.endsWith('.spec.ts')) {
     throw new Error(`Invalid fileName from spec refiner: ${String(fileName)}`);
+  }
+  if (/[/\\]/.test(fileName) || fileName.includes('..')) {
+    throw new Error(
+      `Refusing fileName with path separators or traversal sequences: ${String(fileName)}`
+    );
   }
   if (typeof code !== 'string' || code.length === 0) {
     throw new Error('Empty code from spec refiner');
@@ -130,9 +136,9 @@ export async function refineSpec(
       metadata: { caseId: input.caseId, attempt },
     });
     const parsed = parseRefinerOutput(modelResult.content);
-    // Same file, updated content
+    // Same file, updated content — report name from the actual write path
     currentCode = parsed.code;
-    currentFileName = parsed.fileName;
+    currentFileName = basename(currentOutputPath);
     // Write the updated code to the same file the first iteration produced
     const { writeFile } = await import('node:fs/promises');
     await writeFile(currentOutputPath, currentCode, 'utf8');
