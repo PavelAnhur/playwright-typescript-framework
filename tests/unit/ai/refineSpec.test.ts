@@ -165,7 +165,9 @@ describe('refineSpec - parser policy rejects dangerous fileName (Item 1)', () =>
 describe('refineSpec - hollowPass invariant', () => {
   it('should have hollowPass === false when all attempts failed', async () => {
     vi.mocked(callModel).mockResolvedValue(
-      createMockResult(JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'code' }))
+      createMockResult(
+        JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'code' })
+      )
     );
     vi.mocked(runPlaywrightTest).mockResolvedValue({
       passed: false,

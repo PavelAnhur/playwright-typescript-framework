@@ -162,6 +162,7 @@ async function runRefinementIteration(
 
 export async function refineSpec(
   input: SpecGeneratorInput,
+  /** Total attempt cap. Attempt 1 always runs regardless of this value (e.g. maxIterations = 0 still runs attempt 1). Values below 1 behave as 1. */
   maxIterations: number = 3
 ): Promise<RefineResult> {
   const iterations: RefineIteration[] = [];
