@@ -275,3 +275,27 @@ the policy is flat-only.
 
 Origin: traversal write outside `tests/specs/review/` (reproduced by execution,
 2026-10-13), fixed in commit `1b290b6a`.
+
+### refineSpec parser policy — consistency alignment, defense-in-depth
+
+`src/ai/agents/refineSpec.ts`, `parseRefinerOutput` previously checked only that
+`fileName` ends with `.spec.ts`. It did NOT reject `/`, `\`, or `..`.
+
+Phase 0 investigation confirmed the model-supplied `fileName` cannot reach any
+filesystem call in `refineSpec`: the sole `writeFile` call uses `currentOutputPath`
+(from `generateSpec`), which is never reassigned. The model's `fileName` flows only
+to records, logs, and result fields — both consumers (`mcp-server.ts`,
+`refineSpecCli.ts`) are display-only.
+
+The parser policy was aligned with `specGenerator`'s `parseOutput` (commit
+`1b290b6a`) for **consistency**, not as a security fix. The guard is
+defense-in-depth — it is unreachable by construction because no fs call consumes
+the model's `fileName`.
+
+**Test coverage:** the reject tests (`../x.spec.ts`, `nested/deep.spec.ts`,
+`nested\deep.spec.ts`) were demonstrated to fail when the policy check is removed
+(revert-and-restore proof in commit `db25e74e`), so the guard is actually tested
+and not vacuous.
+
+Origin: consistency alignment with `specGenerator` parser policy, commit
+`db25e74e`.
