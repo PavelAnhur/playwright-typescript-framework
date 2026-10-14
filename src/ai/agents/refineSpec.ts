@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { callModel } from '../dshClient';
 import type { SpecGeneratorInput } from '../prompts/specGenerator';
 import { buildSpecRefinerUser, specRefinerSystem } from '../prompts/specGenerator';
@@ -18,6 +20,7 @@ export interface RefineIteration {
 
 export interface RefineResult {
   passed: boolean;
+  /** Only meaningful when passed is true. On a failed run this is false and carries no signal — it does not mean a clean pass. */
   hollowPass: boolean;
   selectorValidation: ValidationResult | null;
   iterations: RefineIteration[];
@@ -50,38 +53,116 @@ function parseRefinerOutput(raw: string): SpecRefinerOutput {
   if (typeof fileName !== 'string' || !fileName.endsWith('.spec.ts')) {
     throw new Error(`Invalid fileName from spec refiner: ${String(fileName)}`);
   }
+  if (/[/\\]/.test(fileName) || fileName.includes('..')) {
+    throw new Error(
+      `Refusing fileName with path separators or traversal sequences: ${String(fileName)}`
+    );
+  }
   if (typeof code !== 'string' || code.length === 0) {
     throw new Error('Empty code from spec refiner');
   }
   return { fileName, code };
 }
 
-async function finalizeResult(
-  passed: boolean,
-  iterations: RefineIteration[],
-  fileName: string,
-  outputPath: string,
-  code: string
-): Promise<RefineResult> {
+interface FinalizeInput {
+  passed: boolean;
+  iterations: RefineIteration[];
+  fileName: string;
+  outputPath: string;
+  code: string;
+}
+
+async function finalizeResult(input: FinalizeInput): Promise<RefineResult> {
   let hollowPass = false;
   let selectorValidation: ValidationResult | null = null;
-  if (passed) {
-    selectorValidation = await validateTestSelectors(outputPath);
+  if (input.passed) {
+    selectorValidation = await validateTestSelectors(input.outputPath);
     hollowPass = !selectorValidation.allValid;
   }
   return {
-    passed,
+    passed: input.passed,
     hollowPass,
     selectorValidation,
-    iterations,
-    finalFileName: fileName,
-    finalOutputPath: outputPath,
-    finalCode: code,
+    iterations: input.iterations,
+    finalFileName: input.fileName,
+    finalOutputPath: input.outputPath,
+    finalCode: input.code,
   };
+}
+
+async function recordAndLogAttempt(
+  iterations: RefineIteration[],
+  caseId: string,
+  attemptNumber: number,
+  fileName: string,
+  outputPath: string,
+  code: string,
+  testResult: TestRunResult
+): Promise<void> {
+  iterations.push({
+    attemptNumber,
+    fileName,
+    outputPath,
+    code,
+    testResult,
+  });
+  await logRefineAttempt({
+    timestamp: new Date().toISOString(),
+    caseId,
+    attemptNumber,
+    fileName,
+    durationMs: testResult.durationMs,
+    passed: testResult.passed,
+    errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
+    codeLength: code.length,
+    fullCode: code,
+  });
+}
+
+async function runRefinementIteration(
+  input: SpecGeneratorInput,
+  attempt: number,
+  currentCode: string,
+  currentOutputPath: string,
+  testResult: TestRunResult,
+  iterations: RefineIteration[],
+  caseId: string
+): Promise<{ code: string; passed: boolean; fileName: string }> {
+  const userPrompt = buildSpecRefinerUser({
+    currentCode,
+    errorMessage: testResult.errorMessage,
+    errorContext: testResult.errorContext,
+    projectContext: input.projectContext,
+    attemptNumber: attempt,
+  });
+  const modelResult = await callModel({
+    agent: AGENT,
+    messages: [
+      { role: 'system', content: specRefinerSystem },
+      { role: 'user', content: userPrompt },
+    ],
+    metadata: { caseId, attempt },
+  });
+  const parsed = parseRefinerOutput(modelResult.content);
+  const newCode = parsed.code;
+  const fileName = basename(currentOutputPath);
+  await writeFile(currentOutputPath, newCode, 'utf8');
+  const newTestResult = await runPlaywrightTest(currentOutputPath);
+  recordAndLogAttempt(
+    iterations,
+    caseId,
+    attempt,
+    fileName,
+    currentOutputPath,
+    newCode,
+    newTestResult
+  );
+  return { code: newCode, passed: newTestResult.passed, fileName };
 }
 
 export async function refineSpec(
   input: SpecGeneratorInput,
+  /** Total attempt cap. Attempt 1 always runs regardless of this value (e.g. maxIterations = 0 still runs attempt 1). Values below 1 behave as 1. */
   maxIterations: number = 3
 ): Promise<RefineResult> {
   const iterations: RefineIteration[] = [];
@@ -91,73 +172,56 @@ export async function refineSpec(
   let currentFileName = generated.fileName;
   let currentOutputPath = generated.outputPath;
   let testResult = await runPlaywrightTest(currentOutputPath);
-  iterations.push({
-    attemptNumber: 1,
-    fileName: currentFileName,
-    outputPath: currentOutputPath,
-    code: currentCode,
-    testResult,
-  });
-  await logRefineAttempt({
-    timestamp: new Date().toISOString(),
-    caseId: input.caseId,
-    attemptNumber: 1,
-    fileName: currentFileName,
-    durationMs: testResult.durationMs,
-    passed: testResult.passed,
-    errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
-    codeLength: currentCode.length,
-    fullCode: currentCode,
-  });
+  recordAndLogAttempt(
+    iterations,
+    input.caseId,
+    1,
+    currentFileName,
+    currentOutputPath,
+    currentCode,
+    testResult
+  );
   if (testResult.passed) {
-    return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
-  }
-  // Refinement iterations
-  for (let attempt = 2; attempt <= maxIterations; attempt++) {
-    const userPrompt = buildSpecRefinerUser({
-      currentCode,
-      errorMessage: testResult.errorMessage,
-      errorContext: testResult.errorContext,
-      projectContext: input.projectContext,
-      attemptNumber: attempt,
-    });
-    const modelResult = await callModel({
-      agent: AGENT,
-      messages: [
-        { role: 'system', content: specRefinerSystem },
-        { role: 'user', content: userPrompt },
-      ],
-      metadata: { caseId: input.caseId, attempt },
-    });
-    const parsed = parseRefinerOutput(modelResult.content);
-    // Same file, updated content
-    currentCode = parsed.code;
-    currentFileName = parsed.fileName;
-    // Write the updated code to the same file the first iteration produced
-    const { writeFile } = await import('node:fs/promises');
-    await writeFile(currentOutputPath, currentCode, 'utf8');
-    testResult = await runPlaywrightTest(currentOutputPath);
-    iterations.push({
-      attemptNumber: attempt,
+    return finalizeResult({
+      passed: true,
+      iterations,
       fileName: currentFileName,
       outputPath: currentOutputPath,
       code: currentCode,
+    });
+  }
+  // Refinement iterations
+  for (let attempt = 2; attempt <= maxIterations; attempt++) {
+    const result = await runRefinementIteration(
+      input,
+      attempt,
+      currentCode,
+      currentOutputPath,
       testResult,
-    });
-    await logRefineAttempt({
-      timestamp: new Date().toISOString(),
-      caseId: input.caseId,
-      attemptNumber: attempt,
-      fileName: currentFileName,
-      durationMs: testResult.durationMs,
-      passed: testResult.passed,
-      errorMessageFirstLine: testResult.errorMessage?.split('\n')[0] ?? null,
-      codeLength: currentCode.length,
-      fullCode: currentCode,
-    });
-    if (testResult.passed) {
-      return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
+      iterations,
+      input.caseId
+    );
+    currentCode = result.code;
+    // Invariant: keep the reported name in sync with the written file. In production
+    // basename(outputPath) === fileName (generateSpec derives one from the other), so this
+    // reassignment is a no-op there; it is kept so the loop explicitly preserves the
+    // invariant rather than relying on that coincidence. See KNOWN_LIMITATIONS.md.
+    currentFileName = result.fileName;
+    if (result.passed) {
+      return finalizeResult({
+        passed: true,
+        iterations,
+        fileName: currentFileName,
+        outputPath: currentOutputPath,
+        code: currentCode,
+      });
     }
   }
-  return finalizeResult(false, iterations, currentFileName, currentOutputPath, currentCode);
+  return finalizeResult({
+    passed: false,
+    iterations,
+    fileName: currentFileName,
+    outputPath: currentOutputPath,
+    code: currentCode,
+  });
 }

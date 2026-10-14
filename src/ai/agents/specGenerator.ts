@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
 import {
@@ -21,6 +21,14 @@ export interface GeneratedSpec {
   code: string;
 }
 
+export function assertPathInsideTargetDir(resolvedOutput: string, resolvedTarget: string): void {
+  const rel = relative(resolvedTarget, resolvedOutput);
+  const normalizedRel = rel.replace(/\\/g, '/');
+  if (!normalizedRel || normalizedRel.startsWith('../') || normalizedRel === '..') {
+    throw new Error(`Refusing to write outside target directory: ${resolvedOutput}`);
+  }
+}
+
 function parseOutput(raw: string): SpecGeneratorOutput {
   let parsed: unknown;
   try {
@@ -39,6 +47,11 @@ function parseOutput(raw: string): SpecGeneratorOutput {
   const code = obj['code'];
   if (typeof fileName !== 'string' || !fileName.endsWith('.spec.ts')) {
     throw new Error(`Invalid fileName from spec generator: ${String(fileName)}`);
+  }
+  if (/[/\\]/.test(fileName) || fileName.includes('..')) {
+    throw new Error(
+      `Refusing fileName with path separators or traversal sequences: ${String(fileName)}`
+    );
   }
   if (typeof code !== 'string' || code.length === 0) {
     throw new Error('Empty code from spec generator');
@@ -59,6 +72,9 @@ export async function generateSpec(input: SpecGeneratorInput): Promise<Generated
   const targetDir = join(aiConfig.projectRoot, 'tests', 'specs', 'review');
   await mkdir(targetDir, { recursive: true });
   const outputPath = join(targetDir, output.fileName);
+  const resolvedOutput = resolve(outputPath);
+  const resolvedTarget = resolve(targetDir);
+  assertPathInsideTargetDir(resolvedOutput, resolvedTarget);
   await writeFile(outputPath, output.code, 'utf8');
   return { fileName: output.fileName, outputPath, code: output.code };
 }

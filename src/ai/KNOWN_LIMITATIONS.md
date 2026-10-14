@@ -252,3 +252,66 @@ The agents analyze text and code. They do not drive a browser on their own to di
 ### No custom agent framework
 
 No LangChain, no CrewAI, no AutoGen. Four functions, one HTTP client, three zod schemas. The total surface is small enough to reason about without abstractions.
+
+### specGenerator path containment — defense-in-depth, unreachable by design
+
+`src/ai/agents/specGenerator.ts` enforces spec-file writes with two layers:
+
+1. **Policy (`parseOutput`)** — rejects any model-supplied `fileName` containing
+   `/`, `\`, or `..`, and requires a `.spec.ts` suffix. This is the _authoritative_
+   policy: spec output is flat only — no subdirectories under `tests/specs/review/`.
+2. **Defense-in-depth (`assertPathInsideTargetDir`)** — asserts the resolved output
+   path is inside the resolved target dir (rejects `../` and `..`).
+
+**Scope note:** under the flat-only policy, layer 2 is **unreachable via
+`generateSpec`** — layer 1 rejects every input that could escape, so no
+policy-passing `fileName` ever triggers the containment throw. The isolation tests
+in `tests/unit/ai/specGenerator.test.ts` call `assertPathInsideTargetDir` directly
+to cover its logic. Do **not** delete layer 2 as dead code: it exists so that if
+layer 1 is ever loosened (e.g. to allow nested spec paths), writes remain confined.
+Its escape branch is covered only by direct unit tests, not by any `generateSpec`
+integration test — a `generateSpec`-level mutation test for it is impossible while
+the policy is flat-only.
+
+Origin: traversal write outside `tests/specs/review/` (reproduced by execution,
+2026-10-13), fixed in commit `1b290b6a`.
+
+### refineSpec parser policy — consistency alignment, defense-in-depth
+
+`src/ai/agents/refineSpec.ts`, `parseRefinerOutput` previously checked only that
+`fileName` ends with `.spec.ts`. It did NOT reject `/`, `\`, or `..`.
+
+Phase 0 investigation confirmed the model-supplied `fileName` cannot reach any
+filesystem call in `refineSpec`: the sole `writeFile` call uses `currentOutputPath`
+(from `generateSpec`), which is never reassigned. The model's `fileName` flows only
+to records, logs, and result fields — both consumers (`mcp-server.ts`,
+`refineSpecCli.ts`) are display-only.
+
+The parser policy was aligned with `specGenerator`'s `parseOutput` (commit
+`1b290b6a`) for **consistency**, not as a security fix. The guard is
+defense-in-depth — it is unreachable by construction because no fs call consumes
+the model's `fileName`.
+
+**Test coverage:** the reject tests (`../x.spec.ts`, `nested/deep.spec.ts`,
+`nested\deep.spec.ts`) were demonstrated to fail when the policy check is removed
+(revert-and-restore proof in commit `db25e74e`), so the guard is actually tested
+and not vacuous.
+
+Origin: consistency alignment with `specGenerator` parser policy, commit
+`db25e74e`.
+
+### refineSpec name invariant — unobservable in production
+
+The refactor (commit `81703eb4`) moved the loop's name assignment into
+`runRefinementIteration` and re-establishes it in the loop via
+`currentFileName = result.fileName`. In production this reassignment is
+unobservable: `generateSpec` derives `outputPath` from `fileName`
+(`specGenerator.ts` line 74) and validates `fileName` as a flat basename
+(line 51), so `basename(outputPath)` always equals `fileName`. No test can
+distinguish the reassignment present vs absent; a revert-proof is impossible.
+It is kept as an explicit invariant, not a fix.
+
+This mirrors the specGenerator unreachable-guard entry: a real code property
+that cannot be exercised in production.
+
+Origin: refinement decomposition, commit `9ded8184`.
