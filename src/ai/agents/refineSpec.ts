@@ -63,27 +63,29 @@ function parseRefinerOutput(raw: string): SpecRefinerOutput {
   return { fileName, code };
 }
 
-async function finalizeResult(
-  passed: boolean,
-  iterations: RefineIteration[],
-  fileName: string,
-  outputPath: string,
-  code: string
-): Promise<RefineResult> {
+interface FinalizeInput {
+  passed: boolean;
+  iterations: RefineIteration[];
+  fileName: string;
+  outputPath: string;
+  code: string;
+}
+
+async function finalizeResult(input: FinalizeInput): Promise<RefineResult> {
   let hollowPass = false;
   let selectorValidation: ValidationResult | null = null;
-  if (passed) {
-    selectorValidation = await validateTestSelectors(outputPath);
+  if (input.passed) {
+    selectorValidation = await validateTestSelectors(input.outputPath);
     hollowPass = !selectorValidation.allValid;
   }
   return {
-    passed,
+    passed: input.passed,
     hollowPass,
     selectorValidation,
-    iterations,
-    finalFileName: fileName,
-    finalOutputPath: outputPath,
-    finalCode: code,
+    iterations: input.iterations,
+    finalFileName: input.fileName,
+    finalOutputPath: input.outputPath,
+    finalCode: input.code,
   };
 }
 
@@ -145,7 +147,15 @@ async function runRefinementIteration(
   const fileName = basename(currentOutputPath);
   await writeFile(currentOutputPath, newCode, 'utf8');
   const newTestResult = await runPlaywrightTest(currentOutputPath);
-  recordAndLogAttempt(iterations, caseId, attempt, fileName, currentOutputPath, newCode, newTestResult);
+  recordAndLogAttempt(
+    iterations,
+    caseId,
+    attempt,
+    fileName,
+    currentOutputPath,
+    newCode,
+    newTestResult
+  );
   return { code: newCode, passed: newTestResult.passed, fileName };
 }
 
@@ -160,14 +170,34 @@ export async function refineSpec(
   let currentFileName = generated.fileName;
   let currentOutputPath = generated.outputPath;
   let testResult = await runPlaywrightTest(currentOutputPath);
-  recordAndLogAttempt(iterations, input.caseId, 1, currentFileName, currentOutputPath, currentCode, testResult);
+  recordAndLogAttempt(
+    iterations,
+    input.caseId,
+    1,
+    currentFileName,
+    currentOutputPath,
+    currentCode,
+    testResult
+  );
   if (testResult.passed) {
-    return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
+    return finalizeResult({
+      passed: true,
+      iterations,
+      fileName: currentFileName,
+      outputPath: currentOutputPath,
+      code: currentCode,
+    });
   }
   // Refinement iterations
   for (let attempt = 2; attempt <= maxIterations; attempt++) {
     const result = await runRefinementIteration(
-      input, attempt, currentCode, currentOutputPath, testResult, iterations, input.caseId
+      input,
+      attempt,
+      currentCode,
+      currentOutputPath,
+      testResult,
+      iterations,
+      input.caseId
     );
     currentCode = result.code;
     // Invariant: keep the reported name in sync with the written file. In production
@@ -176,8 +206,20 @@ export async function refineSpec(
     // invariant rather than relying on that coincidence. See KNOWN_LIMITATIONS.md.
     currentFileName = result.fileName;
     if (result.passed) {
-      return finalizeResult(true, iterations, currentFileName, currentOutputPath, currentCode);
+      return finalizeResult({
+        passed: true,
+        iterations,
+        fileName: currentFileName,
+        outputPath: currentOutputPath,
+        code: currentCode,
+      });
     }
   }
-  return finalizeResult(false, iterations, currentFileName, currentOutputPath, currentCode);
+  return finalizeResult({
+    passed: false,
+    iterations,
+    fileName: currentFileName,
+    outputPath: currentOutputPath,
+    code: currentCode,
+  });
 }
