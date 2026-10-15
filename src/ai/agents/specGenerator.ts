@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
+import { stripFences } from '../tools/stripFences';
 import {
   buildSpecGeneratorUser,
   specGeneratorSystem,
@@ -30,12 +31,13 @@ export function assertPathInsideTargetDir(resolvedOutput: string, resolvedTarget
 }
 
 function parseOutput(raw: string): SpecGeneratorOutput {
+  const cleaned = stripFences(raw);
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(cleaned);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Spec generator returned non-JSON: ${msg}\n\nRaw:\n${raw.slice(0, 500)}`, {
+    throw new Error(`Spec generator returned non-JSON: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`, {
       cause: error,
     });
   }

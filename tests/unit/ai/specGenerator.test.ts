@@ -115,3 +115,13 @@ describe('assertPathInsideTargetDir - invariant isolation', () => {
     expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).not.toThrow();
   });
 });
+
+describe('generateSpec - markdown fence stripping', () => {
+  it('should parse model output wrapped in ```json fences', async () => {
+    const fencedContent = '```json\n' + JSON.stringify(validSpec) + '\n```';
+    vi.mocked(callModel).mockResolvedValue(createMockResult(fencedContent));
+    const result = await generateSpec(mockInput);
+    expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
+    expect(result.code).toBe(validSpec.code);
+  });
+});
