@@ -60,6 +60,22 @@ Missing capabilities that a production harness would have.
 - **Fix:** start with the pure functions — `detectFlake` (mock `runPlaywrightTest` and assert classification logic), `flakeDecisionGate.shouldConsider` (table-driven tests over category/confidence combos), `runPlaywrightTest` JSON parsing (feed fixed JSON, assert extracted fields). Then add a snapshot test for the reporter summary output. Prompt regression testing is a separate, larger effort — see the "No prompt A/B testing" entry.
 - **Priority:** high
 
+### runPlaywrightTest retries option is unreachable
+
+- **Where:** `src/ai/tools/runPlaywrightTest.ts` — `RunOptions.retries` (line 22), loop at line 185.
+- **What:** no caller passes `retries`. Verified by grep: `detectFlake.ts:48` passes `{ project, workers, repeatEach }`; `refineSpec.ts:150` and `refineSpec.ts:174` pass no options object. Default `retries = 0` at line 176 means the loop (`attempt <= retries`) always runs exactly once. The retry semantics are dead code.
+- **Latent caveat:** IF retries were ever wired, the semantics are wrong for the obvious use case ("retry a flaky test"). At line 210, a genuine test failure (`code === 1` with parsed failures) sets `lastResult` and breaks immediately — it never retries. Only non-test-failure exit codes with no parsed report reach the continue path.
+- **Classification:** defense-in-depth — the option is dead, document, do not fix (rule 8).
+
+### runPlaywrightTest merges stderr into the parsed stdout buffer
+
+- **Where:** `src/ai/tools/runPlaywrightTest.ts` — `runProcess` lines 66–68 append both `child.stdout` and `child.stderr` to the same `stdout` variable; `parseJsonReport` (line 114) then parses that merged buffer.
+- **What (CONFIRMED):** stderr is non-empty during a `--reporter=json` run. Observed npm notice output on stderr (176 bytes) in a real run.
+- **Observed impact (do NOT overstate):** `parseJsonReport` uses `indexOf` on `'{\n  "config":'` and slices from there, so preceding stderr/stdout chatter is tolerated — the anchor was found at index 263 in a real run and parsing succeeded. The merge is therefore NOT demonstrated to corrupt the parse today.
+- **Residual risk:** if stderr output ever interleaves *within* the JSON body (after the opening brace, before the closing brace), `JSON.parse` would fail and the report would be null, silently emptying `failures.names`. The anchor+slice design is not structurally safe against that.
+- **Classification:** real code property, observed impact tolerated, latent risk — document, do not fix.
+- **Note:** this is NOT covered by the existing "no tests for the harness" entry, which names JSON parsing generally but not the stream merge.
+
 ### maison/ is a vendored copy, rebuilt manually
 
 - **Where:** `maison/` (at the repository root of the framework)
