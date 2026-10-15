@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { join, relative, resolve } from 'node:path';
+import { basename, join, relative, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
 import { stripFences } from '../tools/stripFences';
@@ -50,15 +50,20 @@ function parseOutput(raw: string): SpecGeneratorOutput {
   if (typeof fileName !== 'string' || !fileName.endsWith('.spec.ts')) {
     throw new Error(`Invalid fileName from spec generator: ${String(fileName)}`);
   }
-  if (/[/\\]/.test(fileName) || fileName.includes('..')) {
+  // Normalize to bare filename — strips any directory component so the write
+  // always lands inside targetDir even when the model returns a path-shaped name.
+  const bareFileName = basename(fileName);
+  // Path/traversal check is now redundant defense-in-depth (basename already
+  // stripped any directory), but kept as an explicit invariant.
+  if (/[/\\]/.test(bareFileName) || bareFileName.includes('..')) {
     throw new Error(
-      `Refusing fileName with path separators or traversal sequences: ${String(fileName)}`
+      `Refusing fileName with path separators or traversal sequences: ${String(bareFileName)}`
     );
   }
   if (typeof code !== 'string' || code.length === 0) {
     throw new Error('Empty code from spec generator');
   }
-  return { fileName, code };
+  return { fileName: bareFileName, code };
 }
 
 export async function generateSpec(input: SpecGeneratorInput): Promise<GeneratedSpec> {
