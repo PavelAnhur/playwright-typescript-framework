@@ -60,10 +60,10 @@ describe('refineLogger per-case log file resolution', () => {
     expect(pathC1).not.toBe(pathC2);
 
     const contentC1 = await readFile(pathC1, 'utf8');
-    const linesC1 = contentC1.trim().split('\n').filter((l) => l.length > 0).map(JSON.parse);
+    const linesC1 = contentC1.trim().split('\n').filter((l) => l.length > 0).map((l) => JSON.parse(l));
 
     const contentC2 = await readFile(pathC2, 'utf8');
-    const linesC2 = contentC2.trim().split('\n').filter((l) => l.length > 0).map(JSON.parse);
+    const linesC2 = contentC2.trim().split('\n').filter((l) => l.length > 0).map((l) => JSON.parse(l));
 
     for (const entry of linesC1) {
       expect(entry.caseId).toBe('C1');
