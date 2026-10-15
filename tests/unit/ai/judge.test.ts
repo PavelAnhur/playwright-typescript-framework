@@ -164,3 +164,17 @@ describe('judgeTriage - overwrite guard', () => {
     );
   });
 });
+
+describe('judgeTriage - markdown fence stripping', () => {
+  it('should parse model output wrapped in ```json fences', async () => {
+    vi.mocked(readFile).mockImplementation(async path => {
+      if (path === 'checkout-button-disabled.triage.json') return JSON.stringify(summaryFixture);
+      throw new Error('ENOENT: no such file');
+    });
+    const fencedContent = '```json\n' + JSON.stringify(validVerdict) + '\n```';
+    vi.mocked(callModel).mockResolvedValue(createMockResult(fencedContent));
+    const result = await judgeTriage('checkout-button-disabled.triage.json', null, null);
+    expect(result.verdict.score).toBe(9);
+    expect(result.verdict.verdict).toBe('correct');
+  });
+});
