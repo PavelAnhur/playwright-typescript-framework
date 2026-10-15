@@ -2,48 +2,22 @@ import { describe, expect, it } from 'vitest';
 
 import { deriveProject } from '@ai/tools/projectResolver';
 
+type Row = [string, string | null, string];
+
 describe('deriveProject', () => {
-  it('derives "ui" from a spec under tests/specs/ui/', () => {
-    expect(deriveProject('tests/specs/ui/home-page/accessibility.spec.ts')).toBe('ui');
-  });
-
-  it('derives "api" from a spec under tests/specs/api/', () => {
-    expect(deriveProject('tests/specs/api/home-page/cors-headers.spec.ts')).toBe('api');
-  });
-
-  it('derives "review" from a spec under tests/specs/review/', () => {
-    expect(deriveProject('tests/specs/review/something.spec.ts')).toBe('review');
-  });
-
-  it('returns null when spec path does not contain /specs/<project>/', () => {
-    expect(deriveProject('some/random/path.spec.ts')).toBeNull();
-  });
-
-  it('returns null for an unknown project directory name', () => {
-    expect(deriveProject('tests/specs/unknown/file.spec.ts')).toBeNull();
-  });
-
-  it('strips leading ./ from the path before matching', () => {
-    expect(deriveProject('./tests/specs/ui/login.spec.ts')).toBe('ui');
-  });
-
-  it('strips leading . from the path before matching', () => {
-    expect(deriveProject('.tests/specs/api/users.spec.ts')).toBe('api');
-  });
-
-  it('handles absolute-looking paths with /specs/', () => {
-    expect(deriveProject('/home/user/project/tests/specs/ui/dashboard.spec.ts')).toBe('ui');
-  });
-
-  it('handles deeply nested paths', () => {
-    expect(deriveProject('tests/specs/api/seller/products-certificate.spec.ts')).toBe('api');
-  });
-
-  it('returns null for empty string', () => {
-    expect(deriveProject('')).toBeNull();
-  });
-
-  it('returns null for a path with no /specs/ segment', () => {
-    expect(deriveProject('src/ai/tools/projectResolver.ts')).toBeNull();
+  it.each<Row>([
+    ['tests/specs/ui/home-page/accessibility.spec.ts', 'ui', 'ui path'],
+    ['tests/specs/api/home-page/cors-headers.spec.ts', 'api', 'api path'],
+    ['tests/specs/review/something.spec.ts', 'review', 'review path'],
+    ['some/random/path.spec.ts', null, 'no /specs/ segment'],
+    ['tests/specs/unknown/file.spec.ts', null, 'unknown project dir'],
+    ['./tests/specs/ui/login.spec.ts', 'ui', 'leading ./'],
+    ['.tests/specs/api/users.spec.ts', 'api', 'leading . no slash'],
+    ['/home/user/project/tests/specs/ui/dashboard.spec.ts', 'ui', 'absolute-looking'],
+    ['tests/specs/api/seller/products-certificate.spec.ts', 'api', 'deeply nested'],
+    ['', null, 'empty string'],
+    ['src/ai/tools/projectResolver.ts', null, 'no /specs/ segment'],
+  ])('deriveProject(%p) -> %s (case: %s)', (inputPath, expected, _desc) => {
+    expect(deriveProject(inputPath)).toBe(expected);
   });
 });
