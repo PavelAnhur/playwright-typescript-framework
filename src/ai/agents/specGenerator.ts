@@ -1,8 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { basename, join, relative, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
 import { stripFences } from '../tools/stripFences';
+import { normalizeFileName } from '../tools/normalizeFileName';
 import {
   buildSpecGeneratorUser,
   specGeneratorSystem,
@@ -52,7 +53,7 @@ function parseOutput(raw: string): SpecGeneratorOutput {
   }
   // Normalize to bare filename — strips any directory component so the write
   // always lands inside targetDir even when the model returns a path-shaped name.
-  const bareFileName = basename(fileName);
+  const bareFileName = normalizeFileName(fileName);
   // Path/traversal check is now redundant defense-in-depth (basename already
   // stripped any directory), but kept as an explicit invariant.
   if (/[/\\]/.test(bareFileName) || bareFileName.includes('..')) {

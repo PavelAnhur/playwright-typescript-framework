@@ -1,9 +1,9 @@
 import { writeFile } from 'node:fs/promises';
-import { basename } from 'node:path';
 import { callModel } from '../dshClient';
 import type { SpecGeneratorInput } from '../prompts/specGenerator';
 import { buildSpecRefinerUser, specRefinerSystem } from '../prompts/specGenerator';
 import { logRefineAttempt } from '../tools/refineLogger';
+import { normalizeFileName } from '../tools/normalizeFileName';
 import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTest';
 import { validateTestSelectors, type ValidationResult } from '../tools/validateTestSelectors';
 import { generateSpec } from './specGenerator';
@@ -53,15 +53,13 @@ function parseRefinerOutput(raw: string): SpecRefinerOutput {
   if (typeof fileName !== 'string' || !fileName.endsWith('.spec.ts')) {
     throw new Error(`Invalid fileName from spec refiner: ${String(fileName)}`);
   }
-  if (/[/\\]/.test(fileName) || fileName.includes('..')) {
-    throw new Error(
-      `Refusing fileName with path separators or traversal sequences: ${String(fileName)}`
-    );
-  }
+  // Normalize to bare filename — strips any directory component so the write
+  // always lands inside targetDir even when the model returns a path-shaped name.
+  const bareFileName = normalizeFileName(fileName);
   if (typeof code !== 'string' || code.length === 0) {
     throw new Error('Empty code from spec refiner');
   }
-  return { fileName, code };
+  return { fileName: bareFileName, code };
 }
 
 interface FinalizeInput {
@@ -145,7 +143,7 @@ async function runRefinementIteration(
   });
   const parsed = parseRefinerOutput(modelResult.content);
   const newCode = parsed.code;
-  const fileName = basename(currentOutputPath);
+  const fileName = normalizeFileName(currentOutputPath);
   await writeFile(currentOutputPath, newCode, 'utf8');
   const newTestResult = await runPlaywrightTest(currentOutputPath);
   recordAndLogAttempt(

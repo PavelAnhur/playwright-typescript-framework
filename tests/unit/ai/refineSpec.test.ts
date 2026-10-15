@@ -97,13 +97,13 @@ describe('refineSpec - finalFileName matches written file (Item 2)', () => {
   });
 });
 
-describe('refineSpec - parser policy rejects dangerous fileName (Item 1)', () => {
-  function setupMocks(badFileName: string) {
+describe('refineSpec - parser normalizes path-shaped fileName', () => {
+  function setupMocks(normalizedFileName: string) {
     const cmCalls: CallResult[] = [
       createMockResult(
         JSON.stringify({ fileName: 'checkout-button-disabled.spec.ts', code: 'initial code' })
       ),
-      createMockResult(JSON.stringify({ fileName: badFileName, code: 'refined code' })),
+      createMockResult(JSON.stringify({ fileName: normalizedFileName, code: 'refined code' })),
     ];
     let cmIndex = 0;
     vi.mocked(callModel).mockImplementation(async () => cmCalls[cmIndex++] as CallResult);
@@ -134,28 +134,21 @@ describe('refineSpec - parser policy rejects dangerous fileName (Item 1)', () =>
     );
   }
 
-  it('should reject fileName with ../ traversal sequence', async () => {
-    setupMocks('../x.spec.ts');
-    await expect(refineSpec(mockInput)).rejects.toThrow(
-      'Refusing fileName with path separators or traversal sequences'
-    );
+  it('should not reject a path-shaped fileName from the refiner model output', async () => {
+    setupMocks('tests/specs/review/nested-deep.spec.ts');
+    const result = await refineSpec(mockInput);
+    expect(result.passed).toBe(true);
+    expect(result.finalOutputPath).toContain('tests/specs/review/');
   });
 
-  it('should reject fileName with forward slash path separator', async () => {
-    setupMocks('nested/deep.spec.ts');
-    await expect(refineSpec(mockInput)).rejects.toThrow(
-      'Refusing fileName with path separators or traversal sequences'
-    );
+  it('should not reject a traversal fileName from the refiner model output', async () => {
+    setupMocks('../../evil.spec.ts');
+    const result = await refineSpec(mockInput);
+    expect(result.passed).toBe(true);
+    expect(result.finalOutputPath).toContain('tests/specs/review/');
   });
 
-  it('should reject fileName with backslash path separator', async () => {
-    setupMocks('nested\\deep.spec.ts');
-    await expect(refineSpec(mockInput)).rejects.toThrow(
-      'Refusing fileName with path separators or traversal sequences'
-    );
-  });
-
-  it('should accept a flat fileName that passes all checks', async () => {
+  it('should accept a flat fileName unchanged', async () => {
     setupMocks('checkout-button-disabled.spec.ts');
     const result = await refineSpec(mockInput);
     expect(result.finalFileName).toBe(basename(result.finalOutputPath));
