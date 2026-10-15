@@ -302,18 +302,22 @@ Origin: traversal write outside `tests/specs/review/` (reproduced by execution,
 ### spec-generator returns path-shaped fileName intermittently
 
 - **Where:** `src/ai/prompts/specGenerator.ts` (the fileName instruction) and
-  `src/ai/agents/specGenerator.ts` parseOutput (the containment guard).
+  `src/ai/agents/specGenerator.ts` parseOutput (basename normalization + guard).
 - **What:** the model intermittently returns a path-shaped fileName
   (`tests/specs/review/checkout-empty-cart.spec.ts`) instead of a bare filename.
-  Observed twice in live `ai:refine` runs. The guard in `parseOutput` rejects it
-  correctly — the CLI fails loudly with "Refusing fileName with path separators or
-  traversal sequences", no file is written outside targetDir.
-- **Fix applied:** the prompt was tightened to require a BARE filename with an explicit
-  negative example (commit `1eca30e8`).
-- **Residual:** model output is probabilistic; the tightened prompt reduces but cannot
-  deterministically eliminate the path-return. There is no unit test for prompt
+  Observed three times in live `ai:refine` runs. A prompt tightening (commit
+  `1eca30e8`) was attempted but did not reduce the behavior — all three post-fix
+  runs still returned paths.
+- **Actual fix:** `parseOutput` now normalizes `fileName` to its basename via
+  `node:path/basename`, so any path-shaped or traversal name is reduced to a bare
+  name before writing. The write always lands inside `tests/specs/review/`. The
+  original path/traversal check remains as redundant defense-in-depth with a comment
+  noting its redundancy. `assertPathInsideTargetDir` still runs as an additional
+  invariant.
+- **Residual:** model output is probabilistic; the normalizer makes it harmless
+  regardless of what shape the model returns. There is no unit test for prompt
   compliance (see the "No prompt A/B testing" entry).
-- **Classification:** documented model-variance, guard handles it correctly.
+- **Classification:** documented model-variance, normalizer handles it correctly.
 
 ### refineSpec parser policy — consistency alignment, defense-in-depth
 
