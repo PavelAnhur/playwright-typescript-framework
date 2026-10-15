@@ -1,19 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
+import type { FlakeDetectionResult, FlakeClassification } from '@ai/tools/detectFlake';
 import type { FailureHypothesis } from '@ai/schemas';
 import type { TriagedFailure } from '../../../reporters/aiTriageTypes';
 import { OutputFormatter } from '../../../reporters/outputFormatter';
 
 function makeFixture(
-  hypothesisCategory: string,
-  flakeClassification: string | null
+  hypothesisCategory: FailureHypothesis['category'],
+  flakeClassification: FlakeClassification | null
 ): TriagedFailure {
   const flake: FlakeDetectionResult | null = flakeClassification
     ? {
         spec: 'test.spec.ts',
         suite: null,
-        classification: flakeClassification as any,
+        classification: flakeClassification,
         recommendation: '',
         phases: [],
         totalDurationMs: 0,
@@ -21,7 +21,7 @@ function makeFixture(
     : null;
 
   const hypothesis: FailureHypothesis | null = hypothesisCategory
-    ? { category: hypothesisCategory, hypothesis: 'dummy hypothesis text', confidence: 0 }
+    ? { category: hypothesisCategory, hypothesis: 'dummy hypothesis text', confidence: 'high', evidence: ['placeholder'] }
     : null;
 
   return {
