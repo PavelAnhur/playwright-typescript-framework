@@ -22,29 +22,29 @@ export interface RunOptions {
   retries?: number;
 }
 
-interface PlaywrightJsonTestResult {
+export interface PlaywrightJsonTestResult {
   status: string;
   error?: { message?: string };
 }
 
-interface PlaywrightJsonTest {
+export interface PlaywrightJsonTest {
   results: PlaywrightJsonTestResult[];
 }
 
-interface PlaywrightJsonSpec {
+export interface PlaywrightJsonSpec {
   title: string;
   file?: string;
   line?: number;
   tests: PlaywrightJsonTest[];
 }
 
-interface PlaywrightJsonSuite {
+export interface PlaywrightJsonSuite {
   title: string;
   specs?: PlaywrightJsonSpec[];
   suites?: PlaywrightJsonSuite[];
 }
 
-interface PlaywrightJsonReport {
+export interface PlaywrightJsonReport {
   suites?: PlaywrightJsonSuite[];
 }
 
@@ -111,7 +111,7 @@ async function findLatestErrorContext(): Promise<string | null> {
   }
 }
 
-function parseJsonReport(stdout: string): PlaywrightJsonReport | null {
+export function parseJsonReport(stdout: string): PlaywrightJsonReport | null {
   const idx = stdout.indexOf('{\n  "config":');
   if (idx === -1) return null;
   try {
@@ -121,7 +121,7 @@ function parseJsonReport(stdout: string): PlaywrightJsonReport | null {
   }
 }
 
-function collectFailures(
+export function collectFailures(
   suite: PlaywrightJsonSuite,
   prefix: string,
   out: { title: string; message: string | null }[]
@@ -154,7 +154,7 @@ function collectFailures(
   }
 }
 
-function extractFailures(report: PlaywrightJsonReport): {
+export function extractFailures(report: PlaywrightJsonReport): {
   names: string[];
   firstMessage: string | null;
 } {

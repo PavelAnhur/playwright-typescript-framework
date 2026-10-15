@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
+import { stripFences } from '../tools/stripFences';
 import {
   batchFailureAnalystSystem,
   buildBatchFailureAnalystUser,
@@ -137,11 +138,12 @@ export async function analyzeFailures(
 }
 
 function parseJsonResult(content: string): unknown {
+  const cleaned = stripFences(content);
   try {
-    return JSON.parse(content);
+    return JSON.parse(cleaned);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${content.slice(0, 500)}`, {
+    throw new Error(`Model returned non-JSON output: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`, {
       cause: error,
     });
   }

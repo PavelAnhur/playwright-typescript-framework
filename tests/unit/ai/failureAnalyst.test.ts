@@ -176,3 +176,14 @@ describe('analyzeFailure - output file', () => {
     expect(parsed.sourceContext).toContain('Fails consistently in CI');
   });
 });
+
+describe('analyzeFailure - markdown fence stripping', () => {
+  it('should parse model output wrapped in ```json fences', async () => {
+    const fencedContent = '```json\n' + JSON.stringify(mockResponse) + '\n```';
+    vi.mocked(callModel).mockResolvedValue(createMockResult(fencedContent));
+    const ctx = { testTitle: 'test', testFile: 'test.spec.ts', errorMessage: 'fail' };
+    const result = await analyzeFailure(ctx);
+    expect(result.hypothesis.category).toBe('product_bug');
+    expect(result.hypothesis.confidence).toBe('high');
+  });
+});

@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
+import { stripFences } from '../tools/stripFences';
 import { buildJudgeUser, judgeSystem } from '../prompts/judge';
 import {
   FailureHypothesisSchema,
@@ -98,7 +99,8 @@ async function requestVerdict(inputs: JudgeInputs, triageFile: string): Promise<
   });
   let responseParsed: unknown;
   try {
-    responseParsed = JSON.parse(result.content);
+    const cleaned = stripFences(result.content);
+    responseParsed = JSON.parse(cleaned);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     throw new Error(

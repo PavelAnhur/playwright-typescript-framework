@@ -2,6 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
+import { stripFences } from '../tools/stripFences';
+import { normalizeFileName } from '../tools/normalizeFileName';
 import {
   buildSpecGeneratorUser,
   specGeneratorSystem,
@@ -30,12 +32,13 @@ export function assertPathInsideTargetDir(resolvedOutput: string, resolvedTarget
 }
 
 function parseOutput(raw: string): SpecGeneratorOutput {
+  const cleaned = stripFences(raw);
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(cleaned);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Spec generator returned non-JSON: ${msg}\n\nRaw:\n${raw.slice(0, 500)}`, {
+    throw new Error(`Spec generator returned non-JSON: ${msg}\n\nRaw:\n${cleaned.slice(0, 500)}`, {
       cause: error,
     });
   }
@@ -48,15 +51,20 @@ function parseOutput(raw: string): SpecGeneratorOutput {
   if (typeof fileName !== 'string' || !fileName.endsWith('.spec.ts')) {
     throw new Error(`Invalid fileName from spec generator: ${String(fileName)}`);
   }
-  if (/[/\\]/.test(fileName) || fileName.includes('..')) {
+  // Normalize to bare filename — strips any directory component so the write
+  // always lands inside targetDir even when the model returns a path-shaped name.
+  const bareFileName = normalizeFileName(fileName);
+  // Path/traversal check is now redundant defense-in-depth (basename already
+  // stripped any directory), but kept as an explicit invariant.
+  if (/[/\\]/.test(bareFileName) || bareFileName.includes('..')) {
     throw new Error(
-      `Refusing fileName with path separators or traversal sequences: ${String(fileName)}`
+      `Refusing fileName with path separators or traversal sequences: ${String(bareFileName)}`
     );
   }
   if (typeof code !== 'string' || code.length === 0) {
     throw new Error('Empty code from spec generator');
   }
-  return { fileName, code };
+  return { fileName: bareFileName, code };
 }
 
 export async function generateSpec(input: SpecGeneratorInput): Promise<GeneratedSpec> {

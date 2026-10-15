@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
+import { stripFences } from '../tools/stripFences';
 import {
   buildRequirementsAnalystUser,
   requirementsAnalystSystem,
@@ -9,19 +10,6 @@ import {
 import { RequirementsAnalysisSchema, type RequirementsAnalysis } from '../schemas';
 
 const AGENT = 'requirements-analyst';
-
-/**
- * Strips common markdown fences and whitespace that models sometimes wrap
- * around JSON output despite instructions not to.
- */
-function stripFences(text: string): string {
-  const trimmed = text.trim();
-  const fenceMatch = trimmed.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/);
-  if (fenceMatch && fenceMatch[1] !== undefined) {
-    return fenceMatch[1].trim();
-  }
-  return trimmed;
-}
 
 function toYaml(analysis: RequirementsAnalysis): string {
   const lines: string[] = [];

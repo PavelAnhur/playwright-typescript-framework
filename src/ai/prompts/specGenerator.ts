@@ -19,7 +19,7 @@ RULES — non-negotiable:
 Output format:
 - Return ONLY valid JSON. No markdown fences, no prose outside the JSON.
 - The JSON must have exactly two fields: \\\`fileName\\\` and \\\`code\\\`.
-- \\\`fileName\\\` is kebab-case, ending in \\\`.spec.ts\\\`.
+- \\\`fileName\\\` is a BARE filename — no directory, no path separators. Kebab-case, ending in \\\`.spec.ts\\\`. Example: \\\`checkout-empty-cart.spec.ts\\\` (NOT \\\`tests/specs/review/checkout-empty-cart.spec.ts\\\`).
 - \\\`code\\\` is the full file content as a single string, including imports.
 
 Output shape:

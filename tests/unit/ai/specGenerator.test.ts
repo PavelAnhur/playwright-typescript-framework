@@ -55,32 +55,38 @@ describe('generateSpec - happy path', () => {
   });
 });
 
-describe('generateSpec - path traversal guard', () => {
-  it('should refuse fileName with ../ traversal sequence', async () => {
+describe('generateSpec - path normalization', () => {
+  it('should normalize a path-shaped fileName to its bare name', async () => {
     vi.mocked(callModel).mockResolvedValue(
-      createMockResult(JSON.stringify({ fileName: '../__traversal_repro__.spec.ts', code: 'x' }))
+      createMockResult(
+        JSON.stringify({ fileName: 'tests/specs/review/checkout-empty-cart.spec.ts', code: 'x' })
+      )
     );
-    await expect(generateSpec(mockInput)).rejects.toThrow(
-      'Refusing fileName with path separators or traversal sequences'
-    );
+    const result = await generateSpec(mockInput);
+    expect(result.fileName).toBe('checkout-empty-cart.spec.ts');
+    expect(result.outputPath).toContain('tests/specs/review/checkout-empty-cart.spec.ts');
+    expect(writeFile).toHaveBeenCalledTimes(1);
+    const writeCalls = vi.mocked(writeFile).mock.calls;
+    const writtenPath = writeCalls[0]?.[0] as string;
+    expect(writtenPath).toContain('tests/specs/review/');
   });
 
-  it('should refuse fileName with forward slash path separator', async () => {
+  it('should normalize a traversal fileName to its bare name, keeping it inside targetDir', async () => {
     vi.mocked(callModel).mockResolvedValue(
-      createMockResult(JSON.stringify({ fileName: 'nested/deep.spec.ts', code: 'x' }))
+      createMockResult(JSON.stringify({ fileName: '../../evil.spec.ts', code: 'x' }))
     );
-    await expect(generateSpec(mockInput)).rejects.toThrow(
-      'Refusing fileName with path separators or traversal sequences'
-    );
+    const result = await generateSpec(mockInput);
+    expect(result.fileName).toBe('evil.spec.ts');
+    expect(result.outputPath).toContain('tests/specs/review/evil.spec.ts');
+    const writeCalls = vi.mocked(writeFile).mock.calls;
+    const writtenPath = writeCalls[0]?.[0] as string;
+    expect(writtenPath).toContain('tests/specs/review/');
   });
 
-  it('should refuse fileName with backslash path separator', async () => {
-    vi.mocked(callModel).mockResolvedValue(
-      createMockResult(JSON.stringify({ fileName: 'nested\\deep.spec.ts', code: 'x' }))
-    );
-    await expect(generateSpec(mockInput)).rejects.toThrow(
-      'Refusing fileName with path separators or traversal sequences'
-    );
+  it('should leave a bare fileName unchanged', async () => {
+    vi.mocked(callModel).mockResolvedValue(createMockResult());
+    const result = await generateSpec(mockInput);
+    expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
   });
 });
 
@@ -113,5 +119,15 @@ describe('assertPathInsideTargetDir - invariant isolation', () => {
     const resolvedTarget = '/home/user/project/tests/specs/review';
     const resolvedOutput = '/home/user/project/tests/specs/review/login.spec.ts';
     expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).not.toThrow();
+  });
+});
+
+describe('generateSpec - markdown fence stripping', () => {
+  it('should parse model output wrapped in ```json fences', async () => {
+    const fencedContent = '```json\n' + JSON.stringify(validSpec) + '\n```';
+    vi.mocked(callModel).mockResolvedValue(createMockResult(fencedContent));
+    const result = await generateSpec(mockInput);
+    expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
+    expect(result.code).toBe(validSpec.code);
   });
 });
