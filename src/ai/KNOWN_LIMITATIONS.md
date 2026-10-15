@@ -276,44 +276,53 @@ The agents analyze text and code. They do not drive a browser on their own to di
 
 No LangChain, no CrewAI, no AutoGen. Four functions, one HTTP client, three zod schemas. The total surface is small enough to reason about without abstractions.
 
-### specGenerator path containment — defense-in-depth, unreachable by design
+### specGenerator path containment — defense-in-depth, rarely reachable
 
-`src/ai/agents/specGenerator.ts` enforces spec-file writes with two layers:
+`src/ai/agents/specGenerator.ts` enforces spec-file writes with three layers:
 
-1. **Policy (`parseOutput`)** — rejects any model-supplied `fileName` containing
-   `/`, `\`, or `..`, and requires a `.spec.ts` suffix. This is the _authoritative_
-   policy: spec output is flat only — no subdirectories under `tests/specs/review/`.
-2. **Defense-in-depth (`assertPathInsideTargetDir`)** — asserts the resolved output
+1. **Normalization (`parseOutput`)** — normalizes any model-supplied `fileName` to its
+   bare basename via `normalizeFileName` (shared helper in `src/ai/tools/normalizeFileName.ts`,
+   also used by `refineSpec.ts` parseRefinerOutput), then requires a `.spec.ts` suffix.
+   This is the _authoritative_ policy: spec output is flat only — no subdirectories under
+   `tests/specs/review/`.
+2. **Redundant guard** — a path/traversal check on the already-normalized name
+   (`/[/\\]/.test(bareFileName) || bareFileName.includes('..')`). This is now
+   effectively dead code: basename has already stripped any directory component, so a
+   sanitized name cannot contain `/`, `\`, or `..`. Kept as an explicit invariant.
+3. **Defense-in-depth (`assertPathInsideTargetDir`)** — asserts the resolved output
    path is inside the resolved target dir (rejects `../` and `..`).
 
-**Scope note:** under the flat-only policy, layer 2 is **unreachable via
-`generateSpec`** — layer 1 rejects every input that could escape, so no
-policy-passing `fileName` ever triggers the containment throw. The isolation tests
-in `tests/unit/ai/specGenerator.test.ts` call `assertPathInsideTargetDir` directly
-to cover its logic. Do **not** delete layer 2 as dead code: it exists so that if
-layer 1 is ever loosened (e.g. to allow nested spec paths), writes remain confined.
-Its escape branch is covered only by direct unit tests, not by any `generateSpec`
+**Scope note:** under the normalization policy, layer 3 is **rarely reachable via
+`generateSpec`** — layer 1 normalizes every input to a bare name, and layer 2
+catches the theoretical edge case where a bare name still contains separators.
+The isolation tests in `tests/unit/ai/specGenerator.test.ts` call
+`assertPathInsideTargetDir` directly to cover its logic. Do **not** delete layer 3:
+it exists so that if layer 1 or layer 2 ever fails, writes remain confined. Its
+escape branch is covered only by direct unit tests, not by any `generateSpec`
 integration test — a `generateSpec`-level mutation test for it is impossible while
-the policy is flat-only.
+the policy is normalization-only.
 
 Origin: traversal write outside `tests/specs/review/` (reproduced by execution,
-2026-10-13), fixed in commit `1b290b6a`.
+2026-10-13), fixed in commit `1b290b6a`. Normalization added in commit `129ada0d`.
 
 ### spec-generator returns path-shaped fileName intermittently
 
-- **Where:** `src/ai/prompts/specGenerator.ts` (the fileName instruction) and
-  `src/ai/agents/specGenerator.ts` parseOutput (basename normalization + guard).
+- **Where:** `src/ai/prompts/specGenerator.ts` (the fileName instruction),
+  `src/ai/agents/specGenerator.ts` parseOutput, `src/ai/agents/refineSpec.ts`
+  parseRefinerOutput — both use the shared `normalizeFileName` helper from
+  `src/ai/tools/normalizeFileName.ts`.
 - **What:** the model intermittently returns a path-shaped fileName
   (`tests/specs/review/checkout-empty-cart.spec.ts`) instead of a bare filename.
   Observed three times in live `ai:refine` runs. A prompt tightening (commit
   `1eca30e8`) was attempted but did not reduce the behavior — all three post-fix
   runs still returned paths.
-- **Actual fix:** `parseOutput` now normalizes `fileName` to its basename via
-  `node:path/basename`, so any path-shaped or traversal name is reduced to a bare
-  name before writing. The write always lands inside `tests/specs/review/`. The
-  original path/traversal check remains as redundant defense-in-depth with a comment
-  noting its redundancy. `assertPathInsideTargetDir` still runs as an additional
-  invariant.
+- **Actual fix:** both `parseOutput` and `parseRefinerOutput` now normalize
+  `fileName` to its basename via the shared `normalizeFileName` helper, so any
+  path-shaped or traversal name is reduced to a bare name before writing. The write
+  always lands inside `tests/specs/review/`. The redundant path/traversal guard in
+  specGenerator remains as defense-in-depth; `assertPathInsideTargetDir` still runs
+  as an additional invariant. See the "specGenerator path containment" entry for
+  layer details.
 - **Residual:** model output is probabilistic; the normalizer makes it harmless
   regardless of what shape the model returns. There is no unit test for prompt
   compliance (see the "No prompt A/B testing" entry).
