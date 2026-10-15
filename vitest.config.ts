@@ -17,7 +17,11 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
-          include: ['./tests/unit/utils/**/*.test.ts', './tests/unit/ai/**/*.test.ts', './tests/unit/reporters/**/*.test.ts'],
+          include: [
+            './tests/unit/utils/**/*.test.ts',
+            './tests/unit/ai/**/*.test.ts',
+            './tests/unit/reporters/**/*.test.ts',
+          ],
         },
         resolve: {
           alias: {

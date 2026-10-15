@@ -21,7 +21,12 @@ function makeFixture(
     : null;
 
   const hypothesis: FailureHypothesis | null = hypothesisCategory
-    ? { category: hypothesisCategory, hypothesis: 'dummy hypothesis text', confidence: 'high', evidence: ['placeholder'] }
+    ? {
+        category: hypothesisCategory,
+        hypothesis: 'dummy hypothesis text',
+        confidence: 'high',
+        evidence: ['placeholder'],
+      }
     : null;
 
   return {
@@ -44,7 +49,7 @@ describe('OutputFormatter flake-note for product_bug suspects', () => {
 
     formatter.print([fixture], 0, '/tmp/summary.json');
 
-    const output = mock.mock.calls.map((c) => c[0] as string).join('\n');
+    const output = mock.mock.calls.map(c => c[0] as string).join('\n');
 
     expect(output).not.toContain('likely not a product bug');
     expect(output).not.toContain('flake detected');
@@ -60,7 +65,7 @@ describe('OutputFormatter flake-note for product_bug suspects', () => {
 
     formatter.print([fixture], 0, '/tmp/summary.json');
 
-    const output = mock.mock.calls.map((c) => c[0] as string).join('\n');
+    const output = mock.mock.calls.map(c => c[0] as string).join('\n');
 
     expect(output).toContain('flake detected: flake_parallel');
 

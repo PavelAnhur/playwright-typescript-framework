@@ -45,7 +45,10 @@ export class OutputFormatter {
     console.log('\n  product bug suspects:');
     for (const s of suspects) {
       const flakeNote =
-        s.flake !== null && ['flake_parallel', 'flake_serial_only', 'flake_parallel_suite'].includes(s.flake.classification)
+        s.flake !== null &&
+        ['flake_parallel', 'flake_serial_only', 'flake_parallel_suite'].includes(
+          s.flake.classification
+        )
           ? ` (flake detected: ${s.flake.classification} — likely not a product bug)`
           : '';
       console.log(`    • ${s.testTitle}${flakeNote}`);

@@ -72,7 +72,7 @@ Missing capabilities that a production harness would have.
 - **Where:** `src/ai/tools/runPlaywrightTest.ts` — `runProcess` lines 66–68 append both `child.stdout` and `child.stderr` to the same `stdout` variable; `parseJsonReport` (line 114) then parses that merged buffer.
 - **What (CONFIRMED):** stderr is non-empty during a `--reporter=json` run. Observed npm notice output on stderr (176 bytes) in a real run.
 - **Observed impact (do NOT overstate):** `parseJsonReport` uses `indexOf` on `'{\n  "config":'` and slices from there, so preceding stderr/stdout chatter is tolerated — the anchor was found at index 263 in a real run and parsing succeeded. The merge is therefore NOT demonstrated to corrupt the parse today.
-- **Residual risk:** if stderr output ever interleaves *within* the JSON body (after the opening brace, before the closing brace), `JSON.parse` would fail and the report would be null, silently emptying `failures.names`. The anchor+slice design is not structurally safe against that.
+- **Residual risk:** if stderr output ever interleaves _within_ the JSON body (after the opening brace, before the closing brace), `JSON.parse` would fail and the report would be null, silently emptying `failures.names`. The anchor+slice design is not structurally safe against that.
 - **Classification:** real code property, observed impact tolerated, latent risk — document, do not fix.
 - **Note:** this is NOT covered by the existing "no tests for the harness" entry, which names JSON parsing generally but not the stream merge.
 
