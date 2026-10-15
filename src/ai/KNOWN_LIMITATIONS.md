@@ -52,13 +52,13 @@ Missing capabilities that a production harness would have.
 - **Fix:** extend the metrics aggregator to sum `totalTokens` from the logs, multiply by the current price per million, and report weekly totals.
 - **Priority:** low
 
-### No tests for the harness itself
+### Prompt builders and IO pieces are untested
 
-- **Where:** not implemented
-- **What:** the agents, tools, and reporter engines are not covered by automated tests. `detectFlake`, `flakeDecisionGate`, `runPlaywrightTest`, and the reporter engines have no unit or integration tests in the repository. The CLI scripts have been exercised by hand, and frozen artifacts exist in `fixtures/sample-output/`, but there is no regression suite that runs on commit.
-- **Why:** the harness grew bottom-up during demo preparation. Each piece was validated interactively, and the frozen artifacts served as informal baselines. Formal tests were deferred and never added.
-- **Fix:** start with the pure functions — `detectFlake` (mock `runPlaywrightTest` and assert classification logic), `flakeDecisionGate.shouldConsider` (table-driven tests over category/confidence combos), `runPlaywrightTest` JSON parsing (feed fixed JSON, assert extracted fields). Then add a snapshot test for the reporter summary output. Prompt regression testing is a separate, larger effort — see the "No prompt A/B testing" entry.
-- **Priority:** high
+- **Where:** `src/ai/prompts/specGenerator.ts` (`buildSpecGeneratorUser`, `buildSpecRefinerUser`), `src/ai/prompts/requirementsAnalyst.ts` (`buildRequirementsAnalystUser`), `src/ai/prompts/judge.ts` (`buildJudgeUser`), `src/ai/prompts/failureAnalyst.ts` (`buildFailureAnalystUser`, `buildBatchFailureAnalystUser`) — pure functions; `src/ai/dshClient.ts` (`callModel`, `logCall`), `src/ai/auth/AuthContextManager.ts`, `src/ai/agents/step.ts` (`Step`), `reporters/allure.ts` (`addAllure*`).
+- **What:** the harness logic (detectFlake, flakeDecisionGate, runPlaywrightTest JSON parsing, reporter engines, validateTestSelectors, deriveProject, refineLogger, agents) is covered by ~202 unit tests across 18 files. What remains untested are: (a) the six prompt-builder functions — they assemble message arrays from inputs; a regression in their output shape or content would silently degrade model results with no test catching it; (b) IO/runtime pieces by design — callModel talks to an HTTP provider, logCall writes to disk, AuthContextManager manages tokens, Step drives UI actions, addAllure* write to the Allure directory. These are integration/E2E concerns, not unit-testable without spinning up real services.
+- **Why:** prompt builders were validated interactively during development — each was checked against a live model call. The IO pieces require external dependencies (provider, filesystem, browser, Allure) that are out of scope for unit tests. Prompt regression testing is a separate, larger effort — see the "No prompt A/B testing" entry.
+- **Fix (prompts):** unit-test each builder with fixed input objects and assert the resulting message array structure (role, content length, presence of key sections). Snapshot the rendered system/user messages for one representative case per builder; compare snapshots on change. This catches structural regressions (missing section, wrong role order) without needing a model call.
+- **Priority:** medium
 
 ### runPlaywrightTest retries option is unreachable
 
