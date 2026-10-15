@@ -17,7 +17,7 @@ export interface RefineLogEntry {
 const runId = new Date().toISOString().replace(/[:.]/g, '-');
 
 let dirReady: Promise<void> | null = null;
-let logFile: string | null = null;
+const logFiles = new Map<string, string>();
 
 async function ensureDir(): Promise<void> {
   if (!dirReady) {
@@ -27,10 +27,10 @@ async function ensureDir(): Promise<void> {
 }
 
 function resolveLogFile(caseId: string): string {
-  if (logFile === null) {
-    logFile = join(aiConfig.logsDir, `refine-${caseId}-${runId}.jsonl`);
+  if (!logFiles.has(caseId)) {
+    logFiles.set(caseId, join(aiConfig.logsDir, `refine-${caseId}-${runId}.jsonl`));
   }
-  return logFile;
+  return logFiles.get(caseId)!;
 }
 
 export async function logRefineAttempt(entry: RefineLogEntry): Promise<void> {
