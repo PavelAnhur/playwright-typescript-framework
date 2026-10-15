@@ -3,6 +3,14 @@
     "playwright": {
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
+    },
+    "local-terminal": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "local-terminal-mcp"],
+      "env": {
+        "ALLOW_COMMANDS": "^git\\s+(status|diff|log|show)\\b,^npm\\s+run\\s+(test:unit:run|typecheck)\\b"
+      }
     }
   }
 }
