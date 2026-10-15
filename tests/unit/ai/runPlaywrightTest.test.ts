@@ -51,7 +51,7 @@ const buildStdout = (report: PlaywrightJsonReport): string => {
 };
 
 // Fixture: valid report object matching Playwright's --reporter=json shape.
-const validReport: PlaywrightJsonReport = {
+const validReport = {
   config: {},
   suites: [
     {
@@ -64,9 +64,7 @@ const validReport: PlaywrightJsonReport = {
           tests: [
             { results: [{ status: 'passed' }] },
             {
-              results: [
-                { status: 'failed', error: { message: 'Element not found' } },
-              ],
+              results: [{ status: 'failed', error: { message: 'Element not found' } }],
             },
           ],
         },
@@ -95,7 +93,7 @@ const validReport: PlaywrightJsonReport = {
       ],
     },
   ],
-};
+} as unknown as PlaywrightJsonReport;
 
 // ── parseJsonReport ─────────────────────────────────────────────────────────
 
@@ -261,8 +259,12 @@ describe('extractFailures', () => {
   it('should handle multiple top-level suites, collecting failures from all', () => {
     const report: PlaywrightJsonReport = {
       suites: [
-        makeSuite('tests/specs/ui/a.spec.ts', [makeSpec('a-fail', 'failed', 'err-a', 'tests/specs/ui/a.spec.ts')]),
-        makeSuite('tests/specs/ui/b.spec.ts', [makeSpec('b-fail', 'failed', 'err-b', 'tests/specs/ui/b.spec.ts')]),
+        makeSuite('tests/specs/ui/a.spec.ts', [
+          makeSpec('a-fail', 'failed', 'err-a', 'tests/specs/ui/a.spec.ts'),
+        ]),
+        makeSuite('tests/specs/ui/b.spec.ts', [
+          makeSpec('b-fail', 'failed', 'err-b', 'tests/specs/ui/b.spec.ts'),
+        ]),
       ],
     };
     const result = extractFailures(report);
