@@ -315,3 +315,20 @@ This mirrors the specGenerator unreachable-guard entry: a real code property
 that cannot be exercised in production.
 
 Origin: refinement decomposition, commit `9ded8184`.
+
+### refineLogger caseId interpolated into filename without sanitization
+
+- **Where:** `src/ai/tools/refineLogger.ts`, `resolveLogFile`, line 31 — `caseId`
+  is interpolated directly into `` `refine-${caseId}-${runId}.jsonl` `` with no
+  validation or sanitization.
+- **Why it is not a live bug:** the `caseId` reaching this code originates from
+  parsed requirements YAML (`testCase.id` via `refineSpec` → `logRefineAttempt`),
+  not from a raw MCP tool argument. The raw client string is used only for the YAML
+  lookup `parsed.cases.find(c => c.id === caseId)`, and the value threaded onward is
+  `testCase.id` from the YAML structure.
+- **Residual risk:** if a requirements YAML ever contains a case id with `/` or `..`,
+  the resolved path could escape `aiConfig.logsDir`. Trust in the YAML is the only
+  barrier.
+- **Classification:** defense-in-depth — document, do not fix (rule 8). A sanitizing
+  guard would be appropriate if `caseId` could originate from an untrusted source;
+  today it is trusted input from the YAML pipeline.
