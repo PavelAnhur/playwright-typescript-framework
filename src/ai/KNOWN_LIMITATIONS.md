@@ -200,7 +200,7 @@ Working code that should be rewritten or reconfigured.
 ### No npm script for the flake detector in CI mode
 
 - **Where:** `package.json`
-- **What:** `npm run ai:flake-detect` runs the CLI. There is no script that runs it with `--fail-on-flake` for use as a CI gate.
+- **What:** `npm run ai:flake-detect` runs the CLI. There is no script that runs it with `--fail-on-non-pass` for use as a CI gate.
 - **Why:** the flag was added recently. No CI use case yet.
 - **Fix:** add `ai:flake-gate` script with the flag. Document the use case in the README.
 - **Priority:** low

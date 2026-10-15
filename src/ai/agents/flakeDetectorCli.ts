@@ -16,13 +16,13 @@ function formatPhaseLine(phase: FlakeDetectionResult['phases'][number]): string 
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const failOnFlake = args.includes('--fail-on-flake');
+  const failOnNonPass = args.includes('--fail-on-non-pass');
   const positional = args.filter(a => !a.startsWith('--'));
   const specPath = positional[0];
   const suitePath = positional[1];
 
   if (!specPath) {
-    console.error('usage: flakeDetectorCli.ts <spec-path> [<suite-path>] [--fail-on-flake]');
+    console.error('usage: flakeDetectorCli.ts <spec-path> [<suite-path>] [--fail-on-non-pass]');
     process.exit(2);
   }
 
@@ -49,7 +49,7 @@ async function main(): Promise<void> {
   console.log('   recommendation:');
   console.log(`   ${result.recommendation}`);
 
-  if (failOnFlake && result.classification !== 'not_reproduced') {
+  if (failOnNonPass && result.classification !== 'not_reproduced') {
     process.exit(1);
   }
 }
