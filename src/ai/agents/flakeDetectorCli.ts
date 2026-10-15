@@ -29,13 +29,17 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const failOnNonPass = args.includes('--fail-on-non-pass');
   const projectOverrideMatch = args.find(a => a.startsWith('--project='));
-  const explicitProject = projectOverrideMatch ? projectOverrideMatch.slice('--project='.length) : null;
+  const explicitProject = projectOverrideMatch
+    ? projectOverrideMatch.slice('--project='.length)
+    : null;
   const positional = args.filter(a => !a.startsWith('--'));
   const specPath = positional[0];
   const suitePath = positional[1];
 
   if (!specPath) {
-    console.error('usage: flakeDetectorCli.ts <spec-path> [<suite-path>] [--project=<name>] [--fail-on-non-pass]');
+    console.error(
+      'usage: flakeDetectorCli.ts <spec-path> [<suite-path>] [--project=<name>] [--fail-on-non-pass]'
+    );
     process.exit(2);
   }
 

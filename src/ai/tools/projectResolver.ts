@@ -4,7 +4,7 @@ export function deriveProject(specPath: string): string | null {
   const normalized = specPath.replace(/^\.?\//, '');
   const match = normalized.match(/\/specs\/([^/]+)/);
   if (!match) return null;
-  const candidate = match[1];
-  if (KNOWN_PROJECTS.includes(candidate)) return candidate;
+  const candidate = match[1] ?? null;
+  if (candidate && KNOWN_PROJECTS.includes(candidate)) return candidate;
   return null;
 }
