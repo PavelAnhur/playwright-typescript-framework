@@ -23,16 +23,13 @@ describe('shouldConsiderFlake predicate', () => {
     { category: 'environment', confidence: 'low', expected: false },
   ];
 
-  it.each(rows)(
-    '$category + $confidence → $expected',
-    ({ category, confidence, expected }) => {
-      const result = shouldConsiderFlake({
-        category,
-        confidence,
-        hypothesis: 'dummy',
-        evidence: ['x'],
-      });
-      expect(result).toBe(expected);
-    }
-  );
+  it.each(rows)('$category + $confidence → $expected', ({ category, confidence, expected }) => {
+    const result = shouldConsiderFlake({
+      category,
+      confidence,
+      hypothesis: 'dummy',
+      evidence: ['x'],
+    });
+    expect(result).toBe(expected);
+  });
 });

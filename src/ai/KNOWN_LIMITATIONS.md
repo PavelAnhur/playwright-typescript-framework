@@ -146,7 +146,7 @@ Places where similar tasks are handled differently.
 
 ### Two CLI invocation patterns: embedded guard vs separate *Cli.ts files
 
-- **Where:** `src/ai/agents/requirementsAnalyst.ts:86`, `judge.ts:141`, `failureAnalyst.ts:168` embed `if (import.meta.url === \`file://${process.argv[1]}\`)`; `refineSpecCli.ts` and `specGeneratorCli.ts` use separate files instead.
+- **Where:** `src/ai/agents/requirementsAnalyst.ts:86`, `judge.ts:141`, `failureAnalyst.ts:168` embed `if (import.meta.url === \`file://${process.argv[1]}\`)`; `refineSpecCli.ts`and`specGeneratorCli.ts` use separate files instead.
 - **What:** three agents have an inline CLI entrypoint guard; two others use dedicated *Cli.ts modules. Both patterns work under tsx today — `npm run ai:judge` was executed and ran correctly (exit 0, real output), confirming the embedded guard fires in the real invocation.
 - **Why it is a note, not a fix:** the embedded guard depends on `argv[1]` being an absolute realpath, which is true under tsx but not guaranteed under a symlinked install or a different runner. Standardizing would touch six files for marginal gain.
 - **Classification:** consistency/robustness note — document, do not fix.
