@@ -3,6 +3,14 @@ import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
 import { detectFlake } from '@ai/tools/detectFlake';
 import type { TestCase } from '@playwright/test/reporter';
 
+export function shouldConsiderFlake(hypothesis: FailureHypothesis): boolean {
+  const isFlakeCategory = hypothesis.category === 'test_issue' || hypothesis.category === 'flake';
+  const isLowConfidenceProductBug =
+    hypothesis.category === 'product_bug' &&
+    (hypothesis.confidence === 'low' || hypothesis.confidence === 'medium');
+  return isFlakeCategory || isLowConfidenceProductBug;
+}
+
 export class FlakeDecisionGate {
   constructor(
     private readonly enabled: boolean,
@@ -21,7 +29,7 @@ export class FlakeDecisionGate {
     error: string | null;
   }> {
     if (!this.enabled) return { result: null, error: null };
-    if (!this.shouldConsider(hypothesis)) return { result: null, error: null };
+    if (!shouldConsiderFlake(hypothesis)) return { result: null, error: null };
     if (this.runs >= this.maxRuns) {
       console.log(`  ⏭️  ${test.title} → flake detection skipped (cap ${this.maxRuns})`);
       return { result: null, error: null };
@@ -39,14 +47,6 @@ export class FlakeDecisionGate {
       console.log(`     flake detection failed: ${msg.slice(0, 80)}`);
       return { result: null, error: msg };
     }
-  }
-
-  private shouldConsider(hypothesis: FailureHypothesis): boolean {
-    const isFlakeCategory = hypothesis.category === 'test_issue' || hypothesis.category === 'flake';
-    const isLowConfidenceProductBug =
-      hypothesis.category === 'product_bug' &&
-      (hypothesis.confidence === 'low' || hypothesis.confidence === 'medium');
-    return isFlakeCategory || isLowConfidenceProductBug;
   }
 
   private runs = 0;

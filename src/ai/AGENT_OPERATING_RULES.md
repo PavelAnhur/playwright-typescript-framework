@@ -72,6 +72,22 @@ did," a "recommendations for next session," or an offer to continue.
 If you cannot produce the deliverable, reply with the single blocking error and the
 command that produced it. Do not keep trying variations.
 
+### 8. CHECK REACHABILITY BEFORE CALLING SOMETHING A BUG
+
+Before treating a code property as a defect, state whether production can reach it.
+If it cannot, it is defense-in-depth to document, not a bug to fix.
+
+### 9. DO NOT EXPAND SCOPE
+
+The work order names one deliverable. If you believe it requires a change the order did
+not name, STOP AND ASK. Do not make the change.
+
+### 10. TEST-FIRST NEEDS THE BROKEN STATE PRESENT
+
+When a work order is test-first, state whether the broken code is present in the tree.
+If it is not, prove the test's sensitivity by reverting the fix locally, not by committing
+the break.
+
 ---
 
 ## Anti-loop guidance (read this if you feel stuck)
@@ -86,3 +102,16 @@ If you notice you are doing any of these, stop and act:
 
 The failure this file exists to prevent is the loop: an agent that keeps verifying instead
 of finishing. Finishing — or stopping cleanly at a divergence — is the goal.
+
+---
+
+## Why these rules exist
+
+- Rule 8: twice a real code property was treated as a live bug before checking whether
+  production could reach it (the specGenerator containment guard; the refineSpec name
+  reassignment). Both were unreachable by design; both belong in KNOWN_LIMITATIONS, not in
+  a fix.
+- Rule 9: twice a bounded order grew beyond its named deliverable (two orders done as one;
+  an unrequested module mock that forced collateral test edits).
+- Rule 10: a test-first order assumed the broken state was committed; it was not, so the
+  test could not fail. The sensitivity had to be shown by a local revert instead.

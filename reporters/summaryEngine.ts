@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { SummaryFile, TriagedFailure } from './aiTriageTypes';
+import { shouldConsiderFlake } from '@ai/tools/flakeDecisionGate';
 
 export class SummaryEngine {
   constructor(
@@ -37,16 +38,8 @@ export class SummaryEngine {
           t.hypothesis !== null &&
           t.flake === null &&
           t.flakeError === null &&
-          this.shouldConsiderFlake(t.hypothesis)
+          shouldConsiderFlake(t.hypothesis)
       ).length,
     };
-  }
-
-  private shouldConsiderFlake(hypothesis: import('@ai/schemas').FailureHypothesis): boolean {
-    const isFlakeCategory = hypothesis.category === 'test_issue' || hypothesis.category === 'flake';
-    const isLowConfidenceProductBug =
-      hypothesis.category === 'product_bug' &&
-      (hypothesis.confidence === 'low' || hypothesis.confidence === 'medium');
-    return isFlakeCategory || isLowConfidenceProductBug;
   }
 }

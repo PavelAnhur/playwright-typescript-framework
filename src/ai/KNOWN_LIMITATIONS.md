@@ -60,6 +60,22 @@ Missing capabilities that a production harness would have.
 - **Fix:** start with the pure functions — `detectFlake` (mock `runPlaywrightTest` and assert classification logic), `flakeDecisionGate.shouldConsider` (table-driven tests over category/confidence combos), `runPlaywrightTest` JSON parsing (feed fixed JSON, assert extracted fields). Then add a snapshot test for the reporter summary output. Prompt regression testing is a separate, larger effort — see the "No prompt A/B testing" entry.
 - **Priority:** high
 
+### runPlaywrightTest retries option is unreachable
+
+- **Where:** `src/ai/tools/runPlaywrightTest.ts` — `RunOptions.retries` (line 22), loop at line 185.
+- **What:** no caller passes `retries`. Verified by grep: `detectFlake.ts:48` passes `{ project, workers, repeatEach }`; `refineSpec.ts:150` and `refineSpec.ts:174` pass no options object. Default `retries = 0` at line 176 means the loop (`attempt <= retries`) always runs exactly once. The retry semantics are dead code.
+- **Latent caveat:** IF retries were ever wired, the semantics are wrong for the obvious use case ("retry a flaky test"). At line 210, a genuine test failure (`code === 1` with parsed failures) sets `lastResult` and breaks immediately — it never retries. Only non-test-failure exit codes with no parsed report reach the continue path.
+- **Classification:** defense-in-depth — the option is dead, document, do not fix (rule 8).
+
+### runPlaywrightTest merges stderr into the parsed stdout buffer
+
+- **Where:** `src/ai/tools/runPlaywrightTest.ts` — `runProcess` lines 66–68 append both `child.stdout` and `child.stderr` to the same `stdout` variable; `parseJsonReport` (line 114) then parses that merged buffer.
+- **What (CONFIRMED):** stderr is non-empty during a `--reporter=json` run. Observed npm notice output on stderr (176 bytes) in a real run.
+- **Observed impact (do NOT overstate):** `parseJsonReport` uses `indexOf` on `'{\n  "config":'` and slices from there, so preceding stderr/stdout chatter is tolerated — the anchor was found at index 263 in a real run and parsing succeeded. The merge is therefore NOT demonstrated to corrupt the parse today.
+- **Residual risk:** if stderr output ever interleaves _within_ the JSON body (after the opening brace, before the closing brace), `JSON.parse` would fail and the report would be null, silently emptying `failures.names`. The anchor+slice design is not structurally safe against that.
+- **Classification:** real code property, observed impact tolerated, latent risk — document, do not fix.
+- **Note:** this is NOT covered by the existing "no tests for the harness" entry, which names JSON parsing generally but not the stream merge.
+
 ### maison/ is a vendored copy, rebuilt manually
 
 - **Where:** `maison/` (at the repository root of the framework)
@@ -128,6 +144,13 @@ Places where similar tasks are handled differently.
 - **Fix:** pick one style and apply it to both. The `parts.push()` form handles conditional sections more cleanly; the array literal form is more compact when all sections are unconditional. Document the choice in the file's comment header, or in AGENTS.md.
 - **Priority:** low
 
+### Two CLI invocation patterns: embedded guard vs separate *Cli.ts files
+
+- **Where:** `src/ai/agents/requirementsAnalyst.ts:86`, `judge.ts:141`, `failureAnalyst.ts:168` embed `if (import.meta.url === \`file://${process.argv[1]}\`)`; the `refineSpecCli.ts`/`specGeneratorCli.ts` CLI modules use separate files instead.
+- **What:** three agents have an inline CLI entrypoint guard; two others use dedicated *Cli.ts modules. Both patterns work under tsx today — `npm run ai:judge` was executed and ran correctly (exit 0, real output), confirming the embedded guard fires in the real invocation.
+- **Why it is a note, not a fix:** the embedded guard depends on `argv[1]` being an absolute realpath, which is true under tsx but not guaranteed under a symlinked install or a different runner. Standardizing would touch six files for marginal gain.
+- **Classification:** consistency/robustness note — document, do not fix.
+
 ### Judge output-name transform is a single undocumented convention
 
 - **Where:** `src/ai/agents/judge.ts`, `writeVerdict`
@@ -184,7 +207,7 @@ Working code that should be rewritten or reconfigured.
 ### No npm script for the flake detector in CI mode
 
 - **Where:** `package.json`
-- **What:** `npm run ai:flake-detect` runs the CLI. There is no script that runs it with `--fail-on-flake` for use as a CI gate.
+- **What:** `npm run ai:flake-detect` runs the CLI. There is no script that runs it with `--fail-on-non-pass` for use as a CI gate.
 - **Why:** the flag was added recently. No CI use case yet.
 - **Fix:** add `ai:flake-gate` script with the flag. Document the use case in the README.
 - **Priority:** low
@@ -315,3 +338,20 @@ This mirrors the specGenerator unreachable-guard entry: a real code property
 that cannot be exercised in production.
 
 Origin: refinement decomposition, commit `9ded8184`.
+
+### refineLogger caseId interpolated into filename without sanitization
+
+- **Where:** `src/ai/tools/refineLogger.ts`, `resolveLogFile`, line 31 — `caseId`
+  is interpolated directly into `` `refine-${caseId}-${runId}.jsonl` `` with no
+  validation or sanitization.
+- **Why it is not a live bug:** the `caseId` reaching this code originates from
+  parsed requirements YAML (`testCase.id` via `refineSpec` → `logRefineAttempt`),
+  not from a raw MCP tool argument. The raw client string is used only for the YAML
+  lookup `parsed.cases.find(c => c.id === caseId)`, and the value threaded onward is
+  `testCase.id` from the YAML structure.
+- **Residual risk:** if a requirements YAML ever contains a case id with `/` or `..`,
+  the resolved path could escape `aiConfig.logsDir`. Trust in the YAML is the only
+  barrier.
+- **Classification:** defense-in-depth — document, do not fix (rule 8). A sanitizing
+  guard would be appropriate if `caseId` could originate from an untrusted source;
+  today it is trusted input from the YAML pipeline.
