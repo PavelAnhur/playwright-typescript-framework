@@ -37,5 +37,5 @@ export interface ContextInput {
   testTitle: string;
   testFile: string;
   errorMessage: string;
-  stackTrace?: string;
+  stackTrace?: string | undefined;
 }

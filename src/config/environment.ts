@@ -6,7 +6,7 @@ import { z } from 'zod';
 interface ValidatedEnvironment {
   ENV_NAME: string;
   NODE_ENV: string;
-  CI?: boolean;
+  CI?: boolean | undefined;
   MAISON_URL: string;
   MAISON_API_URL: string;
   TEST_BUYER_EMAIL: string;
@@ -15,9 +15,9 @@ interface ValidatedEnvironment {
   TEST_SELLER1_PASSWORD: string;
   TEST_SELLER2_EMAIL: string;
   TEST_SELLER2_PASSWORD: string;
-  DSH_BASE_URL?: string;
-  DSH_MODEL?: string;
-  DSH_API_KEY?: string;
+  DSH_BASE_URL?: string | undefined;
+  DSH_MODEL?: string | undefined;
+  DSH_API_KEY?: string | undefined;
 }
 
 class Environment {

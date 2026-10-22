@@ -11,7 +11,7 @@ export interface LogEntry {
   durationMs: number;
   status: 'ok' | 'error';
   error?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 const runId = new Date().toISOString().replace(/[:.]/g, '-');

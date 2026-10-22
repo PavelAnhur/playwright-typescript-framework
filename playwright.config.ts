@@ -7,7 +7,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: ENV.isCI,
   retries: ENV.isCI ? 2 : 0,
-  workers: ENV.isCI ? 2 : undefined,
+  ...(ENV.isCI ? { workers: 2 } : {}),
   timeout: TIMEOUTS.DOM_CONTENT_LOADED,
   expect: { timeout: TIMEOUTS.LONG },
   reporter: [

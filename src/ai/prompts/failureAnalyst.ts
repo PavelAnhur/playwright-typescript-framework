@@ -61,8 +61,8 @@ export interface FailureContext {
   testTitle: string;
   testFile: string;
   errorMessage: string;
-  stackTrace?: string;
-  extraContext?: string;
+  stackTrace?: string | undefined;
+  extraContext?: string | undefined;
 }
 
 function formatFailureContext(ctx: FailureContext): string {

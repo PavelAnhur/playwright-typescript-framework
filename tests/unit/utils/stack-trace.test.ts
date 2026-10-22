@@ -105,7 +105,7 @@ describe('unit', () => {
       global.Error = class extends originalError {
         constructor() {
           super();
-          this.stack = undefined;
+          delete this.stack;
         }
       } as any;
       expect(() => detectSpecPath()).toThrow();

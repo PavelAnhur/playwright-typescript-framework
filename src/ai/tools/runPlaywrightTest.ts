@@ -40,8 +40,8 @@ export interface PlaywrightJsonSpec {
 
 export interface PlaywrightJsonSuite {
   title: string;
-  specs?: PlaywrightJsonSpec[];
-  suites?: PlaywrightJsonSuite[];
+  specs?: PlaywrightJsonSpec[] | undefined;
+  suites?: PlaywrightJsonSuite[] | undefined;
 }
 
 export interface PlaywrightJsonReport {
