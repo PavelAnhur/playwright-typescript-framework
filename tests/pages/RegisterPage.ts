@@ -61,7 +61,7 @@ export class RegisterPage extends BasePage {
   }
 
   @Step('Wait for registration page to be ready')
-  async waitForLoad(): Promise<void> {
+  override async waitForLoad(): Promise<void> {
     await super.waitForLoad();
     await expect(this.registerForm).toBeAttached();
   }

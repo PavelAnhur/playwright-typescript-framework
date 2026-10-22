@@ -7,7 +7,6 @@ export class HomePage extends BasePage {
   // Navigation
   readonly cartCount: Locator;
   readonly ordersLink: Locator;
-  readonly logoutLink: Locator;
   readonly flash: Locator;
   // Hero Section
   readonly eyebrow: Locator;
@@ -27,12 +26,11 @@ export class HomePage extends BasePage {
   readonly saleBadges: Locator;
   readonly soldoutBadge: Locator;
 
-  constructor(readonly page: Page) {
+  constructor(override readonly page: Page) {
     super(page);
     // Navigation
     this.cartCount = page.getByTestId('cart-count');
     this.ordersLink = page.getByTestId('nav-orders');
-    this.logoutLink = page.getByTestId('logout-link');
     this.flash = page.locator('#flash');
     // Hero Section
     this.eyebrow = page.locator('.eyebrow');
@@ -60,7 +58,7 @@ export class HomePage extends BasePage {
   }
 
   @Step('Wait for home page to be ready')
-  async waitForLoad(): Promise<void> {
+  override async waitForLoad(): Promise<void> {
     await super.waitForLoad();
     await expect(this.brand).toBeVisible();
     await expect(this.catalogue).toBeVisible();
