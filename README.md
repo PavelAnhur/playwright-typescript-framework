@@ -49,7 +49,7 @@ Three design decisions make this different from "call a model and trust the outp
 
 **CI integrates automatically.** A Playwright reporter hooks into the lifecycle and runs the batch triage after every test run. Flake detection is triggered only for promising candidates, with a per-run cap. Output: `test-results/ai-triage-summary.json` plus a terminal summary.
 
-Every agent is also exposed through an MCP server — any MCP-compatible AI client (Klepa AI, Claude Desktop, Cursor) can call them directly. Run the full CLI pipeline with `npm run ai:demo`. Design notes in [`src/ai/README.md`](src/ai/README.md) and frozen sample runs in `fixtures/sample-output/`.
+Every agent is also exposed through an MCP server — any MCP-compatible AI client (Klepa AI, Claude Desktop, Cursor) can call them directly. Run the full CLI pipeline with `npm run ai:demo`. Design notes in [`src/ai/README.md`](src/ai/README.md) and frozen sample runs in `samples/sample-output/`.
 
 ## 📁 Project Structure
 

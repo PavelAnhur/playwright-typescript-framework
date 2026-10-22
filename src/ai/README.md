@@ -46,16 +46,16 @@ This generates a Playwright test for case C2, runs it, and refines it until it p
 
 ## Individual agents
 
-    npm run ai:requirements   # requirements-analyst on fixtures/requirements/checkout.md
-    npm run ai:triage         # failure-analyst on fixtures/failures/checkout-button-disabled.txt
+    npm run ai:requirements   # requirements-analyst on samples/requirements/checkout.md
+    npm run ai:triage         # failure-analyst on samples/failures/checkout-button-disabled.txt
     npm run ai:judge          # judge on the most recent triage output
     npm run ai:refine         # spec-generator + refine loop on a case from a YAML
 
 Each script accepts optional arguments:
 
-    npx tsx src/ai/agents/requirementsAnalyst.ts fixtures/requirements/other.md
-    npx tsx src/ai/agents/failureAnalyst.ts fixtures/failures/other.txt
-    npx tsx src/ai/agents/judge.ts generated-cases/other.triage.json fixtures/failures/other.txt
+    npx tsx src/ai/agents/requirementsAnalyst.ts samples/requirements/other.md
+    npx tsx src/ai/agents/failureAnalyst.ts samples/failures/other.txt
+    npx tsx src/ai/agents/judge.ts generated-cases/other.triage.json samples/failures/other.txt
     npx tsx src/ai/agents/refineSpecCli.ts generated-cases/checkout.yaml C2 3
 
 ## CI reporter (automatic)
@@ -156,9 +156,9 @@ Design decisions worth calling out:
 
 ## Sample output
 
-fixtures/sample-output/ contains frozen examples:
+samples/sample-output/ contains frozen examples:
 
-- checkout.yaml — risks and test cases generated from fixtures/requirements/checkout.md
+- checkout.yaml — risks and test cases generated from samples/requirements/checkout.md
 - checkout-button-disabled.triage.json and checkout-button-disabled.judge.json — a triage of a Playwright failure and the judge's verdict
 - judge-catches-hallucination/ — a case where the failure-analyst invented a concept ("pages") not present in the test or the API, and the judge caught it: 6/10, partially_correct, four hallucinations flagged
 - triage-run/ — a three-failure triage run from the CI reporter

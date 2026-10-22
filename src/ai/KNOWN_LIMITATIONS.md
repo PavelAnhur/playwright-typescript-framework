@@ -41,7 +41,7 @@ Missing capabilities that a production harness would have.
 - **Where:** not implemented
 - **What:** when the analyst classifies a failure incorrectly, there is no mechanism to record "this was wrong, it should have been X." Feedback does not accumulate.
 - **Why:** no UI for it, and the demo scale does not justify the effort yet.
-- **Fix:** a CLI command `npm run ai:feedback -- <triage-id> <correct-category>`. Store under `fixtures/triage-feedback/`. Compare against agent output in the metrics report.
+- **Fix:** a CLI command `npm run ai:feedback -- <triage-id> <correct-category>`. Store under `samples/triage-feedback/`. Compare against agent output in the metrics report.
 - **Priority:** medium
 
 ### No cost tracking across runs
