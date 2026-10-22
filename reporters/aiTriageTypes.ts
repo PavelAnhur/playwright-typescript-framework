@@ -1,6 +1,6 @@
 import type { FailureHypothesis } from '@ai/schemas';
 import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
-import type { TestCase } from '@playwright/test/reporter';
+import type { TestCase, TestResult } from '@playwright/test/reporter';
 
 export interface TriagedFailure {
   testTitle: string;
@@ -30,7 +30,7 @@ export interface ReporterOptions {
 
 export interface RawFailure {
   test: TestCase;
-  result: import('@playwright/test/reporter').TestResult;
+  result: TestResult;
 }
 
 export interface ContextInput {

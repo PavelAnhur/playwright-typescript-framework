@@ -116,7 +116,7 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
       buyerHomePage,
     }) => {
       await buyerHomePage.getProductById(1).click();
-      buyerHomePage.expectUrlToContain('/#/product/1');
+      await buyerHomePage.expectUrlToContain('/#/product/1');
     });
   });
 
@@ -195,7 +195,7 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
   test.describe('Flash Messages', () => {
     test('should show flash message on login', async ({ buyerHomePage }) => {
       await buyerHomePage.logout();
-      (await buyerHomePage.openLoginPage()).loginAsDemoUser('buyer');
+      await (await buyerHomePage.openLoginPage()).loginAsDemoUser('buyer');
       await expect(buyerHomePage.flash).toBeVisible();
       await expect(buyerHomePage.flash).toContainText('Welcome');
     });

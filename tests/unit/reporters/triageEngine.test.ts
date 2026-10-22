@@ -54,7 +54,7 @@ function makeRawFailure(title: string, errMsg: string, stack?: string): RawFailu
     duration: 100,
     annotations: [],
     error: { message: errMsg, stack },
-  } as unknown as import('../../../reporters/aiTriageTypes').RawFailure['result'];
+  } as unknown as RawFailure['result'];
   return { test, result };
 }
 

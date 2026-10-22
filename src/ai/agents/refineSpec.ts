@@ -154,7 +154,7 @@ async function runRefinementIteration(
     currentOutputPath,
     newCode,
     newTestResult
-  );
+  ).catch((err: unknown) => console.error('Failed to record attempt:', err));
   return { code: newCode, passed: newTestResult.passed, fileName };
 }
 
@@ -178,7 +178,7 @@ export async function refineSpec(
     currentOutputPath,
     currentCode,
     testResult
-  );
+  ).catch((err: unknown) => console.error('Failed to record attempt:', err));
   if (testResult.passed) {
     return finalizeResult({
       passed: true,

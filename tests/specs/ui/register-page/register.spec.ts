@@ -2,7 +2,7 @@ import { expect, test } from '@fixtures';
 
 test.describe('Register Page UI', () => {
   test.beforeEach(async ({ registerPage }) => {
-    registerPage.open();
+    await registerPage.open();
   });
 
   test('should display all registration elements', async ({ registerPage }) => {

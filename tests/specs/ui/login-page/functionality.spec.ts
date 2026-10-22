@@ -36,7 +36,7 @@ test.describe('Login Page UI -- Functionality', () => {
     await expect(loginPage.alertContainer).toBeVisible();
     await expect(loginPage.alertContainer).toContainText('Email or password is incorrect.');
     const currentPath = await loginPage.getCurrentPath();
-    addAllureAttachment('Current path', currentPath, ContentType.TEXT);
+    await addAllureAttachment('Current path', currentPath, ContentType.TEXT);
     expect(currentPath).toContain('login');
   });
 
