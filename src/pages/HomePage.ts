@@ -131,12 +131,12 @@ export class HomePage extends BasePage {
 
   @Step('Wait for catalogue to be visible')
   async waitForCatalogue(): Promise<void> {
-    await expect(this.catalogue).toBeVisible();
+    await this.catalogue.waitFor({ state: 'visible' });
   }
 
   @Step('Wait for products to appear')
   async waitForProducts(): Promise<void> {
-    await expect(this.productCards.first()).toBeVisible();
+    await this.productCards.first().waitFor({ state: 'visible' });
   }
 
   @Step('Search for "{0}"')

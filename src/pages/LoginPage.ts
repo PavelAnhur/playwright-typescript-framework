@@ -100,7 +100,7 @@ export class LoginPage extends BasePage {
 
   @Step('Wait for login error message')
   async waitForLoginError(): Promise<void> {
-    await expect(this.alertContainer).toBeVisible();
+    await this.alertContainer.waitFor({ state: 'visible' });
     await expect(this.alertContainer).toContainText(/invalid|incorrect|error/i);
   }
 

@@ -126,6 +126,6 @@ export class RegisterPage extends BasePage {
 
   @Step('Wait for registration error message')
   async waitForRegistrationError(): Promise<void> {
-    await expect(this.alertContainer).toBeVisible();
+    await this.alertContainer.waitFor({ state: 'visible' });
   }
 }
