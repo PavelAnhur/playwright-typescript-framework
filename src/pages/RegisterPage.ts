@@ -2,7 +2,7 @@ import { TIMEOUTS } from '@config/timeouts';
 import { type Locator, type Page, expect } from '@playwright/test';
 import type { Account } from '@src/types/account';
 import { BasePage } from './BasePage';
-import { Step } from '@utils/step-decorator';
+import { Step } from '@utils/stepDecorator';
 
 export interface RegisterData extends Account {
   firstName: string;

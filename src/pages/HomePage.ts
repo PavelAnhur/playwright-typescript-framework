@@ -1,5 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
-import { Step } from '@utils/step-decorator';
+import { Step } from '@utils/stepDecorator';
 import { BasePage } from './BasePage';
 import { LoginPage } from './LoginPage';
 

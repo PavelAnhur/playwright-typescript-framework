@@ -4,7 +4,7 @@ import { LoginPage } from '@pages/LoginPage';
 import { test as base, type Browser } from '@playwright/test';
 import type { Account } from '@src/types/account';
 import type { StorageState } from '@src/types/storage-state';
-import { readJsonFile } from '@utils/file-utils';
+import { readJsonFile } from '@utils/fileUtils';
 import fs from 'fs';
 import path from 'path';
 

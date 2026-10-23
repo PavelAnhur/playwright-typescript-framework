@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { detectSpecPath } from '@utils/stack-trace';
+import { detectSpecPath } from '@utils/stackTrace';
 
 describe('unit', () => {
   describe('detectSpecPath', () => {

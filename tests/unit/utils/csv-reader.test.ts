@@ -1,10 +1,10 @@
-import { getCsvData } from '@utils/csv-reader';
-import { readFile } from '@utils/file-utils';
-import { buildCsvFilePath } from '@utils/path-utils';
+import { getCsvData } from '@utils/csvReader';
+import { readFile } from '@utils/fileUtils';
+import { buildCsvFilePath } from '@utils/pathUtils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@utils/file-utils');
-vi.mock('@utils/path-utils');
+vi.mock('@utils/fileUtils');
+vi.mock('@utils/pathUtils');
 
 describe('unit', () => {
   const mockSpecFilePath = '/path/to/spec/file.spec.ts';
