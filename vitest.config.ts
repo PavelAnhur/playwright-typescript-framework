@@ -11,7 +11,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['tests/utils/**/*.ts'],
+      include: ['src/utils/**/*.ts'],
     },
     projects: [
       {
@@ -25,7 +25,7 @@ export default defineConfig({
         },
         resolve: {
           alias: {
-            '@utils': path.resolve(__dirname, './tests/utils'),
+            '@utils': path.resolve(__dirname, './src/utils'),
             '@config': path.resolve(__dirname, './src/config'),
             '@types': path.resolve(__dirname, './src/types'),
             '@ai': path.resolve(__dirname, './src/ai'),
