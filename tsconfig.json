@@ -34,7 +34,7 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@fixtures": ["./tests/fixtures/index.ts"],
+      "@fixtures": ["./src/fixtures/index.ts"],
       "@pages/*": ["./src/pages/*"],
       "@utils/*": ["./src/utils/*"],
       "@data/*": ["./test-data/*"],

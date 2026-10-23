@@ -4,10 +4,10 @@ import { aiConfig } from '../config';
 
 const CONTEXT_FILES = [
   'AGENTS.md',
-  'tests/fixtures/index.ts',
-  'tests/fixtures/auth.browser.fixture.ts',
-  'tests/pages/BasePage.ts',
-  'tests/pages/HomePage.ts',
+  'src/fixtures/index.ts',
+  'src/fixtures/auth.browser.fixture.ts',
+  'src/pages/BasePage.ts',
+  'src/pages/HomePage.ts',
   'tests/specs/ui/home-page/authenticated-buyer.spec.ts',
 ] as const;
 

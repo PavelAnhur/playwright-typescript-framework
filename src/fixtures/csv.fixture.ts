@@ -2,7 +2,7 @@
 import { test as base } from '@playwright/test';
 import { getCsvData } from '@utils/csv-reader';
 import { detectSpecPath } from '@utils/stack-trace';
-import { type CsvRow } from '../../src/types/csv';
+import { type CsvRow } from '@src/types/csv';
 
 type CsvFixtures = {
   /**
