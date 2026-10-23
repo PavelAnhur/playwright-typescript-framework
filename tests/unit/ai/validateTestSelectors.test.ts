@@ -15,7 +15,7 @@ const mockReaddir = vi.mocked(readdir);
 let _specContent = '';
 let _sourceFiles: Record<string, string> = {};
 
-mockReadFile.mockImplementation((async (path: any) => {
+mockReadFile.mockImplementation((async (path: unknown) => {
   const p = typeof path === 'string' ? path : '';
   if (p.includes('tests/specs/') && p.endsWith('.spec.ts')) return _specContent;
   const relPath = p.replace('/project-root/', '');
@@ -23,7 +23,7 @@ mockReadFile.mockImplementation((async (path: any) => {
   return '';
 }) as unknown as typeof readFile);
 
-mockReaddir.mockImplementation((async (path: any) => {
+mockReaddir.mockImplementation((async (path: unknown) => {
   const dir = typeof path === 'string' ? path : '';
   const dirents = (name: string) => [{ name, isDirectory: () => false, isFile: () => true }];
   if (dir === '/project-root/maison/web/src') return dirents('App.tsx');
@@ -269,12 +269,13 @@ describe('validateTestSelectors - walkDir error handling', () => {
     mockSourceFiles({
       'maison/server/src/server.ts': '<button data-testid="test-id">Go</button>',
     });
-    mockReaddir.mockImplementation((async (dir: any) => {
-      if (dir.includes('maison/web/src')) {
+    mockReaddir.mockImplementation((async (dir: unknown) => {
+      const d = typeof dir === 'string' ? dir : '';
+      if (d.includes('maison/web/src')) {
         throw new Error('ENOENT: no such file or directory');
       }
       const dirents = (name: string) => [{ name, isDirectory: () => false, isFile: () => true }];
-      if (dir.includes('maison/server/src')) return dirents('server.ts');
+      if (d.includes('maison/server/src')) return dirents('server.ts');
       return [];
     }) as unknown as typeof readdir);
 
