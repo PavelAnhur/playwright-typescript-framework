@@ -81,7 +81,7 @@ export class RegisterPage extends BasePage {
   async selectDateOfBirth(dob: string): Promise<boolean> {
     const [year, month, day] = dob.split('-').map(Number);
     await this.dobDisplay.click();
-    await expect(this.datePickerDialog).toBeVisible();
+    await this.datePickerDialog.waitFor({ state: 'visible' });
     if (this.dobYearSelect) {
       const timeout = TIMEOUTS.SHORT;
       try {
@@ -102,7 +102,7 @@ export class RegisterPage extends BasePage {
     const paddedDay = String(day).padStart(2, '0');
     const dayButton = this.page.getByTestId(`dob-day-${paddedDay}`);
     await dayButton.click();
-    await expect(this.datePickerDialog).toHaveAttribute('aria-hidden', 'true');
+    await this.datePickerDialog.waitFor({ state: 'hidden' });
     return true;
   }
 
