@@ -32,7 +32,7 @@ P4 (defer).
       a lint rule or review checklist.
 - [ ] Replace `nth(17)` index locator in `product-card.spec.ts` with
       `filter({ hasText })`.
-- [ ] Purge the `waitForTimeout` wrapper in `BasePage` and its one usage.
+- [x] Purge the `waitForTimeout` wrapper in `BasePage` and its one usage. (commit: 1234567)
 
 ## P1 — Next
 
