@@ -46,10 +46,10 @@ Test layers: Vitest (unit), Playwright API, Playwright UI.
 
 - ES modules (`import`/`export`), no CommonJS
 - TypeScript strict mode — ensure type safety
-- Unit tests → `tests/specs/unit/`
+- Unit tests → `tests/unit/`
 - API tests → `tests/specs/api/`
 - UI tests → `tests/specs/ui/`
-- New fixtures go in `tests/fixtures/` and are merged in `index.ts`
+- New fixtures go in `src/fixtures/` and are merged in `index.ts`
 - New page objects extend `BasePage`
 
 ### Function and method design

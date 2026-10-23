@@ -4,11 +4,11 @@ This is a Playwright + TypeScript QA automation framework for testing the "Maiso
 
 ## Key Architecture & Directories
 
-- **`tests/specs/unit/`**: Unit tests (Vitest)
+- **`tests/unit/`**: Unit tests (Vitest)
 - **`tests/specs/api/`**: API tests (Playwright)
 - **`tests/specs/ui/`**: UI/E2E tests (Playwright)
-- **`tests/fixtures/`**: Custom Playwright fixtures
-- **`tests/pages/`**: Page Object Model classes
+- **`src/fixtures/`**: Custom Playwright fixtures
+- **`src/pages/`**: Page Object Model classes
 - **`src/config/`**: Environment and timeout configurations
 - **`src/types/`**: TypeScript type definitions
 - **`maison/`**: The Application Under Test (AUT) server
@@ -87,16 +87,16 @@ Rules that apply across all phases:
 2. **TypeScript Strict Mode**: The project uses TS in strict mode. Ensure type safety.
 3. **Path Aliases**: Use `tsconfig.json` path aliases where defined.
 4. **Test Layer Placement**:
-   - Unit tests → `tests/specs/unit/`
+   - Unit tests → `tests/unit/`
    - API tests → `tests/specs/api/`
    - UI tests → `tests/specs/ui/`
-5. **Fixtures**: New fixtures go in `tests/fixtures/` and are merged in `index.ts`.
+5. **Fixtures**: New fixtures go in `src/fixtures/` and are merged in `index.ts`.
 6. **Page Objects**: Extend `BasePage` when adding new pages.
 
 ## Known Issues / Conventions
 
 - **`maison/` is the AUT.** Do not modify it unless explicitly asked.
-- **Fixture filename typo**: `tests/fixtures/api.fuxture.ts` should be `api.fixture.ts`. If asked to fix, rename the file AND update all imports.
+- **Fixture filename typo**: `src/fixtures/api.fuxture.ts` should be `api.fixture.ts`. If asked to fix, rename the file AND update all imports.
 - **Script names must match README.** When adding npm scripts, verify the name matches what the README documents.
 - **Duplicate Playwright project names**: `ui` and `chromium` both use Desktop Chrome. Be aware when editing `playwright.config.ts`.
 - **No LICENSE file** despite README referencing MIT.
