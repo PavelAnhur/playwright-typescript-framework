@@ -7,8 +7,6 @@ import type {
   PlaywrightJsonSuite,
 } from '@ai/tools/runPlaywrightTest';
 
-// ── Fixtures ────────────────────────────────────────────────────────────────
-
 function makeSpec(
   title: string,
   status: string,
@@ -95,8 +93,6 @@ const validReport = {
   ],
 } as unknown as PlaywrightJsonReport;
 
-// ── parseJsonReport ─────────────────────────────────────────────────────────
-
 describe('unit', () => {
   describe('parseJsonReport', () => {
     it('should parse a valid report embedded in stdout with leading chatter', () => {
@@ -127,8 +123,6 @@ describe('unit', () => {
       expect(result).toBeNull();
     });
   });
-
-  // ── extractFailures / collectFailures ───────────────────────────────────────
 
   describe('extractFailures', () => {
     it('should include a FAILED test in names and capture its error message', () => {
