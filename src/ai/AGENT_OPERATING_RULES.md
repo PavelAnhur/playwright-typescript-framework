@@ -1,7 +1,10 @@
 # Agent Operating Rules
 
 These rules govern how an agent works ANY task in this repo. Read this file BEFORE the
-work order. The work order tells you WHAT to do; this file tells you HOW to work.
+work order. If your lane has its own operating-rules file, that file governs your lane
+and this file is the fallback for anything it does not cover. Where this file and your
+lane file would conflict, follow your lane file. The work order tells you WHAT to do;
+this file tells you HOW to work.
 
 The work order is the task. These rules are the protocol. If a work order and this file
 ever conflict, stop and ask — do not guess.
@@ -75,7 +78,9 @@ command that produced it. Do not keep trying variations.
 ### 8. CHECK REACHABILITY BEFORE CALLING SOMETHING A BUG
 
 Before treating a code property as a defect, state whether production can reach it.
-If it cannot, it is defense-in-depth to document, not a bug to fix.
+If it cannot, it is defense-in-depth to document, not a bug to fix. When reachability
+can be checked by execution, show the command and its raw output — do not assert
+reachability by inspection alone.
 
 ### 9. DO NOT EXPAND SCOPE
 
@@ -87,6 +92,12 @@ not name, STOP AND ASK. Do not make the change.
 When a work order is test-first, state whether the broken code is present in the tree.
 If it is not, prove the test's sensitivity by reverting the fix locally, not by committing
 the break.
+
+### 11. FALSE POSITIVES ARE RECORDED AS DISPROVEN
+
+If a finding you reported is later shown to be wrong, record it as DISPROVEN with
+the evidence that disproved it. Do not file a corrected false alarm as a defect, and
+do not silently drop it.
 
 ---
 
