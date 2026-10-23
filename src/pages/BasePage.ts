@@ -248,9 +248,4 @@ export abstract class BasePage {
   async screenshot(options?: { path?: string; fullPage?: boolean }): Promise<Buffer> {
     return await this.page.screenshot(options);
   }
-
-  @Step('Wait {0}ms')
-  async waitForTimeout(ms: number): Promise<void> {
-    await this.page.waitForTimeout(ms);
-  }
 }
