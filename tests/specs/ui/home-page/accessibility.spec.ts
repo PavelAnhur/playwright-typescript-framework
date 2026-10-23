@@ -2,9 +2,9 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@fixtures';
 
 test.describe('Home Page UI -- Accessibility', () => {
-  test('home page has no serious violations', async ({ page }) => {
+  test('home page has no serious violations', async ({ page, homePage }) => {
     await page.goto('/');
-    await page.locator('img').first().waitFor({ state: 'visible' });
+    await homePage.waitForAnyImageVisible();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .exclude('.pagination')
