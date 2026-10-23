@@ -116,6 +116,46 @@ of finishing. Finishing — or stopping cleanly at a divergence — is the goal.
 
 ---
 
+## Verification protocol (Driver only)
+
+The Coder (Aider) hands off a diff and stops. The driver (human or lead agent) runs the
+gates below. This separation exists because Aider cannot execute code or run tests.
+
+### Fast gates (after every handoff)
+
+Run the static checks concurrently:
+
+    ./node_modules/.bin/tsc --noEmit & ./node_modules/.bin/prettier --check . & wait
+
+(Note: on this machine, `npm run` and `npx` misroute through WSL. Use the local binaries directly. In CI, the npm scripts are correct.)
+
+Both green before proceeding. Any red → send back to Coder with raw output.
+
+Read the summary line, not the exit code. `EXIT:0` has been observed with 61 failing
+tests; `npx vitest` has printed `EXIT:0` while failing. Paste raw compiler/formatter
+output on red; a short "green" note suffices on green.
+
+### Format scope
+
+`prettier --check .` is the CI gate. If it is red only on files outside the current
+change, scope the check to the changed files and note it. Do not "fix" pre-existing
+red in the current commit.
+
+### Tests
+
+- Fast unit run during iteration: `./node_modules/.bin/vitest run`
+- Full suite before commit: `npm run test:all` (= `test:unit:run && test:api && test:ui`)
+- Run the affected project (`test:api` or `test:ui`) rather than the full suite each time.
+
+### test:all outcomes
+
+- **Green** → split by intent (one commit, one concern) and commit.
+- **Red** →
+  - If the sole failure is the `flake_parallel` cart test, note it, cite the known Maison `POST /_reset` parallel-workers bug, and proceed.
+  - Any other failure is a blocker. Send back to Coder.
+
+---
+
 ## Why these rules exist
 
 - Rule 8: twice a real code property was treated as a live bug before checking whether

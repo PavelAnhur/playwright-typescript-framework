@@ -48,3 +48,6 @@ tests/specs/review/
 
 # Klepa AI worktrees (local tooling, not part of the project)
 .kilo/
+
+# Aider temporary files                                      
+.aider.*
