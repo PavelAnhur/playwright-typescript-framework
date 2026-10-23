@@ -3,15 +3,30 @@ import { type Locator, type Page, expect } from '@playwright/test';
 import { Step } from '@utils/stepDecorator';
 
 /**
- * Abstract base class for all Page Objects.
- * Provides common functionality and utilities for page interactions.
- */
-/**
- * BasePage is the foundational class for all page objects in the test framework.
+ * BasePage is the foundational abstract class for all page objects in the test framework.
  * It encapsulates shared UI elements (navigation, banners, loading indicators),
  * standardizes page navigation and waiting patterns, and offers utility methods
  * for common interactions (keyboard, screenshots, assertions). Extend this class
  * to create specific page objects while ensuring consistent behavior across tests.
+ *
+ * Key responsibilities:
+ * - Providing locators for common page components (flash messages, cookie banners, navigation)
+ * - Handling automatic waiting for page loads and loading indicators
+ * - Managing cookie consent banners and other pop‑ups
+ * - Offering step‑decorated navigation methods (goToShop, goToCart, etc.)
+ * - Centralizing element visibility checks and assertions
+ * - Exposing keyboard and viewport utilities for accessibility and responsive testing
+ *
+ * Usage:
+ * ```typescript
+ * class HomePage extends BasePage {
+ *   readonly welcomeHeading = this.page.locator('h1');
+ *
+ *   async open() {
+ *     await this.goto('/home');
+ *   }
+ * }
+ * ```
  */
 export abstract class BasePage {
   readonly flashMessage: Locator;
