@@ -27,11 +27,37 @@ Run the two static gates concurrently — they are independent:
 
     npm run typecheck & npm run format:check & wait
 
+### Environment (local shell)
+
+`npm run` and `npx` misroute through WSL/Windows interop on this machine (UNC path
+`\\wsl.localhost\...`): `CMD.EXE` starts in the Windows directory and the command fails.
+Use the local binaries directly:
+
+    ./node_modules/.bin/tsc --noEmit
+    ./node_modules/.bin/prettier --check <files>
+    ./node_modules/.bin/vitest run
+    ./node_modules/.bin/playwright test <spec>
+
+In CI (Linux runner) the `npm run` scripts are correct and are what the workflow uses.
+This is a local-environment workaround, not a change to the gates.
+
 - `npm run typecheck` = `tsc --noEmit`
 - `npm run format:check` = `prettier --check .`
 
 Both green before handoff. Any red → fix, do not hand off with a red gate.
-Paste raw compiler/formatter output on red; a short "green" note suffices on green.
+
+Read the summary line, not the exit code. `EXIT:0` has been observed with 61 failing
+tests; `npx vitest` has printed `EXIT:0` while failing. For vitest, the evidence is
+`Test Files N passed` / `Tests N passed`. Paste raw compiler/formatter output on red;
+a short "green" note suffices on green.
+
+### Format scope
+
+`npm run format:check` is repo-wide (`prettier --check .`). It has been red at HEAD on
+files a given change did not touch. If the repo-wide check is red only on files outside
+your change, scope the check to the files you changed (`prettier --check <files>`) and
+say so in the handoff. Do not "fix" pre-existing red in an unrelated commit — that mixes
+intents. The repo-wide check is the post-merge gate; it is not the per-commit gate.
 
 ## Handoff
 
