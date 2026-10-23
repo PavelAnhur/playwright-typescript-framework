@@ -36,6 +36,7 @@ Paste raw compiler/formatter output on red; a short "green" note suffices on gre
 ## Handoff
 
 State, in the handoff message:
+
 - Work order ID.
 - Diff scope: files touched, one sentence per file on why. State it accurately —
   it is what gets reviewed.
