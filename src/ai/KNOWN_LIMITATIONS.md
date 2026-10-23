@@ -281,7 +281,7 @@ No LangChain, no CrewAI, no AutoGen. Four functions, one HTTP client, three zod 
 `src/ai/agents/specGenerator.ts` enforces spec-file writes with three layers:
 
 1. **Normalization (`parseOutput`)** — normalizes any model-supplied `fileName` to its
-   bare basename via `normalizeFileName` (shared helper in `src/ai/tools/normalizeFileName.ts`,
+   bare basename via `normalizeFileName` (shared helper in `src/utils/normalizeFileName.ts`,
    also used by `refineSpec.ts` parseRefinerOutput), then requires a `.spec.ts` suffix.
    This is the _authoritative_ policy: spec output is flat only — no subdirectories under
    `tests/specs/review/`.
@@ -310,7 +310,7 @@ Origin: traversal write outside `tests/specs/review/` (reproduced by execution,
 - **Where:** `src/ai/prompts/specGenerator.ts` (the fileName instruction),
   `src/ai/agents/specGenerator.ts` parseOutput, `src/ai/agents/refineSpec.ts`
   parseRefinerOutput — both use the shared `normalizeFileName` helper from
-  `src/ai/tools/normalizeFileName.ts`.
+  `src/utils/normalizeFileName.ts`.
 - **What:** the model intermittently returns a path-shaped fileName
   (`tests/specs/review/checkout-empty-cart.spec.ts`) instead of a bare filename.
   Observed three times in live `ai:refine` runs. A prompt tightening (commit
