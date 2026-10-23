@@ -41,93 +41,95 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
-describe('generateSpec - happy path', () => {
-  it('should write a spec file and return fileName + outputPath', async () => {
-    vi.mocked(callModel).mockResolvedValue(createMockResult());
-    const result = await generateSpec(mockInput);
-    expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
-    expect(result.outputPath).toContain('checkout-button-disabled.spec.ts');
-    expect(result.code).toBe(validSpec.code);
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    const writeCalls = vi.mocked(writeFile).mock.calls;
-    const writtenPath = writeCalls[0]?.[0] as string;
-    expect(writtenPath).toContain('tests/specs/review/');
-  });
-});
-
-describe('generateSpec - path normalization', () => {
-  it('should normalize a path-shaped fileName to its bare name', async () => {
-    vi.mocked(callModel).mockResolvedValue(
-      createMockResult(
-        JSON.stringify({ fileName: 'tests/specs/review/checkout-empty-cart.spec.ts', code: 'x' })
-      )
-    );
-    const result = await generateSpec(mockInput);
-    expect(result.fileName).toBe('checkout-empty-cart.spec.ts');
-    expect(result.outputPath).toContain('tests/specs/review/checkout-empty-cart.spec.ts');
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    const writeCalls = vi.mocked(writeFile).mock.calls;
-    const writtenPath = writeCalls[0]?.[0] as string;
-    expect(writtenPath).toContain('tests/specs/review/');
+describe('unit', () => {
+  describe('generateSpec - happy path', () => {
+    it('should write a spec file and return fileName + outputPath', async () => {
+      vi.mocked(callModel).mockResolvedValue(createMockResult());
+      const result = await generateSpec(mockInput);
+      expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
+      expect(result.outputPath).toContain('checkout-button-disabled.spec.ts');
+      expect(result.code).toBe(validSpec.code);
+      expect(writeFile).toHaveBeenCalledTimes(1);
+      const writeCalls = vi.mocked(writeFile).mock.calls;
+      const writtenPath = writeCalls[0]?.[0] as string;
+      expect(writtenPath).toContain('tests/specs/review/');
+    });
   });
 
-  it('should normalize a traversal fileName to its bare name, keeping it inside targetDir', async () => {
-    vi.mocked(callModel).mockResolvedValue(
-      createMockResult(JSON.stringify({ fileName: '../../evil.spec.ts', code: 'x' }))
-    );
-    const result = await generateSpec(mockInput);
-    expect(result.fileName).toBe('evil.spec.ts');
-    expect(result.outputPath).toContain('tests/specs/review/evil.spec.ts');
-    const writeCalls = vi.mocked(writeFile).mock.calls;
-    const writtenPath = writeCalls[0]?.[0] as string;
-    expect(writtenPath).toContain('tests/specs/review/');
+  describe('generateSpec - path normalization', () => {
+    it('should normalize a path-shaped fileName to its bare name', async () => {
+      vi.mocked(callModel).mockResolvedValue(
+        createMockResult(
+          JSON.stringify({ fileName: 'tests/specs/review/checkout-empty-cart.spec.ts', code: 'x' })
+        )
+      );
+      const result = await generateSpec(mockInput);
+      expect(result.fileName).toBe('checkout-empty-cart.spec.ts');
+      expect(result.outputPath).toContain('tests/specs/review/checkout-empty-cart.spec.ts');
+      expect(writeFile).toHaveBeenCalledTimes(1);
+      const writeCalls = vi.mocked(writeFile).mock.calls;
+      const writtenPath = writeCalls[0]?.[0] as string;
+      expect(writtenPath).toContain('tests/specs/review/');
+    });
+
+    it('should normalize a traversal fileName to its bare name, keeping it inside targetDir', async () => {
+      vi.mocked(callModel).mockResolvedValue(
+        createMockResult(JSON.stringify({ fileName: '../../evil.spec.ts', code: 'x' }))
+      );
+      const result = await generateSpec(mockInput);
+      expect(result.fileName).toBe('evil.spec.ts');
+      expect(result.outputPath).toContain('tests/specs/review/evil.spec.ts');
+      const writeCalls = vi.mocked(writeFile).mock.calls;
+      const writtenPath = writeCalls[0]?.[0] as string;
+      expect(writtenPath).toContain('tests/specs/review/');
+    });
+
+    it('should leave a bare fileName unchanged', async () => {
+      vi.mocked(callModel).mockResolvedValue(createMockResult());
+      const result = await generateSpec(mockInput);
+      expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
+    });
   });
 
-  it('should leave a bare fileName unchanged', async () => {
-    vi.mocked(callModel).mockResolvedValue(createMockResult());
-    const result = await generateSpec(mockInput);
-    expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
-  });
-});
+  describe('assertPathInsideTargetDir - invariant isolation', () => {
+    it('should throw when resolved output escapes target via ..', () => {
+      const resolvedTarget = '/home/user/project/tests/specs/review';
+      const resolvedOutput = '/home/user/project/tests/__escape__.spec.ts';
+      expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).toThrow(
+        'Refusing to write outside target directory'
+      );
+    });
 
-describe('assertPathInsideTargetDir - invariant isolation', () => {
-  it('should throw when resolved output escapes target via ..', () => {
-    const resolvedTarget = '/home/user/project/tests/specs/review';
-    const resolvedOutput = '/home/user/project/tests/__escape__.spec.ts';
-    expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).toThrow(
-      'Refusing to write outside target directory'
-    );
+    it('should throw when resolved output escapes target via sibling-prefix bypass', () => {
+      const resolvedTarget = '/home/user/project/tests/specs/review';
+      const resolvedOutput = '/home/user/project/tests/specs/review-evil/x.spec.ts';
+      expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).toThrow(
+        'Refusing to write outside target directory'
+      );
+    });
+
+    it('should throw when resolved output is an absolute path outside target', () => {
+      const resolvedTarget = '/home/user/project/tests/specs/review';
+      const resolvedOutput = '/tmp/x.spec.ts';
+      expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).toThrow(
+        'Refusing to write outside target directory'
+      );
+    });
+
+    it('should allow a normal fileName that stays inside target', () => {
+      const resolvedTarget = '/home/user/project/tests/specs/review';
+      const resolvedOutput = '/home/user/project/tests/specs/review/login.spec.ts';
+      expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).not.toThrow();
+    });
   });
 
-  it('should throw when resolved output escapes target via sibling-prefix bypass', () => {
-    const resolvedTarget = '/home/user/project/tests/specs/review';
-    const resolvedOutput = '/home/user/project/tests/specs/review-evil/x.spec.ts';
-    expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).toThrow(
-      'Refusing to write outside target directory'
-    );
-  });
-
-  it('should throw when resolved output is an absolute path outside target', () => {
-    const resolvedTarget = '/home/user/project/tests/specs/review';
-    const resolvedOutput = '/tmp/x.spec.ts';
-    expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).toThrow(
-      'Refusing to write outside target directory'
-    );
-  });
-
-  it('should allow a normal fileName that stays inside target', () => {
-    const resolvedTarget = '/home/user/project/tests/specs/review';
-    const resolvedOutput = '/home/user/project/tests/specs/review/login.spec.ts';
-    expect(() => assertPathInsideTargetDir(resolvedOutput, resolvedTarget)).not.toThrow();
-  });
-});
-
-describe('generateSpec - markdown fence stripping', () => {
-  it('should parse model output wrapped in ```json fences', async () => {
-    const fencedContent = '```json\n' + JSON.stringify(validSpec) + '\n```';
-    vi.mocked(callModel).mockResolvedValue(createMockResult(fencedContent));
-    const result = await generateSpec(mockInput);
-    expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
-    expect(result.code).toBe(validSpec.code);
+  describe('generateSpec - markdown fence stripping', () => {
+    it('should parse model output wrapped in ```json fences', async () => {
+      const fencedContent = '```json\n' + JSON.stringify(validSpec) + '\n```';
+      vi.mocked(callModel).mockResolvedValue(createMockResult(fencedContent));
+      const result = await generateSpec(mockInput);
+      expect(result.fileName).toBe('checkout-button-disabled.spec.ts');
+      expect(result.code).toBe(validSpec.code);
+    });
   });
 });

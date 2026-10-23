@@ -40,35 +40,37 @@ function makeFixture(
   };
 }
 
-describe('OutputFormatter flake-note for product_bug suspects', () => {
-  it('must NOT append "likely not a product bug" when flake classification is deterministic_fail', () => {
-    const mock = vi.spyOn(console, 'log').mockImplementation(() => {});
+describe('unit', () => {
+  describe('OutputFormatter flake-note for product_bug suspects', () => {
+    it('must NOT append "likely not a product bug" when flake classification is deterministic_fail', () => {
+      const mock = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    const formatter = new OutputFormatter();
-    const fixture = makeFixture('product_bug', 'deterministic_fail');
+      const formatter = new OutputFormatter();
+      const fixture = makeFixture('product_bug', 'deterministic_fail');
 
-    formatter.print([fixture], 0, '/tmp/summary.json');
+      formatter.print([fixture], 0, '/tmp/summary.json');
 
-    const output = mock.mock.calls.map(c => c[0] as string).join('\n');
+      const output = mock.mock.calls.map(c => c[0] as string).join('\n');
 
-    expect(output).not.toContain('likely not a product bug');
-    expect(output).not.toContain('flake detected');
+      expect(output).not.toContain('likely not a product bug');
+      expect(output).not.toContain('flake detected');
 
-    mock.mockRestore();
-  });
+      mock.mockRestore();
+    });
 
-  it('SHOULD append flake note when flake classification is flake_parallel', () => {
-    const mock = vi.spyOn(console, 'log').mockImplementation(() => {});
+    it('SHOULD append flake note when flake classification is flake_parallel', () => {
+      const mock = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    const formatter = new OutputFormatter();
-    const fixture = makeFixture('product_bug', 'flake_parallel');
+      const formatter = new OutputFormatter();
+      const fixture = makeFixture('product_bug', 'flake_parallel');
 
-    formatter.print([fixture], 0, '/tmp/summary.json');
+      formatter.print([fixture], 0, '/tmp/summary.json');
 
-    const output = mock.mock.calls.map(c => c[0] as string).join('\n');
+      const output = mock.mock.calls.map(c => c[0] as string).join('\n');
 
-    expect(output).toContain('flake detected: flake_parallel');
+      expect(output).toContain('flake detected: flake_parallel');
 
-    mock.mockRestore();
+      mock.mockRestore();
+    });
   });
 });

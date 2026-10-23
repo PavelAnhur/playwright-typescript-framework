@@ -58,286 +58,290 @@ function makeRawFailure(title: string, errMsg: string, stack?: string): RawFailu
   return { test, result };
 }
 
-describe('TriageEngine MAX_TRIAGE cap', () => {
-  beforeEach(() => {
-    mockAnalyzeFailures.mockClear();
-    mockAnalyzeFailure.mockClear();
-    mockMaybeDetect.mockClear();
-  });
-
-  it('trims failures to at most 10', async () => {
-    const failures = Array.from({ length: 15 }, (_, i) =>
-      makeRawFailure(`test-${i}`, `error ${i}`)
-    );
-
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: Array.from({ length: 10 }, () => makeHypothesis('product_bug')),
+describe('unit', () => {
+  describe('TriageEngine MAX_TRIAGE cap', () => {
+    beforeEach(() => {
+      mockAnalyzeFailures.mockClear();
+      mockAnalyzeFailure.mockClear();
+      mockMaybeDetect.mockClear();
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('trims failures to at most 10', async () => {
+      const failures = Array.from({ length: 15 }, (_, i) =>
+        makeRawFailure(`test-${i}`, `error ${i}`)
+      );
 
-    expect(result).toHaveLength(10);
-    expect(mockAnalyzeFailures).toHaveBeenCalledTimes(1);
-    const callCtx = mockAnalyzeFailures.mock.calls[0]![0];
-    expect(callCtx).toHaveLength(10);
-  });
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: Array.from({ length: 10 }, () => makeHypothesis('product_bug')),
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-  it('returns all failures when count <= 10', async () => {
-    const failures = Array.from({ length: 5 }, (_, i) => makeRawFailure(`test-${i}`, `error ${i}`));
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
 
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: Array.from({ length: 5 }, () => makeHypothesis('product_bug')),
+      expect(result).toHaveLength(10);
+      expect(mockAnalyzeFailures).toHaveBeenCalledTimes(1);
+      const callCtx = mockAnalyzeFailures.mock.calls[0]![0];
+      expect(callCtx).toHaveLength(10);
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('returns all failures when count <= 10', async () => {
+      const failures = Array.from({ length: 5 }, (_, i) =>
+        makeRawFailure(`test-${i}`, `error ${i}`)
+      );
 
-    expect(result).toHaveLength(5);
-  });
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: Array.from({ length: 5 }, () => makeHypothesis('product_bug')),
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-  it('returns empty array when no failures provided', async () => {
-    mockAnalyzeFailures.mockResolvedValue({ hypotheses: [] });
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run([]);
-
-    expect(result).toHaveLength(0);
-  });
-});
-
-describe('TriageEngine truncation', () => {
-  beforeEach(() => {
-    mockAnalyzeFailures.mockClear();
-    mockAnalyzeFailure.mockClear();
-    mockMaybeDetect.mockClear();
-  });
-
-  it('truncates errorMessage longer than 2000 chars', async () => {
-    const longMsg = 'x'.repeat(2001);
-    const failures = [makeRawFailure('long-error', longMsg)];
-
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: [makeHypothesis('test_issue')],
+      expect(result).toHaveLength(5);
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('returns empty array when no failures provided', async () => {
+      mockAnalyzeFailures.mockResolvedValue({ hypotheses: [] });
 
-    expect(result).toHaveLength(1);
-    // pairResults reads from RawFailure, so TriagedFailure has the raw message
-    expect(result[0]!.errorMessage).toBe(longMsg);
-    // Context passed to analyzeFailures should be truncated
-    const callCtx = mockAnalyzeFailures.mock.calls[0]![0];
-    expect(callCtx).toHaveLength(1);
-    const ctx = callCtx[0]!;
-    expect(ctx.errorMessage.length).toBe(2012); // 2000 + '…[truncated]'
-    expect(ctx.errorMessage.endsWith('…[truncated]'));
-  });
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run([]);
 
-  it('truncates stackTrace longer than 4000 chars', async () => {
-    const longStack = 'y'.repeat(4001);
-    const failures = [makeRawFailure('long-stack', 'short error', longStack)];
-
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: [makeHypothesis('test_issue')],
+      expect(result).toHaveLength(0);
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
-
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
-
-    expect(result).toHaveLength(1);
-    const stack = result[0]!.errorMessage;
-    expect(stack).toBe('short error');
   });
 
-  it('does not truncate short messages and stacks', async () => {
-    const failures = [makeRawFailure('short', 'short error', 'short stack')];
-
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: [makeHypothesis('test_issue')],
+  describe('TriageEngine truncation', () => {
+    beforeEach(() => {
+      mockAnalyzeFailures.mockClear();
+      mockAnalyzeFailure.mockClear();
+      mockMaybeDetect.mockClear();
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('truncates errorMessage longer than 2000 chars', async () => {
+      const longMsg = 'x'.repeat(2001);
+      const failures = [makeRawFailure('long-error', longMsg)];
 
-    expect(result[0]!.errorMessage).toBe('short error');
-  });
-});
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: [makeHypothesis('test_issue')],
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-describe('TriageEngine batch success path', () => {
-  beforeEach(() => {
-    mockAnalyzeFailures.mockClear();
-    mockAnalyzeFailure.mockClear();
-    mockMaybeDetect.mockClear();
-  });
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
 
-  it('pairs hypotheses with failures and calls maybeDetect per failure', async () => {
-    const failures = [
-      makeRawFailure('test-a', 'error a'),
-      makeRawFailure('test-b', 'error b'),
-      makeRawFailure('test-c', 'error c'),
-    ];
-
-    const hypA = makeHypothesis('product_bug');
-    const hypB = makeHypothesis('test_issue');
-    const hypC = makeHypothesis('flake');
-
-    mockAnalyzeFailures.mockResolvedValue({ hypotheses: [hypA, hypB, hypC] });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
-
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
-
-    expect(result).toHaveLength(3);
-
-    expect(result[0]!.hypothesis).toBe(hypA);
-    expect(result[0]!.testTitle).toBe('test-a');
-    expect(result[0]!.errorMessage).toBe('error a');
-    expect(result[0]!.triageError).toBeNull();
-
-    expect(result[1]!.hypothesis).toBe(hypB);
-    expect(result[1]!.testTitle).toBe('test-b');
-    expect(result[1]!.errorMessage).toBe('error b');
-
-    expect(result[2]!.hypothesis).toBe(hypC);
-    expect(result[2]!.testTitle).toBe('test-c');
-    expect(result[2]!.errorMessage).toBe('error c');
-
-    expect(mockMaybeDetect).toHaveBeenCalledTimes(3);
-    expect(mockMaybeDetect).toHaveBeenCalledWith(failures[0]!.test, hypA);
-    expect(mockMaybeDetect).toHaveBeenCalledWith(failures[1]!.test, hypB);
-    expect(mockMaybeDetect).toHaveBeenCalledWith(failures[2]!.test, hypC);
-  });
-
-  it('sets flake and flakeError from maybeDetect return value', async () => {
-    const failures = [makeRawFailure('flake-test', 'timeout')];
-
-    const flakeResult: FlakeDetectionResult = {
-      spec: 'flake-test.spec.ts',
-      suite: null,
-      classification: 'flake_parallel',
-      recommendation: 'retry',
-      phases: [],
-      totalDurationMs: 5000,
-    };
-
-    mockAnalyzeFailures.mockResolvedValue({ hypotheses: [makeHypothesis('test_issue')] });
-    mockMaybeDetect.mockResolvedValue({ result: flakeResult, error: null });
-
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
-
-    expect(result[0]!.flake).toBe(flakeResult);
-    expect(result[0]!.flakeError).toBeNull();
-  });
-});
-
-describe('TriageEngine batch failure fallback', () => {
-  beforeEach(() => {
-    mockAnalyzeFailures.mockClear();
-    mockAnalyzeFailure.mockClear();
-    mockMaybeDetect.mockClear();
-  });
-
-  it('falls back to single triage when batch throws', async () => {
-    const failures = [makeRawFailure('test-a', 'error a'), makeRawFailure('test-b', 'error b')];
-
-    mockAnalyzeFailures.mockRejectedValue(new Error('model unavailable'));
-    mockAnalyzeFailure.mockResolvedValue({
-      hypothesis: makeHypothesis('product_bug'),
-      outputPath: null,
+      expect(result).toHaveLength(1);
+      // pairResults reads from RawFailure, so TriagedFailure has the raw message
+      expect(result[0]!.errorMessage).toBe(longMsg);
+      // Context passed to analyzeFailures should be truncated
+      const callCtx = mockAnalyzeFailures.mock.calls[0]![0];
+      expect(callCtx).toHaveLength(1);
+      const ctx = callCtx[0]!;
+      expect(ctx.errorMessage.length).toBe(2012); // 2000 + '…[truncated]'
+      expect(ctx.errorMessage.endsWith('…[truncated]'));
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('truncates stackTrace longer than 4000 chars', async () => {
+      const longStack = 'y'.repeat(4001);
+      const failures = [makeRawFailure('long-stack', 'short error', longStack)];
 
-    expect(result).toHaveLength(2);
-    expect(mockAnalyzeFailure).toHaveBeenCalledTimes(2);
-    expect(mockAnalyzeFailure).toHaveBeenCalledWith(
-      expect.objectContaining({ testTitle: 'test-a' })
-    );
-    expect(mockAnalyzeFailure).toHaveBeenCalledWith(
-      expect.objectContaining({ testTitle: 'test-b' })
-    );
-    expect(mockMaybeDetect).toHaveBeenCalledTimes(2);
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: [makeHypothesis('test_issue')],
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result).toHaveLength(1);
+      const stack = result[0]!.errorMessage;
+      expect(stack).toBe('short error');
+    });
+
+    it('does not truncate short messages and stacks', async () => {
+      const failures = [makeRawFailure('short', 'short error', 'short stack')];
+
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: [makeHypothesis('test_issue')],
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result[0]!.errorMessage).toBe('short error');
+    });
   });
 
-  it('sets triageError and null hypothesis when single triage throws', async () => {
-    const failures = [makeRawFailure('fail-a', 'error a'), makeRawFailure('ok-b', 'error b')];
+  describe('TriageEngine batch success path', () => {
+    beforeEach(() => {
+      mockAnalyzeFailures.mockClear();
+      mockAnalyzeFailure.mockClear();
+      mockMaybeDetect.mockClear();
+    });
 
-    mockAnalyzeFailures.mockRejectedValue(new Error('batch crash'));
-    mockAnalyzeFailure
-      .mockRejectedValueOnce(new Error('single triage failed'))
-      .mockResolvedValueOnce({
-        hypothesis: makeHypothesis('test_issue'),
+    it('pairs hypotheses with failures and calls maybeDetect per failure', async () => {
+      const failures = [
+        makeRawFailure('test-a', 'error a'),
+        makeRawFailure('test-b', 'error b'),
+        makeRawFailure('test-c', 'error c'),
+      ];
+
+      const hypA = makeHypothesis('product_bug');
+      const hypB = makeHypothesis('test_issue');
+      const hypC = makeHypothesis('flake');
+
+      mockAnalyzeFailures.mockResolvedValue({ hypotheses: [hypA, hypB, hypC] });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result).toHaveLength(3);
+
+      expect(result[0]!.hypothesis).toBe(hypA);
+      expect(result[0]!.testTitle).toBe('test-a');
+      expect(result[0]!.errorMessage).toBe('error a');
+      expect(result[0]!.triageError).toBeNull();
+
+      expect(result[1]!.hypothesis).toBe(hypB);
+      expect(result[1]!.testTitle).toBe('test-b');
+      expect(result[1]!.errorMessage).toBe('error b');
+
+      expect(result[2]!.hypothesis).toBe(hypC);
+      expect(result[2]!.testTitle).toBe('test-c');
+      expect(result[2]!.errorMessage).toBe('error c');
+
+      expect(mockMaybeDetect).toHaveBeenCalledTimes(3);
+      expect(mockMaybeDetect).toHaveBeenCalledWith(failures[0]!.test, hypA);
+      expect(mockMaybeDetect).toHaveBeenCalledWith(failures[1]!.test, hypB);
+      expect(mockMaybeDetect).toHaveBeenCalledWith(failures[2]!.test, hypC);
+    });
+
+    it('sets flake and flakeError from maybeDetect return value', async () => {
+      const failures = [makeRawFailure('flake-test', 'timeout')];
+
+      const flakeResult: FlakeDetectionResult = {
+        spec: 'flake-test.spec.ts',
+        suite: null,
+        classification: 'flake_parallel',
+        recommendation: 'retry',
+        phases: [],
+        totalDurationMs: 5000,
+      };
+
+      mockAnalyzeFailures.mockResolvedValue({ hypotheses: [makeHypothesis('test_issue')] });
+      mockMaybeDetect.mockResolvedValue({ result: flakeResult, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result[0]!.flake).toBe(flakeResult);
+      expect(result[0]!.flakeError).toBeNull();
+    });
+  });
+
+  describe('TriageEngine batch failure fallback', () => {
+    beforeEach(() => {
+      mockAnalyzeFailures.mockClear();
+      mockAnalyzeFailure.mockClear();
+      mockMaybeDetect.mockClear();
+    });
+
+    it('falls back to single triage when batch throws', async () => {
+      const failures = [makeRawFailure('test-a', 'error a'), makeRawFailure('test-b', 'error b')];
+
+      mockAnalyzeFailures.mockRejectedValue(new Error('model unavailable'));
+      mockAnalyzeFailure.mockResolvedValue({
+        hypothesis: makeHypothesis('product_bug'),
         outputPath: null,
       });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
 
-    expect(result).toHaveLength(2);
-
-    expect(result[0]!.hypothesis).toBeNull();
-    expect(result[0]!.triageError).toBe('single triage failed');
-    expect(result[0]!.flake).toBeNull();
-    expect(result[0]!.flakeError).toBeNull();
-    expect(result[0]!.testTitle).toBe('fail-a');
-
-    expect(result[1]!.hypothesis).toEqual(makeHypothesis('test_issue'));
-    expect(result[1]!.triageError).toBeNull();
-  });
-});
-
-describe('TriageEngine pairResults silent skip', () => {
-  beforeEach(() => {
-    mockAnalyzeFailures.mockClear();
-    mockAnalyzeFailure.mockClear();
-    mockMaybeDetect.mockClear();
-  });
-
-  it('skips extra failures when fewer hypotheses than failures', async () => {
-    const failures = [
-      makeRawFailure('test-a', 'error a'),
-      makeRawFailure('test-b', 'error b'),
-      makeRawFailure('test-c', 'error c'),
-    ];
-
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: [makeHypothesis('product_bug')],
+      expect(result).toHaveLength(2);
+      expect(mockAnalyzeFailure).toHaveBeenCalledTimes(2);
+      expect(mockAnalyzeFailure).toHaveBeenCalledWith(
+        expect.objectContaining({ testTitle: 'test-a' })
+      );
+      expect(mockAnalyzeFailure).toHaveBeenCalledWith(
+        expect.objectContaining({ testTitle: 'test-b' })
+      );
+      expect(mockMaybeDetect).toHaveBeenCalledTimes(2);
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('sets triageError and null hypothesis when single triage throws', async () => {
+      const failures = [makeRawFailure('fail-a', 'error a'), makeRawFailure('ok-b', 'error b')];
 
-    expect(result).toHaveLength(1);
-    expect(result[0]!.testTitle).toBe('test-a');
+      mockAnalyzeFailures.mockRejectedValue(new Error('batch crash'));
+      mockAnalyzeFailure
+        .mockRejectedValueOnce(new Error('single triage failed'))
+        .mockResolvedValueOnce({
+          hypothesis: makeHypothesis('test_issue'),
+          outputPath: null,
+        });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result).toHaveLength(2);
+
+      expect(result[0]!.hypothesis).toBeNull();
+      expect(result[0]!.triageError).toBe('single triage failed');
+      expect(result[0]!.flake).toBeNull();
+      expect(result[0]!.flakeError).toBeNull();
+      expect(result[0]!.testTitle).toBe('fail-a');
+
+      expect(result[1]!.hypothesis).toEqual(makeHypothesis('test_issue'));
+      expect(result[1]!.triageError).toBeNull();
+    });
   });
 
-  it('matches hypothesis[i] with failure[i] by index', async () => {
-    const failures = [makeRawFailure('first', 'err 1'), makeRawFailure('second', 'err 2')];
-
-    mockAnalyzeFailures.mockResolvedValue({
-      hypotheses: [makeHypothesis('product_bug'), makeHypothesis('test_issue')],
+  describe('TriageEngine pairResults silent skip', () => {
+    beforeEach(() => {
+      mockAnalyzeFailures.mockClear();
+      mockAnalyzeFailure.mockClear();
+      mockMaybeDetect.mockClear();
     });
-    mockMaybeDetect.mockResolvedValue({ result: null, error: null });
 
-    const engine = new TriageEngine(makeMockFlakeGate());
-    const result = await engine.run(failures);
+    it('skips extra failures when fewer hypotheses than failures', async () => {
+      const failures = [
+        makeRawFailure('test-a', 'error a'),
+        makeRawFailure('test-b', 'error b'),
+        makeRawFailure('test-c', 'error c'),
+      ];
 
-    expect(result).toHaveLength(2);
-    expect(result[0]!.hypothesis!.category).toBe('product_bug');
-    expect(result[0]!.testTitle).toBe('first');
-    expect(result[1]!.hypothesis!.category).toBe('test_issue');
-    expect(result[1]!.testTitle).toBe('second');
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: [makeHypothesis('product_bug')],
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]!.testTitle).toBe('test-a');
+    });
+
+    it('matches hypothesis[i] with failure[i] by index', async () => {
+      const failures = [makeRawFailure('first', 'err 1'), makeRawFailure('second', 'err 2')];
+
+      mockAnalyzeFailures.mockResolvedValue({
+        hypotheses: [makeHypothesis('product_bug'), makeHypothesis('test_issue')],
+      });
+      mockMaybeDetect.mockResolvedValue({ result: null, error: null });
+
+      const engine = new TriageEngine(makeMockFlakeGate());
+      const result = await engine.run(failures);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]!.hypothesis!.category).toBe('product_bug');
+      expect(result[0]!.testTitle).toBe('first');
+      expect(result[1]!.hypothesis!.category).toBe('test_issue');
+      expect(result[1]!.testTitle).toBe('second');
+    });
   });
 });
