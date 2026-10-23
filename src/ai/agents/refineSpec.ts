@@ -1,9 +1,9 @@
 import { writeFile } from 'node:fs/promises';
+import { normalizeFileName } from '../../utils/normalizeFileName';
 import { callModel } from '../dshClient';
 import type { SpecGeneratorInput } from '../prompts/specGenerator';
 import { buildSpecRefinerUser, specRefinerSystem } from '../prompts/specGenerator';
 import { logRefineAttempt } from '../tools/refineLogger';
-import { normalizeFileName } from '../tools/normalizeFileName';
 import { runPlaywrightTest, type TestRunResult } from '../tools/runPlaywrightTest';
 import { validateTestSelectors, type ValidationResult } from '../tools/validateTestSelectors';
 import { generateSpec } from './specGenerator';

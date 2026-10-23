@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
-import { stripFences } from '../tools/stripFences';
+import { stripFences } from '../../utils/stripFences';
 import {
   buildRequirementsAnalystUser,
   requirementsAnalystSystem,
