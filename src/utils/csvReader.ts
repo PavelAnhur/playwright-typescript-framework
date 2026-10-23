@@ -1,5 +1,5 @@
-import { readFile } from '@utils/file-utils';
-import { buildCsvFilePath } from '@utils/path-utils';
+import { readFile } from '@utils/fileUtils';
+import { buildCsvFilePath } from '@utils/pathUtils';
 
 /**
  * Reads CSV data from a file with automatic type conversion.

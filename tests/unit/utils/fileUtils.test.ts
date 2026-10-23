@@ -8,8 +8,8 @@ import {
   readFileAs,
   readJsonFile,
   readTextFile,
-} from '@utils/file-utils';
-import { getAbsolutePath } from '@utils/path-utils';
+} from '@utils/fileUtils';
+import { getAbsolutePath } from '@utils/pathUtils';
 import { parse } from 'csv-parse/sync';
 import fs from 'fs';
 import path from 'path';
@@ -19,7 +19,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('fs');
 vi.mock('path');
 vi.mock('csv-parse/sync');
-vi.mock('@utils/path-utils');
+vi.mock('@utils/pathUtils');
 
 describe('unit', () => {
   const mockAbsolutePath = '/absolute/path/to/test/data.csv';

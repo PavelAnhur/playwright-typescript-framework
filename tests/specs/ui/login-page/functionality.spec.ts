@@ -1,6 +1,6 @@
 import { getTestUser } from '@config/env';
 import { expect, test } from '@fixtures';
-import { addAllureAttachment, addAllureEnvironment, addAllureMetadata } from '@utils/allure-helper';
+import { addAllureAttachment, addAllureEnvironment, addAllureMetadata } from '@utils/allureHelper';
 import { ContentType, Severity } from 'allure-js-commons';
 
 test.describe('Login Page UI -- Functionality', () => {

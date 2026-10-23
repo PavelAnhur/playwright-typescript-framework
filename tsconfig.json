@@ -34,10 +34,10 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@fixtures": ["./tests/fixtures/index.ts"],
-      "@pages/*": ["./tests/pages/*"],
-      "@utils/*": ["./tests/utils/*"],
-      "@data/*": ["./src/test-data/*"],
+      "@fixtures": ["./src/fixtures/index.ts"],
+      "@pages/*": ["./src/pages/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@data/*": ["./test-data/*"],
       "@config/*": ["./src/config/*"],
       "@src/*": ["./src/*"],
       "@ai/*": ["./src/ai/*"]

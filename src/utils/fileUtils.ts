@@ -1,7 +1,7 @@
 import { parse } from 'csv-parse/sync';
 import fs from 'fs';
 import path from 'path';
-import { getAbsolutePath } from './path-utils';
+import { getAbsolutePath } from './pathUtils';
 
 /**
  * Unified file reader - automatically detects file type and returns parsed data.

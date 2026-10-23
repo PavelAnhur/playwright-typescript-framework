@@ -1,7 +1,7 @@
 /* eslint-disable no-empty-pattern */
 import { getTestUser } from '@config/env';
 import { type APIRequestContext } from '@playwright/test';
-import { AuthContextManager } from '@utils/auth-context.manager';
+import { AuthContextManager } from '@utils/authContext.manager';
 import { test as apiTest } from './api.fixture';
 
 export interface AuthFixtures {

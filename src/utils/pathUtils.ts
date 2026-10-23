@@ -20,7 +20,7 @@ export function buildCsvFilePath(fileName: string, specFilePath: string): string
     throw new Error(`Could not extract data folder from spec file: ${specFilePath}`);
   }
   // Build the base path
-  const baseDir = path.join('tests/test-data/specs', dataFolder);
+  const baseDir = path.join('test-data/specs', dataFolder);
   // Check for environment-specific file first
   const env = process.env['TEST_ENV'] || 'local';
   const envFileName = fileName.replace('.csv', `-${env}.csv`);

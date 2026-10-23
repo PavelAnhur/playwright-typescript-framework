@@ -2,8 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import { aiConfig } from '../config';
 import { callModel } from '../dshClient';
-import { stripFences } from '../tools/stripFences';
-import { normalizeFileName } from '../tools/normalizeFileName';
+import { stripFences } from '../../utils/stripFences';
+import { normalizeFileName } from '../../utils/normalizeFileName';
 import {
   buildSpecGeneratorUser,
   specGeneratorSystem,

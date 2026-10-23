@@ -1,6 +1,6 @@
 import { T } from '@config/timeouts';
 import { type Locator, type Page, expect } from '@playwright/test';
-import { Step } from '@utils/step-decorator';
+import { Step } from '@utils/stepDecorator';
 
 /**
  * Abstract base class for all Page Objects.
