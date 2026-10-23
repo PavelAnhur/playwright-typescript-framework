@@ -60,8 +60,8 @@ export class HomePage extends BasePage {
   @Step('Wait for home page to be ready')
   override async waitForLoad(): Promise<void> {
     await super.waitForLoad();
-    await expect(this.brand).toBeVisible();
-    await expect(this.catalogue).toBeVisible();
+    await this.brand.waitFor({ state: 'visible' });
+    await this.catalogue.waitFor({ state: 'visible' });
   }
 
   @Step('Click brand logo')

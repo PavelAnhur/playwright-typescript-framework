@@ -36,7 +36,7 @@ export class LoginPage extends BasePage {
   @Step('Wait for login page to be ready')
   override async waitForLoad(): Promise<void> {
     await super.waitForLoad();
-    await expect(this.loginForm).toBeAttached();
+    await this.loginForm.waitFor({ state: 'attached' });
   }
 
   @Step('Fill login form (email: "{0}")')
