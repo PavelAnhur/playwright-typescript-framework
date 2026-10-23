@@ -121,7 +121,7 @@ export class RegisterPage extends BasePage {
   async waitForRegistrationSuccess(): Promise<void> {
     await this.page.waitForURL(/#\//);
     await this.page.waitForSelector('[data-app-ready="true"]');
-    await this.currentUser.waitFor({ state: 'visible' });
+    await expect(this.currentUser).toBeAttached();
   }
 
   @Step('Wait for registration error message')

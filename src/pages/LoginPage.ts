@@ -95,7 +95,7 @@ export class LoginPage extends BasePage {
   async waitForLoginSuccess(): Promise<void> {
     await this.page.waitForURL(/#\//);
     await this.page.waitForSelector('[data-app-ready="true"]');
-    await this.currentUser.waitFor({ state: 'visible' });
+    await expect(this.currentUser).toBeAttached();
   }
 
   @Step('Wait for login error message')
