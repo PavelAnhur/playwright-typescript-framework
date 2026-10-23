@@ -102,7 +102,7 @@ export class RegisterPage extends BasePage {
     const paddedDay = String(day).padStart(2, '0');
     const dayButton = this.page.getByTestId(`dob-day-${paddedDay}`);
     await dayButton.click();
-    await this.datePickerDialog.waitFor({ state: 'hidden' });
+    await expect(this.datePickerDialog).toHaveAttribute('aria-hidden', 'true');
     return true;
   }
 
