@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { SpecGeneratorInput } from '@ai/prompts/specGenerator';
+import { assertPathInsideTargetDir, generateSpec } from '@ai/agents/specGenerator';
 import type { CallResult } from '@ai/dshClient';
 import { callModel } from '@ai/dshClient';
-import { assertPathInsideTargetDir, generateSpec } from '@ai/agents/specGenerator';
+import type { SpecGeneratorInput } from '@ai/prompts/specGenerator';
 import { writeFile } from 'node:fs/promises';
 
 vi.mock('@ai/dshClient');

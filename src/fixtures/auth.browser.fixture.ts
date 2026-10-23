@@ -58,12 +58,6 @@ export const test = base.extend<AuthBrowserFixtures>({
   },
 });
 
-/**
- * Checks if a storage state needs to be refreshed
- * Returns true if:
- * - File doesn't exist
- * - Token is expired or about to expire (within 5 minutes)
- */
 async function shouldRefreshStorageState(account: Account, storagePath: string): Promise<boolean> {
   if (!fs.existsSync(storagePath)) {
     console.log(`📁 Storage file not found for ${account.email}, will create new one`);
@@ -101,9 +95,6 @@ async function shouldRefreshStorageState(account: Account, storagePath: string):
   }
 }
 
-/**
- * Creates a storage state for a single user
- */
 async function createStorageState(
   browser: Browser,
   account: Account,
@@ -136,9 +127,6 @@ async function createStorageState(
   await context.close();
 }
 
-/**
- * Ensures the storage directory exists
- */
 function ensureStorageDir(): void {
   try {
     if (!fs.existsSync(STORAGE_DIR)) {
@@ -150,9 +138,6 @@ function ensureStorageDir(): void {
   }
 }
 
-/**
- * Ensures storage exists, creates it if needed
- */
 async function ensureStorageExists(
   browser: Browser,
   account: Account,
@@ -163,9 +148,6 @@ async function ensureStorageExists(
   }
 }
 
-/**
- * Cleans up a storage file if it exists
- */
 function cleanupStorageFile(file: string): void {
   if (fs.existsSync(file)) {
     try {

@@ -25,7 +25,6 @@ export class RegisterPage extends BasePage {
   readonly submitButton: Locator;
   readonly alertContainer: Locator;
   readonly gotoLoginLink: Locator;
-
   // Date picker elements
   readonly datePickerDialog: Locator;
   readonly dobYearSelect: Locator;
@@ -52,8 +51,6 @@ export class RegisterPage extends BasePage {
     this.dobMonthSelect = page.getByTestId('dob-month-select');
   }
 
-  // ---------- Navigation ----------
-
   @Step('Open registration page')
   async open(): Promise<void> {
     await super.goto('/#/register');
@@ -65,8 +62,6 @@ export class RegisterPage extends BasePage {
     await super.waitForLoad();
     await expect(this.registerForm).toBeAttached();
   }
-
-  // ---------- Form actions ----------
 
   @Step('Fill registration form (email: "{0}")')
   async fillRegisterForm(data: RegisterData): Promise<void> {
@@ -121,8 +116,6 @@ export class RegisterPage extends BasePage {
     await this.fillRegisterForm(data);
     await this.submit();
   }
-
-  // ---------- Assertions & waits ----------
 
   @Step('Wait for successful registration redirect')
   async waitForRegistrationSuccess(): Promise<void> {

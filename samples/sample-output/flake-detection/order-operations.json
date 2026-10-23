@@ -39,7 +39,7 @@
       "passed": false,
       "durationMs": 4125,
       "failedTestNames": [
-        "api/buyer/order-operations.spec.ts:60:3 › Buyer API -- Order Operations › should get single order by reference"
+        "api/buyer/order-operations.spec.ts:60:3 > Buyer API -- Order Operations > should get single order by reference"
       ]
     }
   ],

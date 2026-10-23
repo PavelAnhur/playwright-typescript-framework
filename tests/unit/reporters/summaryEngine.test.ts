@@ -1,8 +1,8 @@
 import { writeFile } from 'node:fs/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
 import type { FailureHypothesis } from '@ai/schemas';
+import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
 import type { SummaryFile, TriagedFailure } from '../../../reporters/aiTriageTypes';
 import { SummaryEngine } from '../../../reporters/summaryEngine';
 
@@ -32,7 +32,6 @@ function makeFixture(
         evidence: ['placeholder'],
       }
     : null;
-
   return {
     testTitle: 'should do the thing',
     testFile: 'tests/specs/ui/example.spec.ts',
@@ -84,32 +83,21 @@ describe('unit', () => {
         phases: [],
         totalDurationMs: 0,
       };
-
       const triaged = [makeFixture(null, flakeA, null), makeFixture(null, flakeB, 'timeout')];
-
       const engine = new SummaryEngine('/tmp', 'reports', 5);
       const summaryPath = await engine.write(triaged, 2);
-
       expect(summaryPath).toContain('ai-triage-summary.json');
-
       const summary = capturedSummary();
-
-      // flakeDetectionsRun: both have flake !== null
       expect(summary.flakeDetectionsRun).toBe(2);
-      // flakeDetectionsFailed: only one has flakeError !== null
       expect(summary.flakeDetectionsFailed).toBe(1);
-      // flakeDetectionsSkipped: neither has hypothesis, so none qualify
       expect(summary.flakeDetectionsSkipped).toBe(0);
     });
 
     it('returns zero counts when triaged is empty', async () => {
       const engine = new SummaryEngine('/tmp', 'reports', 3);
       const summaryPath = await engine.write([], 1);
-
       expect(summaryPath).toContain('ai-triage-summary.json');
-
       const summary = capturedSummary();
-
       expect(summary.flakeDetectionsRun).toBe(0);
       expect(summary.flakeDetectionsFailed).toBe(0);
       expect(summary.flakeDetectionsSkipped).toBe(0);
@@ -122,40 +110,24 @@ describe('unit', () => {
       const itemB = makeFixture('flake', null, null);
       // hypothesis=product_bug(high) → shouldConsiderFlake=false, flake=null, flakeError=null
       const itemC = makeFixture('product_bug', null, null);
-
       const triaged = [itemA, itemB, itemC];
-
       const engine = new SummaryEngine('/tmp', 'reports', 3);
       const summaryPath = await engine.write(triaged, 0);
-
       expect(summaryPath).toContain('ai-triage-summary.json');
-
       const summary = capturedSummary();
-
-      // flakeDetectionsSkipped: itemA (test_issue) + itemB (flake) = 2
-      // itemC excluded because shouldConsiderFlake returns false
       expect(summary.flakeDetectionsSkipped).toBe(2);
       expect(mockShouldConsiderFlake).toHaveBeenCalledTimes(3);
     });
 
     it('excludes shouldConsiderFlake=false items from flakeDetectionsSkipped', async () => {
       mockShouldConsiderFlake.mockReturnValue(false);
-
-      // hypothesis=test_issue but shouldConsiderFlake returns false
       const itemA = makeFixture('test_issue', null, null);
-      // hypothesis=flake but shouldConsiderFlake returns false
       const itemB = makeFixture('flake', null, null);
-
       const triaged = [itemA, itemB];
-
       const engine = new SummaryEngine('/tmp', 'reports', 2);
       const summaryPath = await engine.write(triaged, 0);
-
       expect(summaryPath).toContain('ai-triage-summary.json');
-
       const summary = capturedSummary();
-
-      // Both have hypothesis but shouldConsiderFlake=false → skipped=0
       expect(summary.flakeDetectionsSkipped).toBe(0);
       expect(mockShouldConsiderFlake).toHaveBeenCalledTimes(2);
     });
@@ -163,9 +135,7 @@ describe('unit', () => {
     it('passes totalFailed, triaged length, and skipped through build output', async () => {
       const engine = new SummaryEngine('/tmp', 'reports', 7);
       await engine.write([makeFixture(null, null, null)], 3);
-
       const summary = capturedSummary();
-
       expect(summary.totalFailed).toBe(7);
       expect(summary.triaged).toBe(1);
       expect(summary.skipped).toBe(3);
@@ -175,9 +145,7 @@ describe('unit', () => {
       const fixture = makeFixture('test_issue', null, null);
       const engine = new SummaryEngine('/tmp', 'reports', 1);
       await engine.write([fixture], 0);
-
       const summary = capturedSummary();
-
       expect(summary.failures).toHaveLength(1);
       const f = summary.failures[0]!;
       expect(f.testTitle).toBe(fixture.testTitle);
@@ -190,7 +158,6 @@ describe('unit', () => {
     it('writes ai-triage-summary.json under join(rootDir, outputDir)', async () => {
       const engine = new SummaryEngine('/tmp/myproject', 'reports/triage', 0);
       const summaryPath = await engine.write([], 0);
-
       expect(summaryPath).toBe('/tmp/myproject/reports/triage/ai-triage-summary.json');
     });
   });

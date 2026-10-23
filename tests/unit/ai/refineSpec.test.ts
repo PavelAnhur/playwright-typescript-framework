@@ -1,12 +1,12 @@
 import { basename } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { SpecGeneratorInput } from '@ai/prompts/specGenerator';
+import { refineSpec } from '@ai/agents/refineSpec';
 import type { CallResult } from '@ai/dshClient';
 import { callModel } from '@ai/dshClient';
-import { refineSpec } from '@ai/agents/refineSpec';
-import { runPlaywrightTest } from '@ai/tools/runPlaywrightTest';
+import type { SpecGeneratorInput } from '@ai/prompts/specGenerator';
 import type { TestRunResult } from '@ai/tools/runPlaywrightTest';
+import { runPlaywrightTest } from '@ai/tools/runPlaywrightTest';
 import { writeFile } from 'node:fs/promises';
 
 vi.mock('@ai/dshClient');
@@ -59,7 +59,6 @@ describe('unit', () => {
       ];
       let cmIndex = 0;
       vi.mocked(callModel).mockImplementation(async () => cmCalls[cmIndex++] as CallResult);
-
       const rpwtCalls: TestRunResult[] = [
         {
           passed: false,
@@ -84,11 +83,8 @@ describe('unit', () => {
       vi.mocked(runPlaywrightTest).mockImplementation(
         async () => rpwtCalls[rpwtIndex++] as TestRunResult
       );
-
       const result = await refineSpec(mockInput);
-
       expect(result.finalFileName).toBe(basename(result.finalOutputPath));
-
       const writeCalls = vi.mocked(writeFile).mock.calls;
       const writePaths = writeCalls.map(call => call[0] as string);
       expect(writePaths).toContain(result.finalOutputPath);
@@ -108,7 +104,6 @@ describe('unit', () => {
       ];
       let cmIndex = 0;
       vi.mocked(callModel).mockImplementation(async () => cmCalls[cmIndex++] as CallResult);
-
       const rpwtCalls: TestRunResult[] = [
         {
           passed: false,

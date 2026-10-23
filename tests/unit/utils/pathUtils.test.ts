@@ -111,13 +111,11 @@ describe('unit', () => {
       process.env['TEST_ENV'] = 'staging';
       vi.mocked(fs.existsSync).mockReturnValue(false);
       vi.mocked(path.resolve).mockImplementation((...args) => args.join('/'));
-
       expect(() => buildCsvFilePath(mockFileName, mockSpecFilePath)).toThrow('CSV file not found');
       expect(fs.existsSync).toHaveBeenCalled();
     });
 
     it('should use local as default environment', () => {
-      // TEST_ENV not set, should default to 'local'
       vi.mocked(fs.existsSync).mockImplementation((path: fs.PathLike) => {
         const pathString = path.toString();
         return pathString.includes('categories-local.csv');

@@ -156,7 +156,6 @@ describe('unit', () => {
             at tests/specs/api/products.spec.ts:5:10
             at tests/specs/ui/home-page/catalog-toolbar.spec.ts:12:20
       `;
-
       const originalError = global.Error;
       global.Error = class extends originalError {
         constructor() {

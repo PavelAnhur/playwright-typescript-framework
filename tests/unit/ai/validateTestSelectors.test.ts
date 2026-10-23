@@ -58,7 +58,6 @@ describe('unit', () => {
     `;
       mockSpecContent(specContent);
       mockSourceFiles({});
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/login.spec.ts');
       const ids = result.checked.map(c => c.testId).sort();
       expect(ids).toEqual(['password', 'submit-btn', 'username']);
@@ -74,7 +73,6 @@ describe('unit', () => {
     `;
       mockSpecContent(specContent);
       mockSourceFiles({});
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/cart.spec.ts');
       const ids = result.checked.map(c => c.testId).sort();
       expect(ids).toEqual(['cart-icon', 'checkout-btn']);
@@ -90,7 +88,6 @@ describe('unit', () => {
     `;
       mockSpecContent(specContent);
       mockSourceFiles({});
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/search.spec.ts');
       const ids = result.checked.map(c => c.testId).sort();
       expect(ids).toEqual(['search-button', 'search-input']);
@@ -123,7 +120,6 @@ describe('unit', () => {
     `;
       mockSpecContent(specContent);
       mockSourceFiles({});
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/duplicate.spec.ts');
       expect(result.checked.length).toBe(1);
       expect(result.checked[0]!.testId).toBe('shared-id');
@@ -140,7 +136,6 @@ describe('unit', () => {
       });
     `);
       mockSourceFiles({});
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/no-testids.spec.ts');
       expect(result).toEqual({ allValid: true, checked: [] });
     });
@@ -157,7 +152,6 @@ describe('unit', () => {
       mockSourceFiles({
         'maison/web/src/App.tsx': '<img data-testid="nav-logo" src="/logo.png" />',
       });
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/findable.spec.ts');
       expect(result.checked.length).toBe(1);
       expect(result.checked[0]!.testId).toBe('nav-logo');
@@ -175,7 +169,6 @@ describe('unit', () => {
       mockSourceFiles({
         'maison/web/src/App.tsx': '<div>Hello</div>',
       });
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/missing.spec.ts');
       expect(result.checked).toHaveLength(1);
       expect(result.checked[0]!.found).toBe(false);
@@ -193,7 +186,6 @@ describe('unit', () => {
       mockSourceFiles({
         'maison/web/src/App.tsx': '<button data-testid="found-id">Click</button>',
       });
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/partial.spec.ts');
       expect(result.allValid).toBe(false);
       const found = result.checked.find(c => c.testId === 'found-id');
@@ -216,7 +208,6 @@ describe('unit', () => {
         <button data-testid="btn-save">Save</button>
       `,
       });
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/allpresent.spec.ts');
       expect(result.allValid).toBe(true);
     });
@@ -228,11 +219,9 @@ describe('unit', () => {
         await page.getByTestId('asym-id').click();
       });
     `);
-      // Source file has single-quoted data-testid — should NOT match
       mockSourceFiles({
         'maison/web/src/App.tsx': "<div data-testid='asym-id'>text</div>",
       });
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/quoteasym.spec.ts');
       expect(result.checked).toHaveLength(1);
       expect(result.checked[0]!.found).toBe(false);
@@ -248,7 +237,6 @@ describe('unit', () => {
       mockSourceFiles({
         'maison/web/src/App.tsx': '<div data-testid="dbl-id">text</div>',
       });
-
       const result = await validateTestSelectors('/project-root/tests/specs/ui/quotematch.spec.ts');
       expect(result.checked).toHaveLength(1);
       expect(result.checked[0]!.found).toBe(true);
@@ -259,7 +247,6 @@ describe('unit', () => {
     afterEach(() => {
       mockReaddir.mockReset();
     });
-
     it('should skip a missing source directory without throwing', async () => {
       const { validateTestSelectors } = await import('@ai/tools/validateTestSelectors');
       mockSpecContent(`
@@ -279,7 +266,6 @@ describe('unit', () => {
         if (d.includes('maison/server/src')) return dirents('server.ts');
         return [];
       }) as unknown as typeof readdir);
-
       const result = await validateTestSelectors(
         '/project-root/tests/specs/ui/skipmissing.spec.ts'
       );

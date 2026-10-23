@@ -45,28 +45,17 @@ export abstract class BasePage {
     this.skipLink = page.getByTestId('skip-link');
   }
 
-  /**
-   * Navigate to a specific path
-   * @param path - The URL path (defaults to '/')
-   */
   async goto(path: string = '/'): Promise<void> {
     await this.page.goto(path, { timeout: T.NAVIGATION });
     await this.waitForLoad();
   }
 
-  /**
-   * Wait for the page to be fully loaded
-   * Override in child classes for specific load conditions
-   */
   async waitForLoad(): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded', { timeout: T.DOM_CONTENT_LOADED });
     await this.waitForLoadingComplete();
     await this.handleBanners();
   }
 
-  /**
-   * Wait for loading indicators to disappear
-   */
   async waitForLoadingComplete(): Promise<void> {
     try {
       const indicator = this.loadingIndicator.first();
@@ -81,9 +70,6 @@ export abstract class BasePage {
     }
   }
 
-  /**
-   * Handle common banners (cookies, popups, etc.)
-   */
   async handleBanners(): Promise<void> {
     try {
       const bannerExists = await this.cookieBanner.isVisible({ timeout: T.VERY_SHORT });
@@ -101,9 +87,6 @@ export abstract class BasePage {
     await this.handlePopups();
   }
 
-  /**
-   * Accept cookie banner if present
-   */
   async handleCookieBanner(): Promise<void> {
     try {
       if (await this.cookieBanner.isVisible({ timeout: T.VERY_SHORT })) {
@@ -115,24 +98,14 @@ export abstract class BasePage {
     }
   }
 
-  /**
-   * Handle any popups or overlays
-   * Override in child classes for specific popups
-   */
   async handlePopups(): Promise<void> {
     // Default implementation - override in child classes
   }
 
-  /**
-   * Get the page title
-   */
   async getTitle(): Promise<string> {
     return await this.page.title();
   }
 
-  /**
-   * Get the current URL
-   */
   async getCurrentUrl(): Promise<string> {
     return this.page.url();
   }
@@ -168,9 +141,6 @@ export abstract class BasePage {
     return this.page.locator(selector, options);
   }
 
-  /**
-   * Check if an element is visible quickly
-   */
   async isElementVisible(locator: Locator, timeout: number = T.VERY_SHORT): Promise<boolean> {
     try {
       return await locator.isVisible({ timeout });
@@ -179,9 +149,6 @@ export abstract class BasePage {
     }
   }
 
-  /**
-   * Get flash message text
-   */
   async getFlashMessage(): Promise<string> {
     try {
       if (await this.isElementVisible(this.flashMessage, T.VERY_SHORT)) {
@@ -204,8 +171,6 @@ export abstract class BasePage {
     await this.waitForLoad();
   }
 
-  // ---------- Shared navigation actions ----------
-
   @Step('Go to shop')
   async goToShop(): Promise<void> {
     await this.navShop.click();
@@ -224,8 +189,6 @@ export abstract class BasePage {
     await this.page.waitForURL(/#\/login/);
   }
 
-  // ---------- Assertions ----------
-
   @Step('Assert URL contains "{0}"')
   async expectUrlToContain(path: string): Promise<void> {
     await expect(this.page).toHaveURL(new RegExp(path));
@@ -240,8 +203,6 @@ export abstract class BasePage {
   async expectFlashMessage(text: string): Promise<void> {
     await expect(this.flashMessage).toContainText(text);
   }
-
-  // ---------- Keyboard Navigation ----------
 
   @Step('Press Tab')
   async pressTab(): Promise<void> {
@@ -273,8 +234,6 @@ export abstract class BasePage {
     await this.page.keyboard.press('Space');
   }
 
-  // ---------- Environment ----------
-
   @Step('Set viewport to {0}x{1}')
   async setMobileViewport(width: number = 375, height: number = 812): Promise<void> {
     await this.page.setViewportSize({ width: width, height: height });
@@ -289,8 +248,6 @@ export abstract class BasePage {
   async screenshot(options?: { path?: string; fullPage?: boolean }): Promise<Buffer> {
     return await this.page.screenshot(options);
   }
-
-  // ---------- Wait/Timeout Methods (discouraged, kept for edge cases) ----------
 
   @Step('Wait {0}ms')
   async waitForTimeout(ms: number): Promise<void> {

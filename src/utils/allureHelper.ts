@@ -3,10 +3,6 @@ import * as allure from 'allure-js-commons';
 import fs from 'fs';
 import path from 'path';
 
-/**
- * Add test-specific environment variables
- * This appends test-specific info to the existing environment.properties
- */
 export function addAllureEnvironment(info: TestInfo): void {
   const allureResultsDir = './allure-results';
   if (!fs.existsSync(allureResultsDir)) {
@@ -26,7 +22,6 @@ export function addAllureEnvironment(info: TestInfo): void {
         })
     );
   }
-  // Add test-specific environment variables
   const testEnv = {
     ...existingEnv,
     'Test File': info.file,
@@ -43,10 +38,6 @@ export function addAllureEnvironment(info: TestInfo): void {
   fs.writeFileSync(envPath, envContent);
 }
 
-/**
- * Add test metadata to Allure using annotations
- * These will appear in the Allure report
- */
 export function addAllureMetadata(options: {
   epic?: string;
   feature?: string;

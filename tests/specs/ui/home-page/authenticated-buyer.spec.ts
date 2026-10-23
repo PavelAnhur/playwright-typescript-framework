@@ -3,16 +3,12 @@ import { expect, test } from '@fixtures';
 test.describe('Home Page UI -- Authenticated Buyer', () => {
   test.describe('Header & Navigation', () => {
     test('should show buyer-specific navigation elements', async ({ buyerHomePage }) => {
-      // Verify buyer is logged in
       await expect(buyerHomePage.currentUser).toBeVisible();
-      // Verify cart link with count
       await expect(buyerHomePage.navCart).toBeVisible();
       await expect(buyerHomePage.navCart).toContainText('Cart');
       await expect(buyerHomePage.cartCount).toBeVisible();
-      // Verify orders link is visible for buyer
       await expect(buyerHomePage.ordersLink).toBeVisible();
       await expect(buyerHomePage.ordersLink).toHaveText('Orders');
-      // Verify logout link
       await expect(buyerHomePage.logoutLink).toBeVisible();
       await expect(buyerHomePage.logoutLink).toHaveText('Logout');
     });

@@ -39,9 +39,7 @@ test.describe('Home Page UI -- Header and Navigation', () => {
 
   test('shop link is visible and clickable', async ({ homePage }) => {
     await expect(homePage.navShop).toBeVisible();
-    // Shop link might be on the same page (hash routing)
     await homePage.navShop.click();
-    // Verify we're still on home page (since it's #/)
     await homePage.expectAtHomePage();
   });
 });

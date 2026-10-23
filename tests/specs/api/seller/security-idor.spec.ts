@@ -28,30 +28,24 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
     authedSeller1,
     authedSeller2,
   }) => {
-    // Try to update seller2's product as seller1
     const response1 = await authedSeller1.patch(`products/${productIds[1]}`, {
       data: { name: 'Attempted update by seller1' },
     });
     expect(response1.status()).toBe(403);
-    // Try to update seller1's product as seller2
     const response2 = await authedSeller2.patch(`products/${productIds[0]}`, {
       data: { name: 'Attempted update by seller2' },
     });
     expect(response2.status()).toBe(403);
-    // Try to add image to seller2's product as seller1
     const response3 = await authedSeller1.post(`products/${productIds[1]}/images`, {
       data: { url: 'https://example.com/idor-image.jpg' },
     });
     expect(response3.status()).toBe(403);
-    // Try to add discount to seller2's product as seller1
     const response4 = await authedSeller1.put(`products/${productIds[1]}/discount`, {
       data: { type: 'percentage', value: 10 },
     });
     expect(response4.status()).toBe(403);
-    // Try to delete discount from seller2's product as seller1
     const response5 = await authedSeller1.delete(`products/${productIds[1]}/discount`);
     expect(response5.status()).toBe(403);
-    // Try to issue certificate for seller2's product as seller1
     const response6 = await authedSeller1.post(`products/${productIds[1]}/certificate`);
     expect(response6.status()).toBe(403);
   });
@@ -60,18 +54,14 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
     authedSeller1,
     authedBuyer,
   }) => {
-    // Get product detail as seller (should include seller info)
     const sellerResponse = await authedSeller1.get(`products/${productIds[0]}`);
     const sellerData = await sellerResponse.json();
     expect(sellerData.product.sellerId).toBeDefined();
     expect(sellerData.product.sellerName).toBeDefined();
     expect(sellerData.product.stock).toBeDefined();
-
-    // Get same product as buyer (should not include stock or sellerId)
     const buyerResponse = await authedBuyer.get(`products/${productIds[0]}`);
     const buyerData = await buyerResponse.json();
-    // expect(buyerData.product.sellerId).toBeUndefined(); bug, need to fix
-    expect(buyerData.product.sellerName).toBeDefined(); // Should still show seller name
+    expect(buyerData.product.sellerName).toBeDefined();
     expect(buyerData.product.stock).toBeDefined();
   });
 

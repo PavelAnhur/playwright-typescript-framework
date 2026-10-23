@@ -1,7 +1,7 @@
 import js from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
-import globals from 'globals'; // You need this for globals
+import globals from 'globals';
 
 export default [
   {
@@ -30,8 +30,8 @@ export default [
         project: './tsconfig.json',
       },
       globals: {
-        ...globals.node, // ✅ Use globals package
-        ...globals.browser, // ✅ Use globals package
+        ...globals.node,
+        ...globals.browser,
         console: 'readonly',
         process: 'readonly',
         __dirname: 'readonly',
@@ -43,7 +43,6 @@ export default [
       '@typescript-eslint': tsPlugin,
     },
     rules: {
-      // ✅ Correct way to apply recommended rules
       ...tsPlugin.configs.recommended.rules,
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',

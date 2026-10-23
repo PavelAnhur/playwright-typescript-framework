@@ -243,7 +243,6 @@ describe('unit', () => {
       vi.mocked(readFile).mockReturnValue(mockCsvData);
       vi.mocked(buildCsvFilePath).mockReturnValue('/path/to/test-data.csv');
       const result = getCsvData(mockFileName, mockSpecFilePath);
-      // Should treat invalid JSON as a string
       expect(result).toEqual([{ id: 1, metadata: '{invalid json}' }]);
     });
 

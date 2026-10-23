@@ -21,7 +21,6 @@ export function setupAllure(): void {
     .map(([key, value]) => `${key}=${value}`)
     .join('\n');
   fs.writeFileSync(path.join(resultsDir, 'environment.properties'), envContent);
-  // Create categories.json for better test classification
   const categories = {
     categories: [
       {

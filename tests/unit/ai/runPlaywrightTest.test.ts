@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { extractFailures, parseJsonReport } from '@ai/tools/runPlaywrightTest';
 import type {
   PlaywrightJsonReport,
   PlaywrightJsonSpec,
   PlaywrightJsonSuite,
 } from '@ai/tools/runPlaywrightTest';
+import { extractFailures, parseJsonReport } from '@ai/tools/runPlaywrightTest';
 
 function makeSpec(
   title: string,
@@ -33,22 +33,14 @@ function makeSuite(
 ): PlaywrightJsonSuite {
   return { title, specs, suites };
 }
-
-// Empty report (no suites).
 const emptyReport: PlaywrightJsonReport = {};
-
-// Report with a suite but no specs.
 const noSpecsSuite: PlaywrightJsonReport = {
   suites: [makeSuite('Empty Suite')],
 };
-
-// Fixture: full Playwright JSON stdout with leading chatter.
 const buildStdout = (report: PlaywrightJsonReport): string => {
   const json = JSON.stringify(report, null, 2);
   return `some preamble\nchatter\n${json}`;
 };
-
-// Fixture: valid report object matching Playwright's --reporter=json shape.
 const validReport = {
   config: {},
   suites: [
@@ -135,7 +127,7 @@ describe('unit', () => {
         ],
       };
       const result = extractFailures(report);
-      expect(result.names).toContain('tests/specs/ui/a.spec.ts:10:3 › should fail');
+      expect(result.names).toContain('tests/specs/ui/a.spec.ts:10:3 > should fail');
       expect(result.firstMessage).toBe('boom');
     });
 
@@ -148,7 +140,7 @@ describe('unit', () => {
         ],
       };
       const result = extractFailures(report);
-      expect(result.names).toContain('tests/specs/ui/b.spec.ts:10:3 › should timeout');
+      expect(result.names).toContain('tests/specs/ui/b.spec.ts:10:3 > should timeout');
       expect(result.firstMessage).toBe('Time exceeded');
     });
 
@@ -180,15 +172,12 @@ describe('unit', () => {
       };
       const result = extractFailures(report);
       expect(result.names).toContain(
-        'tests/specs/ui/nested.spec.ts:10:3 › Parent › Child › deep fail'
+        'tests/specs/ui/nested.spec.ts:10:3 > Parent > Child > deep fail'
       );
       expect(result.firstMessage).toBe('boom');
     });
 
     it('should NOT add a path segment for file-path suites (ending .spec.ts/.test.ts)', () => {
-      // The suite titled 'tests/specs/ui/home-page.spec.ts' is a file-path suite.
-      // Its direct spec 'Home Page' should NOT become
-      // 'tests/specs/ui/home-page.spec.ts › Home Page'.
       const report: PlaywrightJsonReport = {
         suites: [
           makeSuite('tests/specs/ui/home-page.spec.ts', [
@@ -197,10 +186,8 @@ describe('unit', () => {
         ],
       };
       const result = extractFailures(report);
-      // Path should be just 'Home Page', NOT
-      // 'tests/specs/ui/home-page.spec.ts › Home Page'.
-      expect(result.names).toContain('tests/specs/ui/home-page.spec.ts:10:3 › Home Page');
-      expect(result.names[0]).not.toContain('home-page.spec.ts › Home Page');
+      expect(result.names).toContain('tests/specs/ui/home-page.spec.ts:10:3 > Home Page');
+      expect(result.names[0]).not.toContain('home-page.spec.ts > Home Page');
     });
 
     it('should add a path segment for describe-style suites', () => {
@@ -214,7 +201,7 @@ describe('unit', () => {
         ],
       };
       const result = extractFailures(report);
-      expect(result.names).toContain('tests/specs/ui/a.spec.ts:5:3 › Describe Block › spec title');
+      expect(result.names).toContain('tests/specs/ui/a.spec.ts:5:3 > Describe Block > spec title');
     });
 
     it('should use the FIRST failure message in traversal order', () => {
@@ -264,8 +251,8 @@ describe('unit', () => {
       };
       const result = extractFailures(report);
       expect(result.names).toHaveLength(2);
-      expect(result.names).toContain('tests/specs/ui/a.spec.ts:10:3 › a-fail');
-      expect(result.names).toContain('tests/specs/ui/b.spec.ts:10:3 › b-fail');
+      expect(result.names).toContain('tests/specs/ui/a.spec.ts:10:3 > a-fail');
+      expect(result.names).toContain('tests/specs/ui/b.spec.ts:10:3 > b-fail');
       expect(result.firstMessage).toBe('err-a');
     });
 
@@ -278,12 +265,12 @@ describe('unit', () => {
         suites: [makeSuite('Root', [spec])],
       };
       const result = extractFailures(report);
-      expect(result.names).toContain('Root › bare spec');
+      expect(result.names).toContain('Root > bare spec');
       expect(result.firstMessage).toBe('oops');
     });
 
     it('should pin CURRENT behavior: file-path suite rule (KNOWN_LIMITATIONS)', () => {
-      // A suite titled ending '.spec.ts' does NOT add '› <title>' prefix.
+      // A suite titled ending '.spec.ts' does NOT add '> <title>' prefix.
       // This is current behavior per KNOWN_LIMITATIONS.md — we document it, don't fix it.
       const report: PlaywrightJsonReport = {
         suites: [
@@ -295,10 +282,8 @@ describe('unit', () => {
         ],
       };
       const result = extractFailures(report);
-      // File-path suite → currentPath stays as prefix ('').
-      // Describe suite inside → adds '› Describe Inside File'.
       expect(result.names).toContain(
-        'tests/specs/ui/path.spec.ts:1:3 › Describe Inside File › inner'
+        'tests/specs/ui/path.spec.ts:1:3 > Describe Inside File > inner'
       );
     });
   });

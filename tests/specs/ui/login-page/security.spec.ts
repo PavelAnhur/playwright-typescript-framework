@@ -28,10 +28,8 @@ test.describe('Login Page UI -- Security', () => {
   });
 
   test('should show rate limit error after multiple failed attempts', async ({ loginPage }) => {
-    // Multiple failed login attempts
     for (let i = 0; i < 5; i++) {
       await loginPage.login(`wrong${i}@example.com`, 'wrongpassword');
-      // Wait a bit between attempts
       await loginPage.waitForTimeout(100);
     }
     try {

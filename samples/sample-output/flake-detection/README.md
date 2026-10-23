@@ -20,7 +20,7 @@ The detector ran five phases against `tests/specs/api/buyer/order-operations.spe
 Final classification: `flake_parallel`.
 
 The failing test:
-`api/buyer/order-operations.spec.ts:60:3 › Buyer API -- Order Operations › should get single order by reference`
+`api/buyer/order-operations.spec.ts:60:3 > Buyer API -- Order Operations > should get single order by reference`
 
 ## Why this happens
 

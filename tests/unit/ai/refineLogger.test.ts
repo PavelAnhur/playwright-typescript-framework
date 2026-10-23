@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 let tempDir: string;
 
@@ -23,10 +23,8 @@ describe('unit', () => {
       vi.doMock('../../../src/ai/config', () => ({
         aiConfig: { logsDir: tempDir },
       }));
-
       const { logRefineAttempt, getRefineLogPath } =
         await import('../../../src/ai/tools/refineLogger');
-
       const dummyEntry1 = {
         timestamp: new Date().toISOString(),
         caseId: 'C1',
@@ -38,7 +36,6 @@ describe('unit', () => {
         codeLength: 50,
         fullCode: 'console.log("hello");',
       };
-
       const dummyEntry2 = {
         timestamp: new Date().toISOString(),
         caseId: 'C2',
@@ -50,33 +47,26 @@ describe('unit', () => {
         codeLength: 75,
         fullCode: 'expect(true).toBe(false);',
       };
-
       await logRefineAttempt(dummyEntry1);
       await logRefineAttempt(dummyEntry2);
-
       const pathC1 = getRefineLogPath('C1');
       const pathC2 = getRefineLogPath('C2');
-
       expect(pathC1).not.toBe(pathC2);
-
       const contentC1 = await readFile(pathC1, 'utf8');
       const linesC1 = contentC1
         .trim()
         .split('\n')
         .filter(l => l.length > 0)
         .map(l => JSON.parse(l));
-
       const contentC2 = await readFile(pathC2, 'utf8');
       const linesC2 = contentC2
         .trim()
         .split('\n')
         .filter(l => l.length > 0)
         .map(l => JSON.parse(l));
-
       for (const entry of linesC1) {
         expect(entry.caseId).toBe('C1');
       }
-
       for (const entry of linesC2) {
         expect(entry.caseId).toBe('C2');
       }

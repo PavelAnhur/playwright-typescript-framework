@@ -27,8 +27,6 @@ export class LoginPage extends BasePage {
     this.loginPageHead = page.locator('.tiny');
   }
 
-  // ---------- Navigation ----------
-
   @Step('Open login page')
   async open(): Promise<void> {
     await super.goto('/#/login');
@@ -40,8 +38,6 @@ export class LoginPage extends BasePage {
     await super.waitForLoad();
     await expect(this.loginForm).toBeAttached();
   }
-
-  // ---------- Form actions ----------
 
   @Step('Fill login form (email: "{0}")')
   async fillLoginForm(email: string, password: string): Promise<void> {
@@ -74,16 +70,11 @@ export class LoginPage extends BasePage {
     await this.passwordInput.clear();
   }
 
-  // ---------- Navigation actions ----------
-
   @Step('Go to registration page')
   async goToRegister(): Promise<void> {
     await this.gotoRegisterLink.click();
-    // Wait for navigation to registration page
     await this.page.waitForURL(/#\/register/);
   }
-
-  // ---------- Assertions ----------
 
   @Step('Assert alert contains "{0}"')
   async expectAlertMessage(text: string): Promise<void> {
@@ -112,8 +103,6 @@ export class LoginPage extends BasePage {
     await expect(this.alertContainer).toBeVisible();
     await expect(this.alertContainer).toContainText(/invalid|incorrect|error/i);
   }
-
-  // ---------- Data queries ----------
 
   async getAlertMessage(): Promise<string> {
     try {

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FailureHypothesis } from '@ai/schemas';
-import type { Suite, TestCase } from '@playwright/test/reporter';
-import { FlakeDecisionGate } from '@ai/tools/flakeDecisionGate';
 import { detectFlake } from '@ai/tools/detectFlake';
+import { FlakeDecisionGate } from '@ai/tools/flakeDecisionGate';
+import type { Suite, TestCase } from '@playwright/test/reporter';
 
 vi.mock('@ai/tools/detectFlake');
 
@@ -48,9 +48,7 @@ describe('unit', () => {
         hypothesis: 'test is flaky',
         evidence: ['failed once in CI'],
       };
-
       const result = await gate.maybeDetect(makeTestCase('should pass'), flakeHypothesis);
-
       expect(detectFlake).toHaveBeenCalledTimes(1);
       expect(result.result).toBeDefined();
       expect(result.error).toBeNull();
@@ -63,9 +61,7 @@ describe('unit', () => {
         hypothesis: 'fixture not cleaned up',
         evidence: ['state leaked between tests'],
       };
-
       const result = await gate.maybeDetect(makeTestCase('should pass'), testIssueHypothesis);
-
       expect(detectFlake).toHaveBeenCalledTimes(1);
       expect(result.result).toBeDefined();
     });
@@ -77,9 +73,7 @@ describe('unit', () => {
         hypothesis: 'race condition in API',
         evidence: ['intermittent 500'],
       };
-
       const result = await gate.maybeDetect(makeTestCase('should pass'), lowConfBug);
-
       expect(detectFlake).toHaveBeenCalledTimes(1);
       expect(result.result).toBeDefined();
     });
@@ -91,9 +85,7 @@ describe('unit', () => {
         hypothesis: 'button disabled',
         evidence: ['click fails deterministically'],
       };
-
       const result = await gate.maybeDetect(makeTestCase('should pass'), notFlakeHypothesis);
-
       expect(detectFlake).not.toHaveBeenCalled();
       expect(result.result).toBeNull();
       expect(result.error).toBeNull();
@@ -106,9 +98,7 @@ describe('unit', () => {
         hypothesis: 'server down',
         evidence: ['503 response'],
       };
-
       const result = await gate.maybeDetect(makeTestCase('should pass'), envHypothesis);
-
       expect(detectFlake).not.toHaveBeenCalled();
       expect(result.result).toBeNull();
       expect(result.error).toBeNull();
@@ -122,9 +112,7 @@ describe('unit', () => {
         hypothesis: 'test is flaky',
         evidence: ['failed once in CI'],
       };
-
       const result = await disabledGate.maybeDetect(makeTestCase('should pass'), flakeHypothesis);
-
       expect(detectFlake).not.toHaveBeenCalled();
       expect(result.result).toBeNull();
       expect(result.error).toBeNull();
@@ -138,10 +126,8 @@ describe('unit', () => {
         hypothesis: 'test is flaky',
         evidence: ['failed once in CI'],
       };
-
       await smallGate.maybeDetect(makeTestCase('test 1'), flakeHypothesis);
       expect(detectFlake).toHaveBeenCalledTimes(1);
-
       await smallGate.maybeDetect(makeTestCase('test 2'), flakeHypothesis);
       expect(detectFlake).toHaveBeenCalledTimes(1);
     });

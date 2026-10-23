@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
 import type { FailureHypothesis } from '@ai/schemas';
+import type { FlakeDetectionResult } from '@ai/tools/detectFlake';
+import type { FlakeDecisionGate } from '@ai/tools/flakeDecisionGate';
 import type { TestCase } from '@playwright/test/reporter';
 import type { ContextInput, RawFailure } from '../../../reporters/aiTriageTypes';
-import type { FlakeDecisionGate } from '@ai/tools/flakeDecisionGate';
 import { TriageEngine } from '../../../reporters/triageEngine';
 
 const mockAnalyzeFailures =

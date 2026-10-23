@@ -83,8 +83,6 @@ export class HomePage extends BasePage {
     await this.pressTab();
   }
 
-  // ---------- Mobile navigation ----------
-
   @Step('Assert nav toggle aria-expanded is "{0}"')
   async expectNavToggleAriaExpanded(expected: string): Promise<void> {
     await expect(this.navToggle).toHaveAttribute('aria-expanded', expected);
@@ -121,8 +119,6 @@ export class HomePage extends BasePage {
     await expect(this.page).toHaveURL('#/');
   }
 
-  // ---------- Product queries ----------
-
   getProductById(productId: number | string): Locator {
     return this.page.locator(`[data-testid="product-card"][data-product-id="${productId}"]`);
   }
@@ -142,8 +138,6 @@ export class HomePage extends BasePage {
   async waitForProducts(): Promise<void> {
     await expect(this.productCards.first()).toBeVisible();
   }
-
-  // ---------- Toolbar actions ----------
 
   @Step('Search for "{0}"')
   async searchFor(productName: string): Promise<void> {
@@ -184,8 +178,6 @@ export class HomePage extends BasePage {
       return false;
     }
   }
-
-  // ---------- Session ----------
 
   @Step('Log out if logged in')
   async logout(): Promise<void> {

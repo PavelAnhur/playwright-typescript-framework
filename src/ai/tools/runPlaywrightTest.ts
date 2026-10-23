@@ -130,7 +130,7 @@ export function collectFailures(
   const currentPath = isFilePathSuite
     ? prefix
     : prefix
-      ? `${prefix} › ${suite.title}`
+      ? `${prefix} > ${suite.title}`
       : suite.title;
   if (suite.specs) {
     for (const spec of suite.specs) {
@@ -139,9 +139,9 @@ export function collectFailures(
         .find(r => r.status === 'failed' || r.status === 'timedOut');
       if (failedResult) {
         const location = spec.file && spec.line ? `${spec.file}:${spec.line}:3` : (spec.file ?? '');
-        const describePath = currentPath ? `${currentPath} › ${spec.title}` : spec.title;
+        const describePath = currentPath ? `${currentPath} > ${spec.title}` : spec.title;
         out.push({
-          title: location ? `${location} › ${describePath}` : describePath,
+          title: location ? `${location} > ${describePath}` : describePath,
           message: failedResult.error?.message ?? null,
         });
       }
