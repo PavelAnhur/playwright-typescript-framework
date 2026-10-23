@@ -37,7 +37,7 @@
       "@fixtures": ["./tests/fixtures/index.ts"],
       "@pages/*": ["./tests/pages/*"],
       "@utils/*": ["./tests/utils/*"],
-      "@data/*": ["./src/test-data/*"],
+      "@data/*": ["./test-data/*"],
       "@config/*": ["./src/config/*"],
       "@src/*": ["./src/*"],
       "@ai/*": ["./src/ai/*"]

@@ -129,7 +129,7 @@ describe('unit', () => {
     it('should build correct path structure', () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
       const result = buildCsvFilePath(mockFileName, mockSpecFilePath);
-      expect(result).toContain('tests/test-data/specs');
+      expect(result).toContain('test-data/specs');
       expect(result).toContain('ui/home-page/catalog-toolbar');
       expect(result).toContain('categories-local.csv');
     });
@@ -208,7 +208,7 @@ describe('unit', () => {
         return pathString.includes('categories-staging.csv');
       });
       const result = buildCsvFilePath(fileName, specFilePath);
-      expect(result).toContain('tests/test-data/specs');
+      expect(result).toContain('test-data/specs');
       expect(result).toContain('ui/home-page/catalog-toolbar');
       expect(result).toContain('categories-staging.csv');
     });
