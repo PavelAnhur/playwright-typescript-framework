@@ -6,6 +6,13 @@ import { Step } from '@utils/stepDecorator';
  * Abstract base class for all Page Objects.
  * Provides common functionality and utilities for page interactions.
  */
+/**
+ * BasePage is the foundational class for all page objects in the test framework.
+ * It encapsulates shared UI elements (navigation, banners, loading indicators),
+ * standardizes page navigation and waiting patterns, and offers utility methods
+ * for common interactions (keyboard, screenshots, assertions). Extend this class
+ * to create specific page objects while ensuring consistent behavior across tests.
+ */
 export abstract class BasePage {
   readonly flashMessage: Locator;
   readonly loadingIndicator: Locator;
