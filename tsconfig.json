@@ -35,7 +35,7 @@
     "skipLibCheck": true,
     "paths": {
       "@fixtures": ["./tests/fixtures/index.ts"],
-      "@pages/*": ["./tests/pages/*"],
+      "@pages/*": ["./src/pages/*"],
       "@utils/*": ["./src/utils/*"],
       "@data/*": ["./test-data/*"],
       "@config/*": ["./src/config/*"],
