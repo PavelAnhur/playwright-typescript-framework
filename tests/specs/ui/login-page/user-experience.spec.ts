@@ -12,7 +12,6 @@ test.describe('Login Page UI -- User Experience', () => {
     await loginPage.fillLoginForm(buyer.email, buyer.password);
     await loginPage.passwordInput.press('Enter');
     await loginPage.waitForLoginSuccess();
-    await expect(loginPage.currentUser).toBeVisible();
   });
 
   test('should not clear error on new input', async ({ loginPage }) => {

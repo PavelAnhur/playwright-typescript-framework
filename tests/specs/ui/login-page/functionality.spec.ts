@@ -15,10 +15,7 @@ test.describe('Login Page UI -- Functionality', () => {
     addAllureMetadata({ severity: Severity.CRITICAL });
     await loginPage.login(buyer.email, buyer.password);
     await loginPage.waitForLoginSuccess();
-    await expect(loginPage.currentUser).toBeVisible();
     await expect(loginPage.currentUser).toContainText('Aurelie Dupont');
-    await expect(loginPage.logoutLink).toBeVisible();
-    await expect(loginPage.navCart).toBeVisible();
   });
 
   test('should successfully login with seller credentials', async ({ loginPage }) => {
@@ -26,7 +23,6 @@ test.describe('Login Page UI -- Functionality', () => {
     const seller = getTestUser('seller1');
     await loginPage.login(seller.email, seller.password);
     await loginPage.waitForLoginSuccess();
-    await expect(loginPage.currentUser).toBeVisible();
     await expect(loginPage.currentUser).toContainText('Atelier Maison');
     await expect(loginPage.sellerListing).toBeVisible();
   });

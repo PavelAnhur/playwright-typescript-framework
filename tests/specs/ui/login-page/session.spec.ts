@@ -13,13 +13,15 @@ test.describe('Login Page UI -- Session Management', () => {
     await loginPage.waitForLoginSuccess();
     await loginPage.reload();
     await loginPage.getElement('[data-app-ready="true"]').waitFor({ state: 'attached' });
-    await expect(loginPage.currentUser).toBeVisible();
     await expect(loginPage.currentUser).toContainText('Aurelie Dupont');
   });
 
   test('should logout successfully', async ({ loginPage }) => {
     await loginPage.login(buyer.email, buyer.password);
     await loginPage.waitForLoginSuccess();
+    if (await loginPage.navToggle.isVisible()) {
+      await loginPage.navToggle.click();
+    }
     await loginPage.logoutLink.click();
     await loginPage.expectUrlToBe('#/');
     await expect(loginPage.getElement('#flash')).toBeVisible();

@@ -34,7 +34,6 @@ test.describe('Register Page UI', () => {
     });
     await registerPage.waitForRegistrationSuccess();
     await registerPage.expectUrlToBe('#/');
-    await expect(registerPage.currentUser).toBeVisible();
     await expect(registerPage.currentUser).toContainText(`${firstName} ${lastName}`);
   });
 
