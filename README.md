@@ -57,23 +57,14 @@ Every agent is also exposed through an MCP server — any MCP-compatible AI clie
 <summary>📂 Click to expand full project structure</summary>
 
 ```bash
-# Generated using: tree -f -I "node_modules|test-results|playwright-report"
+# Project layout (curated). Full listing: tree -f -I "node_modules|test-results|playwright-report|allure-results|allure-report|.git|maison|logs|generated-cases|scratch|samples|src/ai"
 
 playwright-typescript-framework/
 ├── src/
 │   ├── config/
 │   │   ├── env.ts
+│   │   ├── environment.ts
 │   │   └── timeouts.ts
-│   ├── types/
-│   │   ├── account.ts
-│   │   ├── cart.ts
-│   │   ├── certificate.ts
-│   │   ├── csv.ts
-│   │   ├── order.ts
-│   │   ├── product.ts
-│   │   └── storage-state.ts
-│   └── setup/
-├── tests/
 │   ├── fixtures/
 │   │   ├── api.fixture.ts
 │   │   ├── auth.browser.fixture.ts
@@ -88,76 +79,57 @@ playwright-typescript-framework/
 │   │   ├── HomePage.ts
 │   │   ├── LoginPage.ts
 │   │   └── RegisterPage.ts
+│   ├── setup/
+│   │   ├── allure-setup.ts
+│   │   └── global-setup.ts
+│   ├── types/
+│   │   ├── account.ts
+│   │   ├── cart.ts
+│   │   ├── certificate.ts
+│   │   ├── csv.ts
+│   │   ├── order.ts
+│   │   ├── product.ts
+│   │   └── storage-state.ts
+│   └── utils/
+│       ├── allureHelper.ts
+│       ├── authContext.manager.ts
+│       ├── csvReader.ts
+│       ├── fileUtils.ts
+│       ├── normalizeFileName.ts
+│       ├── pathUtils.ts
+│       ├── stackTrace.ts
+│       ├── stepDecorator.ts
+│       └── stripFences.ts
+├── test-data/
+│   └── specs/
+│       ├── api/
+│       │   └── home-page/
+│       │       └── products-catalogue/
+│       │           └── products.csv
+│       └── ui/
+│           └── home-page/
+│               └── catalog-toolbar/
+│                   ├── categories.csv
+│                   └── sort-options.csv
+├── tests/
 │   ├── specs/
 │   │   ├── api/
 │   │   │   ├── buyer/
-│   │   │   │   ├── authentication.spec.ts
-│   │   │   │   ├── cart-operations.spec.ts
-│   │   │   │   ├── error-envelope.spec.ts
-│   │   │   │   └── order-operations.spec.ts
 │   │   │   ├── home-page/
-│   │   │   │   ├── cors-headers.spec.ts
-│   │   │   │   ├── error-envelope.spec.ts
-│   │   │   │   ├── health.spec.ts
-│   │   │   │   ├── products-catalogue.spec.ts
-│   │   │   │   ├── products-categories.spec.ts
-│   │   │   │   ├── products-certificate.spec.ts
-│   │   │   │   ├── products-id.spec.ts
-│   │   │   │   ├── security-headers.spec.ts
-│   │   │   │   └── seed-info.spec.ts
 │   │   │   └── seller/
-│   │   │       ├── edge-cases.spec.ts
-│   │   │       ├── pagination-filter.spec.ts
-│   │   │       ├── products-certificate.spec.ts
-│   │   │       ├── products-discount.spec.ts
-│   │   │       ├── products-get.spec.ts
-│   │   │       ├── products-images.spec.ts
-│   │   │       ├── products-patch.spec.ts
-│   │   │       ├── products-post.spec.ts
-│   │   │       └── security-idor.spec.ts
-│   │   ├── ui/
-│   │   │   ├── home-page/
-│   │   │   │   ├── accessibility.spec.ts
-│   │   │   │   ├── authenticated-buyer.spec.ts
-│   │   │   │   ├── catalog-toolbar.spec.ts
-│   │   │   │   ├── header-navigation.spec.ts
-│   │   │   │   ├── hero-section.spec.ts
-│   │   │   │   └── product-card.spec.ts
-│   │   │   ├── login-page/
-│   │   │   │   ├── accessibility.spec.ts
-│   │   │   │   ├── edge-cases.spec.ts
-│   │   │   │   ├── functionality.spec.ts
-│   │   │   │   ├── layout.spec.ts
-│   │   │   │   ├── navigation.spec.ts
-│   │   │   │   ├── responsive.spec.ts
-│   │   │   │   ├── security.spec.ts
-│   │   │   │   ├── session.spec.ts
-│   │   │   │   ├── user-experience.spec.ts
-│   │   │   │   └── validation.spec.ts
-│   │   │   └── register-page/
-│   │   │       └── register.spec.ts
-│   │   └── unit/
-│   │       └── utils/
-│   │           ├── csv-reader.test.ts
-│   │           ├── file-utils.test.ts
-│   │           ├── path-utils.test.ts
-│   │           └── stack-trace.test.ts
-│   ├── test-data/
-│   │   └── specs/
-│   │       ├── api/
-│   │       │   └── home-page/
-│   │       │       └── products-catalogue/
-│   │       │           └── products.csv
-│   │       └── ui/
-│   │           └── home-page/
-│   │               └── catalog-toolbar/
-│   │                   ├── categories.csv
-│   │                   └── sort-options.csv
-│   └── utils/
-│       ├── csv-reader.ts
-│       ├── file-utils.ts
-│       ├── path-utils.ts
-│       └── stack-trace.ts
+│   │   ├── review/
+│   │   └── ui/
+│   │       ├── home-page/
+│   │       ├── login-page/
+│   │       └── register-page/
+│   └── unit/
+│       ├── ai/
+│       ├── reporters/
+│       └── utils/
+│           ├── csvReader.test.ts
+│           ├── fileUtils.test.ts
+│           ├── pathUtils.test.ts
+│           └── stackTrace.test.ts
 ├── playwright.config.ts
 ├── vitest.config.ts
 ├── tsconfig.json
@@ -189,7 +161,7 @@ npm install
 npx playwright install
 
 # Run all tests (unit + API + UI)
-npm test
+npm test:all
 
 # Run specific test types
 npm run test:unit     # Vitest unit tests
