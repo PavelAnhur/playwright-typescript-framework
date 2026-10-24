@@ -100,6 +100,24 @@ Missing capabilities that a production harness would have.
 - **Fix:** add a retry-with-feedback wrapper. On `safeParse` failure, append the validation error to the conversation as a new user message ("your previous output failed validation: <error>. Return corrected JSON.") and call again, up to 1–2 extra attempts. Cap the cost so a stubborn model does not loop indefinitely.
 - **Priority:** medium
 
+### allure-vitest blocks the vitest 5 upgrade
+
+- **Where:** `package.json` (`vitest`, `@vitest/coverage-v8`), `node_modules/allure-vitest/dist/runtime.js`
+- **What:** `allure-vitest` (through 3.14.0) declares `peerDependencies["@vitest/runner"] >=1.3.0` and imports `@vitest/runner` at runtime. Vitest 5 inlines `@vitest/runner` and no longer publishes it — `npm view @vitest/runner versions` shows nothing after `4.1.12` except `5.0.0-beta.*`. Under vitest 5 the reporter fails to load at startup, so no unit tests run and `allure-results/` is never produced.
+- **Why:** the vitest 5 upgrade was attempted to clear two tinypool criticals. It failed its CI gate (run `40100632585`), and the rollback to vitest 3.2.7 / coverage-v8 3.2.7 was merged as PR #60.
+- **Fix:** revisit when `allure-vitest` drops the `@vitest/runner` peer dependency. Until then the rollback stands, and the 2 critical / 2 high audit vulnerabilities (tinypool) return as a known cost.
+- **Priority:** high
+- **Recorded:** 2026-10-24, commit `c72da9eb`
+
+### judge.sh cannot answer its own question 5
+
+- **Where:** `scripts/judge.sh` (prompt build), `scripts/judge.mjs` (client)
+- **What:** question 5 asks whether any claim in the commit message, comment, or PR body is unsupported by the code. The prompt builder does not pass the commit message or PR body, so the Judge can only answer `UNVERIFIED`. The instruction "say UNVERIFIED rather than inferring" works correctly — but the check is incomplete.
+- **Why:** the prompt was built from the diff and file contents only. The commit message was not considered part of the review input.
+- **Fix:** pass the commit message (and PR body, when present) into the prompt alongside the diff — e.g. `git log -1 --format=%B` for the commit, and the PR body when a PR number is supplied.
+- **Priority:** medium
+- **Recorded:** 2026-10-24
+
 ## Inconsistencies
 
 Places where similar tasks are handled differently.
