@@ -96,14 +96,8 @@ jobs:
           done
           echo "App never came up after 30s"; exit 1
 
-      - name: Run Unit tests
-        run: npm run test:unit
-
-      - name: Run API tests
-        run: npm run test:api
-
-      - name: Run UI tests
-        run: npm run test:ui
+      - name: Run all tests
+        run: npm run test:all
 
       - name: Load Allure history
         uses: actions/checkout@v4
