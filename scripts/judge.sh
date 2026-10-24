@@ -170,12 +170,28 @@ printf 'judge: scope %s\n' "$DESC"
 printf 'judge: %s\n' "$STAT"
 printf 'judge: prompt %s\n' "$PROMPT"
 
-node scripts/judge.mjs "$PROMPT" > "$REVIEW" 2> "$ERRLOG"
+# Capture stdout in a variable and stderr in the err file so that neither
+# review-*.md nor err-*.log is left behind unless it has real content. The
+# err file is removed when empty; the review file is written only when the
+# model call succeeded and produced text.
+REVIEW_TEXT="$(node scripts/judge.mjs "$PROMPT" 2>"$ERRLOG")"
 RC=$?
+if [ ! -s "$ERRLOG" ]; then
+  rm -f "$ERRLOG"
+fi
 if [ "$RC" -ne 0 ]; then
-  printf 'judge: model call failed (exit %s); see %s\n' "$RC" "$ERRLOG" >&2
-  cat "$ERRLOG" >&2
+  if [ -s "$ERRLOG" ]; then
+    printf 'judge: model call failed (exit %s); see %s\n' "$RC" "$ERRLOG" >&2
+    cat "$ERRLOG" >&2
+  else
+    printf 'judge: model call failed (exit %s)\n' "$RC" >&2
+  fi
   exit "$RC"
 fi
+if [ -z "$REVIEW_TEXT" ]; then
+  printf 'judge: model call returned no review text; no review file written\n' >&2
+  exit 1
+fi
+printf '%s\n' "$REVIEW_TEXT" > "$REVIEW"
 printf 'judge: review %s\n\n' "$REVIEW"
-cat "$REVIEW"
+printf '%s\n' "$REVIEW_TEXT"
