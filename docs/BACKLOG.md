@@ -21,17 +21,16 @@ P4 (defer).
   hidden is unsatisfiable). 12 `expect()` retained by design: the
   `expect*`-named helpers, `LoginPage:104` (contains-text), and
   `RegisterPage:93` (catch-branch, must not block).
-- [ ] Add `docs/testing.md` with locator policy (role → label → text → testid →
-      CSS → XPath; no absolute XPath; no `nth` without contract).
-      Must also cover viewport/state-dependent visibility: do not assert or
-      wait for visibility on elements hidden by `opacity`/`pointer-events`
-      (`.dob-popup`), by a collapsed mobile nav (`.nav > *` at <=560px), or by
-      a desktop-hidden control (`.nav-toggle`). Assert attachment, attributes,
-      or content; open the mobile menu before interacting with nav children.
-- [ ] Remove `page.locator(...)` from specs — route through POMs; enforce with
-      a lint rule or review checklist.
-- [ ] Replace `nth(17)` index locator in `product-card.spec.ts` with
-      `filter({ hasText })`.
+- [x] Add `docs/testing.md` with locator policy (see docs/testing.md)
+- [ ] Route the five chained `.locator(...)` calls in specs through a per-card
+      POM surface. `page.locator(...)` is already absent from specs (verified by
+      grep) — the remaining hits are card-scoped:
+      `product-card.spec.ts:15,17,23`, `authenticated-buyer.spec.ts:183`,
+      `catalog-toolbar.spec.ts:15`. `HomePage` has no per-card accessors today
+      (`productName`, `images`, `priceList` are page-wide), so this requires
+      adding a per-card API first. `catalog-toolbar` additionally needs a
+      `getCategoryOptions()` analogous to the existing `getSortOptions()`.
+- [x] Replace `nth(17)` index locator in `product-card.spec.ts` with `filter({ hasText })`. (commit: 85aa7b2c)
 - [x] Purge the `waitForTimeout` wrapper in `BasePage` and its one usage. (commit: ca8e7582)
 
 ## P1 — Next
