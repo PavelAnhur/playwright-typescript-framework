@@ -65,6 +65,11 @@ P4 (defer).
 
 ## P2 — Worth doing
 
+- [ ] Document that `scripts/` are driver tools, not Aider plugins.
+      `verify.sh`, `judge.sh`, `gate-watch.sh` are run by the driver; `judge.mjs`
+      is called only by `judge.sh`; `aider-lint.sh` is the sole Aider hook.
+      Place the note in `docs/testing.md` or a scripts README.
+
 - [ ] Add hybrid tests (API seed → UI verify → API post-condition) for
       checkout/order flows.
 - [ ] Add network interception for UI tests: `page.route` for API mocks,
@@ -86,6 +91,12 @@ P4 (defer).
 
 ## P3 — Opportunistic
 
+- [x] CI lint failure on the scripts merge (run `40118359625`) - `scripts/judge.mjs`
+      was linted without node globals, producing 14 no-undef plus one no-empty.
+      Fixed by scoping `globals.node` to `scripts/**/*.mjs` in `eslint.config.js`
+      and commenting the deliberate empty catch (PR #62). Follow-up: `eslint .`
+      added to `verify.sh` (PR #63), so local green now predicts CI green on lint.
+
 - [ ] Add sharding (`--shard`) + `blob` reporter + `merge-reports` for the UI
       suite.
 - [ ] Split shared fragments (header, nav, modal, cookie banner) into component
@@ -105,9 +116,16 @@ P4 (defer).
       (`mcr.microsoft.com/playwright:vX.Y.Z-jammy`).
 - [ ] Add visual regression (`toHaveScreenshot`) for 3–5 stable screens, with
       `mask` + pinned Docker image.
-- [ ] `allure-vitest@3.12.1` still pulls `@vitest/runner@3.2.7`, which vitest 5
-      inlined and no longer uses. Harmless while the Allure reporter passes;
-      revisit when a newer `allure-vitest` aligns with vitest 5.
+- [x] vitest 5 upgrade blocked by `allure-vitest`; rolled back to 3.2.7.
+      `allure-vitest` (through 3.14.0) declares peerDependencies
+      `@vitest/runner >=1.3.0` and imports it at runtime; vitest 5 inlines it and
+      publishes no stable `@vitest/runner` (last stable 4.1.12, then only
+      `5.0.0-beta.*`). Under vitest 5 the reporter fails to load, so no unit
+      tests ran and `allure-results/` was never produced. Rollback merged as
+      PR #60 (commit `c72da9eb`); 2 critical / 2 high audit vulns return as a
+      known cost. Revisit when `allure-vitest` drops the peer dep. See
+      `src/ai/KNOWN_LIMITATIONS.md`.
+      (supersedes the earlier "harmless while the reporter passes" note)
 
 ## P4 — Low priority / defer
 
