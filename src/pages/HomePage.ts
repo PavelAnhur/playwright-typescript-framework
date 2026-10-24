@@ -181,6 +181,12 @@ export class HomePage extends BasePage {
       .evaluateAll(elements => elements.map(el => el.textContent?.trim() || ''));
   }
 
+  async getCategoryOptions(): Promise<string[]> {
+    return await this.categorySelect
+      .locator('option')
+      .evaluateAll(elements => elements.map(el => el.textContent?.trim() || ''));
+  }
+
   async isUserLoggedIn(): Promise<boolean> {
     try {
       return await this.currentUser.isVisible();
