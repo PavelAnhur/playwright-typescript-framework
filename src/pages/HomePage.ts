@@ -128,10 +128,6 @@ export class HomePage extends BasePage {
     return new ProductCard(this.productCards.first());
   }
 
-  cardByText(text: string): ProductCard {
-    return new ProductCard(this.productCards.filter({ hasText: text }));
-  }
-
   async getProductNames(): Promise<string[]> {
     return await this.productCards.evaluateAll(element =>
       element.map(el => el.getAttribute('data-name') || '')

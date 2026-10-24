@@ -24,12 +24,10 @@ P4 (defer).
 - [x] Add `docs/testing.md` with locator policy (see docs/testing.md)
 - [ ] Route the remaining chained `.locator(...)` calls in specs through the
       per-card POM surface. `ProductCard` exists and `HomePage` exposes
-      `firstCard` (getter) and `cardByText(text)`. Migrated so far: the three
+      `firstCard` (getter). Migrated so far: the three
       chained `.locator(...)` calls in `product-card.spec.ts` (two tests). Still
       raw: the `price-was` test in the same file (`filter({ hasText })` plus
-      `getByTestId`) and `authenticated-buyer.spec.ts:183`. `cardByText` is
-      currently unreferenced -- it is the intended route for the `price-was`
-      test but no test calls it yet.
+      `getByTestId`) and `authenticated-buyer.spec.ts:183`.
 - [ ] `catalog-toolbar.spec.ts:15` uses
       `homePage.categorySelect.locator('option')` -- a toolbar select, not a
       product-card locator. Add a `getCategoryOptions()` to `HomePage`
