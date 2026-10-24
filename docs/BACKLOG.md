@@ -22,17 +22,18 @@ P4 (defer).
   `expect*`-named helpers, `LoginPage:104` (contains-text), and
   `RegisterPage:93` (catch-branch, must not block).
 - [x] Add `docs/testing.md` with locator policy (see docs/testing.md)
-- [ ] Route the remaining chained `.locator(...)` calls in specs through the
+- [x] Route the remaining chained `.locator(...)` calls in specs through the
       per-card POM surface. `ProductCard` exists and `HomePage` exposes
-      `firstCard` (getter). Migrated so far: the three
-      chained `.locator(...)` calls in `product-card.spec.ts` (two tests). Still
-      raw: the `price-was` test in the same file (`filter({ hasText })` plus
-      `getByTestId`) and `authenticated-buyer.spec.ts:183`.
-- [ ] `catalog-toolbar.spec.ts:15` uses
+      `firstCard` (getter) and `cardById(id)`; `ProductCard` gained
+      `saleBadge()`/`soldOutBadge()`. Migrated: the three
+      chained `.locator(...)` calls in `product-card.spec.ts` (two tests), the
+      `price-was` test, and `authenticated-buyer.spec.ts:183` (commits: 8accb9ed,
+      4276f598).
+- [x] `catalog-toolbar.spec.ts:15` uses
       `homePage.categorySelect.locator('option')` -- a toolbar select, not a
-      product-card locator. Add a `getCategoryOptions()` to `HomePage`
-      analogous to the existing `getSortOptions()` and route the spec through
-      it.
+      product-card locator. Added `getCategoryOptions()` to `HomePage`
+      analogous to `getSortOptions()` and routed the spec through it.
+      (commit: b06a0693)
 - [x] Replace `nth(17)` index locator in `product-card.spec.ts` with `filter({ hasText })`. (commit: 85aa7b2c)
 - [x] Purge the `waitForTimeout` wrapper in `BasePage` and its one usage. (commit: ca8e7582)
 
@@ -84,9 +85,12 @@ P4 (defer).
 - [ ] Split shared fragments (header, nav, modal, cookie banner) into component
       objects taking `root: Locator`.
 - [ ] `ProductCard` uses CSS selectors for `category`/`media`/`image`
-      (`.card__cat`, `.card__media`, `.card__media img`). Migrate to
-      testid/role when the app exposes stable ones; today they are transcribed
-      from the spec, not chosen per `docs/testing.md`.
+      (`.card__cat`, `.card__media`, `.card__media img`). Parked: the app
+      exposes no `data-testid` for these elements (`maison/web/src/app.ts:218-225`);
+      `.card__media`/`img` carry `aria-label`/`alt` but a role+name locator
+      would require threading the product name into the accessor (an API change,
+      not a like-for-like migration). CSS is the only locator until the app adds
+      testids.
 - [ ] Add custom matcher(s) via `expect.extend` + declaration merging where
       multi-field assertions repeat.
 - [ ] Add `frameLocator` tests for iframe flows.
