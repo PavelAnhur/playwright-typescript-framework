@@ -9,7 +9,9 @@ function envFromFile(file, key) {
       const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
       if (m && m[1] === key) return m[2].replace(/^["']|["']$/g, '');
     }
-  } catch {}
+  } catch {
+    /* file may not exist */
+  }
   return undefined;
 }
 
