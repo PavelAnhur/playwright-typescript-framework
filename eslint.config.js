@@ -51,4 +51,10 @@ export default [
       '@typescript-eslint/no-floating-promises': 'error',
     },
   },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ];
