@@ -51,3 +51,4 @@ tests/specs/review/
 
 # Aider temporary files                                      
 .aider.*
+.judge/
