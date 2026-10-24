@@ -27,17 +27,13 @@ test.describe('Login Page UI -- Security', () => {
     await expect(loginPage.passwordInput).toHaveAttribute('autocomplete', 'current-password');
   });
 
-  test('should show rate limit error after multiple failed attempts', async ({ loginPage }) => {
+  test('should keep the user on the login page after multiple failed attempts', async ({
+    loginPage,
+  }) => {
     for (let i = 0; i < 5; i++) {
       await loginPage.login(`wrong${i}@example.com`, 'wrongpassword');
     }
-    try {
-      await expect(loginPage.alertContainer).toContainText(
-        /too many attempts|rate limit|slow down/i,
-        { timeout: 100 }
-      );
-    } catch {
-      console.log('Rate limiting not implemented or not triggered');
-    }
+    await expect(loginPage.alertContainer).toBeVisible();
+    expect(await loginPage.getCurrentUrl()).toContain('/login');
   });
 });
