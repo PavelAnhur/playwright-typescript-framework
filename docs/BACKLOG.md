@@ -77,6 +77,12 @@ P4 (defer).
       surface hidden state dependencies.
 - [ ] Replace the manual `npm start &` + curl loop in CI with `webServer` in
       `playwright.config.ts`.
+- [x] Audit the npm dependency tree and clear reachable advisories. Fixed:
+      zod `4.6.5` -> `4.6.6` (GHSA-mrhx-c7xc-m3w5, high, commit `fc5028f6`);
+      vitest/`@vitest/coverage-v8` `3.2.7` -> `5.0.5` (clears the two tinypool
+      prototype-pollution criticals by dropping tinypool, and drops the inlined
+      `@vitest/runner`, commit `f0bf7e69`). Method: `npm audit` plus reachability,
+      not `audit fix`.
 
 ## P3 — Opportunistic
 
@@ -99,6 +105,9 @@ P4 (defer).
       (`mcr.microsoft.com/playwright:vX.Y.Z-jammy`).
 - [ ] Add visual regression (`toHaveScreenshot`) for 3–5 stable screens, with
       `mask` + pinned Docker image.
+- [ ] `allure-vitest@3.12.1` still pulls `@vitest/runner@3.2.7`, which vitest 5
+      inlined and no longer uses. Harmless while the Allure reporter passes;
+      revisit when a newer `allure-vitest` aligns with vitest 5.
 
 ## P4 — Low priority / defer
 
@@ -116,3 +125,7 @@ P4 (defer).
 - [ ] Custom-matcher item above — only if the same multi-field assertion
       repeats.
 - [ ] `.d.ts` item above — only when an untyped dependency is introduced.
+- [ ] `body-parser` GHSA-27r3-jxmh-p828 (high) is present transitively
+      (`@modelcontextprotocol/sdk` -> `express@5.2.1`) but not reachable:
+      `src/ai/mcp-server.ts` uses `StdioServerTransport` only, no HTTP listener.
+      Becomes live only if an HTTP transport is added.
