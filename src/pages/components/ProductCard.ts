@@ -26,4 +26,12 @@ export class ProductCard {
   priceWas(): Locator {
     return this.card.getByTestId('price-was');
   }
+
+  saleBadge(): Locator {
+    return this.card.getByTestId('sale-badge');
+  }
+
+  soldOutBadge(): Locator {
+    return this.card.getByTestId('soldout-badge');
+  }
 }
