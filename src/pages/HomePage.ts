@@ -124,6 +124,10 @@ export class HomePage extends BasePage {
     return this.page.locator(`[data-testid="product-card"][data-product-id="${productId}"]`);
   }
 
+  cardById(productId: number | string): ProductCard {
+    return new ProductCard(this.getProductById(productId));
+  }
+
   get firstCard(): ProductCard {
     return new ProductCard(this.productCards.first());
   }

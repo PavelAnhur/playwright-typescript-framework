@@ -77,34 +77,34 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
     });
 
     test('should show sale badges for discounted products', async ({ buyerHomePage }) => {
-      const productCard = buyerHomePage.getProductById(1);
-      const saleBadge = productCard.getByTestId('sale-badge');
+      const productCard = buyerHomePage.cardById(1);
+      const saleBadge = productCard.saleBadge();
       await expect(saleBadge).toBeVisible();
-      await expect(productCard).toContainText('Sale');
+      await expect(saleBadge).toContainText('Sale');
     });
 
     test('should show sold out badge for out of stock products', async ({ buyerHomePage }) => {
-      const productCard = buyerHomePage.getProductById(6);
-      const soldOutBadge = productCard.getByTestId('soldout-badge');
+      const productCard = buyerHomePage.cardById(6);
+      const soldOutBadge = productCard.soldOutBadge();
       await expect(soldOutBadge).toBeVisible();
       await expect(soldOutBadge).toContainText('Sold Out');
     });
 
     test('should show price was for discounted products', async ({ buyerHomePage }) => {
-      const productCard = buyerHomePage.getProductById(1);
-      const priceWas = productCard.getByTestId('price-was');
+      const productCard = buyerHomePage.cardById(1);
+      const priceWas = productCard.priceWas();
       await expect(priceWas).toBeVisible();
       await expect(priceWas).toContainText('$2,850.00');
 
-      const productCard5 = buyerHomePage.getProductById(5);
-      const priceWasProduct5 = productCard5.getByTestId('price-was');
+      const productCard5 = buyerHomePage.cardById(5);
+      const priceWasProduct5 = productCard5.priceWas();
       await expect(priceWasProduct5).toBeVisible();
       await expect(priceWasProduct5).toContainText('$1,420.00');
     });
 
     test('should show correct discounted price for product 1', async ({ buyerHomePage }) => {
-      const productCard = buyerHomePage.getProductById(1);
-      const currentPrice = productCard.getByTestId('price');
+      const productCard = buyerHomePage.cardById(1);
+      const currentPrice = productCard.price();
       await expect(currentPrice).toContainText('$2,422.50');
     });
 
@@ -179,9 +179,8 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
     });
 
     test('should have product card with accessible labels', async ({ buyerHomePage }) => {
-      const firstProduct = buyerHomePage.productCards.first();
-      const link = firstProduct.locator('.card__media');
-      await expect(link).toHaveAttribute(
+      const firstProduct = buyerHomePage.firstCard;
+      await expect(firstProduct.media()).toHaveAttribute(
         'aria-label',
         expect.stringContaining('Noir Saffiano Tote')
       );
