@@ -48,6 +48,24 @@ FILES="$(printf '%s\n' "$NS" | awk -F'\t' '{ if ($1 ~ /^R/) print $3; else if (N
   printf 'Follow the operating rules in src/ai/REVIEWER_OPERATING_RULES.md.\n\n'
   printf 'Repo: %s\n' "$(pwd)"
   printf 'Scope: %s\n\n' "$DESC"
+
+  # Commit message section
+  case "$MODE" in
+    range)
+      printf 'Commit message(s) for the range:\n'
+      COMMIT_MSGS=$(git log --format='%nSubject: %s%nBody:%n%b' "$RANGE" 2>/dev/null || true)
+      if [ -n "$COMMIT_MSGS" ]; then
+        printf '%s\n\n' "$COMMIT_MSGS"
+      else
+        printf '(no commits in range or error retrieving commit messages)\n\n'
+      fi
+      ;;
+    *)
+      # worktree or staged mode: no commit exists yet
+      printf 'Commit message: not available in %s mode.\n\n' "$DESC"
+      ;;
+  esac
+
   printf 'The diff below is the complete change under review. The files on disk are the\n'
   printf 'authority: read them in full before answering. Do not trust the diff alone.\n\n'
   printf 'Files touched:\n%s\n\n' "$FILES"
