@@ -179,9 +179,8 @@ test.describe('Home Page UI -- Authenticated Buyer', () => {
     });
 
     test('should have product card with accessible labels', async ({ buyerHomePage }) => {
-      const firstProduct = buyerHomePage.productCards.first();
-      const link = firstProduct.locator('.card__media');
-      await expect(link).toHaveAttribute(
+      const firstProduct = buyerHomePage.firstCard;
+      await expect(firstProduct.media()).toHaveAttribute(
         'aria-label',
         expect.stringContaining('Noir Saffiano Tote')
       );
