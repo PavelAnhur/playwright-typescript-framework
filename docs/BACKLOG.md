@@ -22,14 +22,19 @@ P4 (defer).
   `expect*`-named helpers, `LoginPage:104` (contains-text), and
   `RegisterPage:93` (catch-branch, must not block).
 - [x] Add `docs/testing.md` with locator policy (see docs/testing.md)
-- [ ] Route the five chained `.locator(...)` calls in specs through a per-card
-      POM surface. `page.locator(...)` is already absent from specs (verified by
-      grep) — the remaining hits are card-scoped:
-      `product-card.spec.ts:15,17,23`, `authenticated-buyer.spec.ts:183`,
-      `catalog-toolbar.spec.ts:15`. `HomePage` has no per-card accessors today
-      (`productName`, `images`, `priceList` are page-wide), so this requires
-      adding a per-card API first. `catalog-toolbar` additionally needs a
-      `getCategoryOptions()` analogous to the existing `getSortOptions()`.
+- [ ] Route the remaining chained `.locator(...)` calls in specs through the
+      per-card POM surface. `ProductCard` exists and `HomePage` exposes
+      `firstCard` (getter) and `cardByText(text)`. Migrated so far: the three
+      chained `.locator(...)` calls in `product-card.spec.ts` (two tests). Still
+      raw: the `price-was` test in the same file (`filter({ hasText })` plus
+      `getByTestId`) and `authenticated-buyer.spec.ts:183`. `cardByText` is
+      currently unreferenced -- it is the intended route for the `price-was`
+      test but no test calls it yet.
+- [ ] `catalog-toolbar.spec.ts:15` uses
+      `homePage.categorySelect.locator('option')` -- a toolbar select, not a
+      product-card locator. Add a `getCategoryOptions()` to `HomePage`
+      analogous to the existing `getSortOptions()` and route the spec through
+      it.
 - [x] Replace `nth(17)` index locator in `product-card.spec.ts` with `filter({ hasText })`. (commit: 85aa7b2c)
 - [x] Purge the `waitForTimeout` wrapper in `BasePage` and its one usage. (commit: ca8e7582)
 
@@ -80,6 +85,10 @@ P4 (defer).
       suite.
 - [ ] Split shared fragments (header, nav, modal, cookie banner) into component
       objects taking `root: Locator`.
+- [ ] `ProductCard` uses CSS selectors for `category`/`media`/`image`
+      (`.card__cat`, `.card__media`, `.card__media img`). Migrate to
+      testid/role when the app exposes stable ones; today they are transcribed
+      from the spec, not chosen per `docs/testing.md`.
 - [ ] Add custom matcher(s) via `expect.extend` + declaration merging where
       multi-field assertions repeat.
 - [ ] Add `frameLocator` tests for iframe flows.
