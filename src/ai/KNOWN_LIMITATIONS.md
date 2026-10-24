@@ -111,12 +111,14 @@ Missing capabilities that a production harness would have.
 
 ### judge.sh cannot answer its own question 5
 
-- **Where:** `scripts/judge.sh` (prompt build), `scripts/judge.mjs` (client)
-- **What:** question 5 asks whether any claim in the commit message, comment, or PR body is unsupported by the code. The prompt builder does not pass the commit message or PR body, so the Judge can only answer `UNVERIFIED`. The instruction "say UNVERIFIED rather than inferring" works correctly — but the check is incomplete.
+- **Where:** `scripts/judge.sh` (prompt build)
+- **What:** question 5 asks whether any claim in the commit message, comment, or PR body is unsupported by the code. The prompt builder did not pass the commit message or PR body, so the Judge could only answer `UNVERIFIED`. The instruction "say UNVERIFIED rather than inferring" works correctly - but the check was incomplete.
 - **Why:** the prompt was built from the diff and file contents only. The commit message was not considered part of the review input.
-- **Fix:** pass the commit message (and PR body, when present) into the prompt alongside the diff — e.g. `git log -1 --format=%B` for the commit, and the PR body when a PR number is supplied.
+- **Fix:** landed. In `--range` mode the prompt now embeds the commit message(s) for the range (subject and body) via `git log --format='%nSubject: %s%nBody:%n%b'`. In worktree and `--staged` modes, where no commit exists yet, the prompt carries an explicit line stating the commit message is not available in that mode. The prompt also carries a PR-body section: the body when the current branch has a PR, otherwise an explicit "PR body: not available (<reason>)" line. The reason is classified from gh's output text, not from its exit status, because gh returns a non-zero status for the normal no-PR case on this machine.
+- **Caveat:** the PR body is fetched for the current branch regardless of mode. Under `--range` the commit messages describe the range while the PR body describes the current branch; the two may not refer to the same work.
 - **Priority:** medium
 - **Recorded:** 2026-10-24
+- **Fixed:** 2026-10-24, commit 0df57969 (commit-message half: 2fe019c4)
 
 ## Inconsistencies
 
