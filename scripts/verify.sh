@@ -42,6 +42,10 @@ fi
 # 3. Format - repo-wide, this is the CI gate
 run "prettier --check ." "$BIN/prettier" --check .
 
+# 3b. ESLint - CI runs this as `npm run lint`; the local gate must cover it,
+#     or a lint violation passes locally and fails the push-to-main gate.
+run "eslint ." "$BIN/eslint" .
+
 # 4. Lockfile sync - catches the failure class that broke PR #57.
 #    A local node_modules can satisfy a requirement the lockfile does not declare.
 CI_OUT="$(npm ci --dry-run 2>&1)"; CI_RC=$?
