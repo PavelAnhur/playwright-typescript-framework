@@ -10,17 +10,17 @@ test.describe('Home Page UI -- Product Cards', () => {
   });
 
   test('product card contains all required elements', async ({ homePage }) => {
-    const firstCard = homePage.productCards.first();
-    await expect(firstCard.getByTestId('product-name')).toBeVisible();
-    await expect(firstCard.locator('.card__cat')).toBeVisible();
-    await expect(firstCard.getByTestId('price')).toBeVisible();
-    await expect(firstCard.locator('.card__media img')).toBeVisible();
+    const card = homePage.firstCard;
+    await expect(card.name()).toBeVisible();
+    await expect(card.category()).toBeVisible();
+    await expect(card.price()).toBeVisible();
+    await expect(card.image()).toBeVisible();
   });
 
   test('product card links to product detail', async ({ homePage }) => {
-    const firstCard = homePage.productCards.first();
-    const productName = await firstCard.getByTestId('product-name').textContent();
-    await firstCard.locator('.card__media').click();
+    const card = homePage.firstCard;
+    const productName = await card.name().textContent();
+    await card.media().click();
     expect(await homePage.getCurrentUrl()).toMatch(/\/product\/\d+/);
     await expect(homePage.getElement('h1')).toContainText(productName || '');
   });

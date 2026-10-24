@@ -2,6 +2,7 @@ import { type Locator, type Page, expect } from '@playwright/test';
 import { Step } from '@utils/stepDecorator';
 import { BasePage } from './BasePage';
 import { LoginPage } from './LoginPage';
+import { ProductCard } from './components/ProductCard';
 
 export class HomePage extends BasePage {
   // Navigation
@@ -121,6 +122,14 @@ export class HomePage extends BasePage {
 
   getProductById(productId: number | string): Locator {
     return this.page.locator(`[data-testid="product-card"][data-product-id="${productId}"]`);
+  }
+
+  get firstCard(): ProductCard {
+    return new ProductCard(this.productCards.first());
+  }
+
+  cardByText(text: string): ProductCard {
+    return new ProductCard(this.productCards.filter({ hasText: text }));
   }
 
   async getProductNames(): Promise<string[]> {
