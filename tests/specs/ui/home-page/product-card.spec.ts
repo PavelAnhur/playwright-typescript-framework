@@ -34,7 +34,7 @@ test.describe('Home Page UI -- Product Cards', () => {
   });
 
   test('price-was is present for sale items', async ({ homePage }) => {
-    const firstSaleItem = homePage.productCards.nth(17); // Product 18
+    const firstSaleItem = homePage.productCards.filter({ hasText: 'Onyx Leather Derby' });
     await expect(firstSaleItem.getByTestId('price-was')).toBeVisible();
     const priceNow = await firstSaleItem.getByTestId('price').textContent();
     const priceWas = await firstSaleItem.getByTestId('price-was').textContent();
