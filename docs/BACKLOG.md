@@ -21,17 +21,10 @@ P4 (defer).
   hidden is unsatisfiable). 12 `expect()` retained by design: the
   `expect*`-named helpers, `LoginPage:104` (contains-text), and
   `RegisterPage:93` (catch-branch, must not block).
-- [ ] Add `docs/testing.md` with locator policy (role → label → text → testid →
-      CSS → XPath; no absolute XPath; no `nth` without contract).
-      Must also cover viewport/state-dependent visibility: do not assert or
-      wait for visibility on elements hidden by `opacity`/`pointer-events`
-      (`.dob-popup`), by a collapsed mobile nav (`.nav > *` at <=560px), or by
-      a desktop-hidden control (`.nav-toggle`). Assert attachment, attributes,
-      or content; open the mobile menu before interacting with nav children.
+- [x] Add `docs/testing.md` with locator policy (see docs/testing.md)
 - [ ] Remove `page.locator(...)` from specs — route through POMs; enforce with
       a lint rule or review checklist.
-- [ ] Replace `nth(17)` index locator in `product-card.spec.ts` with
-      `filter({ hasText })`.
+- [x] Replace `nth(17)` index locator in `product-card.spec.ts` with `filter({ hasText })`. (commit: 85aa7b2c)
 - [x] Purge the `waitForTimeout` wrapper in `BasePage` and its one usage. (commit: ca8e7582)
 
 ## P1 — Next
