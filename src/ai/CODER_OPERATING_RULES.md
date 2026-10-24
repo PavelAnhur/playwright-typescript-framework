@@ -1,6 +1,6 @@
 # Coder Operating Rules
 
-Scope: the Coder (Klepa, Code lane) in the framework repo
+Scope: the Coder (Aider, Code lane) in the framework repo
 (`~/projects/playwright-typescript-framework`).
 
 This file governs how the Coder works. It is self-contained; the Coder does not
@@ -10,54 +10,18 @@ does NOT self-approve, and does NOT expand scope beyond the work order.
 
 ## Flow
 
-1. Coder makes changes in the codebase.
-2. Coder runs the fast gates: `npm run typecheck` and `npm run format:check`,
-   after every change. Paste raw output.
-3. Coder hands off (see Handoff below).
-4. Stop and wait for instructions. Do NOT run `npm run test:all` and do NOT commit
-   until you receive them.
+1. Coder makes changes in the codebase, per the work order.
+2. Coder does NOT commit. Aider runs with `--no-auto-commits`; the driver reviews
+   the diff and runs the gates (see AGENT_OPERATING_RULES.md, "Verification
+   protocol").
+3. Coder hands off with the diff and a one-line note per file.
+4. Stop and wait for instructions. Do NOT commit until the driver says so.
 5. On instructions:
-   - If told to proceed: run `npm run test:all`, split commits by intent, commit.
-   - If given fixes: apply them, re-run the fast gates, run `npm run test:all`,
-     commit.
+   - If told to proceed: driver commits, split by intent.
+   - If given fixes: apply them, hand off again.
 
-## Fast gates (after every change, before handoff)
-
-Run the two static gates concurrently — they are independent:
-
-    npm run typecheck & npm run format:check & wait
-
-### Environment (local shell)
-
-`npm run` and `npx` misroute through WSL/Windows interop on this machine (UNC path
-`\\wsl.localhost\...`): `CMD.EXE` starts in the Windows directory and the command fails.
-Use the local binaries directly:
-
-    ./node_modules/.bin/tsc --noEmit
-    ./node_modules/.bin/prettier --check <files>
-    ./node_modules/.bin/vitest run
-    ./node_modules/.bin/playwright test <spec>
-
-In CI (Linux runner) the `npm run` scripts are correct and are what the workflow uses.
-This is a local-environment workaround, not a change to the gates.
-
-- `npm run typecheck` = `tsc --noEmit`
-- `npm run format:check` = `prettier --check .`
-
-Both green before handoff. Any red → fix, do not hand off with a red gate.
-
-Read the summary line, not the exit code. `EXIT:0` has been observed with 61 failing
-tests; `npx vitest` has printed `EXIT:0` while failing. For vitest, the evidence is
-`Test Files N passed` / `Tests N passed`. Paste raw compiler/formatter output on red;
-a short "green" note suffices on green.
-
-### Format scope
-
-`npm run format:check` is repo-wide (`prettier --check .`). It has been red at HEAD on
-files a given change did not touch. If the repo-wide check is red only on files outside
-your change, scope the check to the files you changed (`prettier --check <files>`) and
-say so in the handoff. Do not "fix" pre-existing red in an unrelated commit — that mixes
-intents. The repo-wide check is the post-merge gate; it is not the per-commit gate.
+Verification gates (tsc, prettier, tests) are run by the driver, not the Coder.
+See AGENT_OPERATING_RULES.md, "Verification protocol."
 
 ## Handoff
 
@@ -70,25 +34,7 @@ State, in the handoff message:
 - Evidence status per claim: CONFIRMED-BY-EXECUTION / UNVERIFIED.
 - Any non-blocking questions, batched here — do not ping mid-task.
 
-## Tests
-
-- Fast unit run (during iteration): `npm run test:unit:run` (= `vitest run`).
-  Note: `test:unit` is watch mode — use `test:unit:run`.
-- `npm run test:all` = `test:unit:run && test:api && test:ui`. It already includes
-  the unit run; do not run units twice.
-- During iteration on a fix, run the affected project (`test:api` or `test:ui`)
-  rather than the full suite each time.
-- Exactly one full `npm run test:all` is required before commit.
-
-## test:all outcomes
-
-- Green → split by intent (one commit, one concern) and commit. A single green
-  `test:all` on the combined tree covers all commits landing together.
-- Red:
-  - **If and only if the sole failure is the `flake_parallel` cart test** — note it,
-    cite the known Maison `POST /_reset` parallel-workers bug, and proceed. No re-run
-    required.
-  - Any other failure is red. Fix it. Re-run the fast gates, then `test:all`.
+Test execution and commit strategy belong to the driver. See AGENT_OPERATING_RULES.md.
 
 ## Reporting
 

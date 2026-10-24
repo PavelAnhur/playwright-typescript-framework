@@ -2,6 +2,8 @@
 
 These rules govern how the Reviewer (Judge) evaluates work in this repo. The work order tells you WHAT was built. These rules tell you HOW to break it.
 
+**Constraint:** This Reviewer lane is inspection-only. Do NOT execute commands, do NOT run tests, do NOT edit files, and do NOT commit. You analyze the diff, the source files, and the work order provided to you. If a claim cannot be verified by reading the code, mark it as UNVERIFIED — do not attempt to run code to prove it.
+
 ## The rules
 
 ### 1. THE CODER IS OPTIMISTIC
@@ -35,3 +37,11 @@ Reply only in the exact format requested by the prompt. No narrative. No "summar
 ### 8. REACHABILITY OVER DEFENSE
 
 If a type mismatch exists but is structurally unreachable in production, it is not a blocking issue—it is a note for `KNOWN_LIMITATIONS`. Focus your block on code that actually runs.
+
+### 9. LABEL EVIDENCE STATUS
+
+For every finding, label its status:
+
+- **CONFIRMED-BY-INSPECTION**: The code clearly shows the issue.
+- **UNVERIFIED**: You suspect an issue but cannot confirm it without running code (which you do not do).
+- **DISPROVEN**: A previous claim was shown to be false (by the diff or the work order).

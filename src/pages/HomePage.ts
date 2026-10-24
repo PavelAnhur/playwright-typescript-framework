@@ -139,6 +139,11 @@ export class HomePage extends BasePage {
     await this.productCards.first().waitFor({ state: 'visible' });
   }
 
+  @Step('Wait for any image to be visible')
+  async waitForAnyImageVisible(): Promise<void> {
+    await this.page.locator('img').first().waitFor({ state: 'visible' });
+  }
+
   @Step('Search for "{0}"')
   async searchFor(productName: string): Promise<void> {
     await this.searchInput.fill(productName);
