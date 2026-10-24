@@ -48,6 +48,73 @@ FILES="$(printf '%s\n' "$NS" | awk -F'\t' '{ if ($1 ~ /^R/) print $3; else if (N
   printf 'Follow the operating rules in src/ai/REVIEWER_OPERATING_RULES.md.\n\n'
   printf 'Repo: %s\n' "$(pwd)"
   printf 'Scope: %s\n\n' "$DESC"
+
+  # Commit message section
+  case "$MODE" in
+    range)
+      printf 'Commit message(s) for the range:\n'
+      COMMIT_MSGS=$(git log --format='%nSubject: %s%nBody:%n%b' "$RANGE" 2>/dev/null || true)
+      if [ -n "$COMMIT_MSGS" ]; then
+        printf '%s\n\n' "$COMMIT_MSGS"
+      else
+        printf '(no commits in range or error retrieving commit messages)\n\n'
+      fi
+      ;;
+    *)
+      # worktree or staged mode: no commit exists yet
+      printf 'Commit message: not available in %s mode.\n\n' "$DESC"
+      ;;
+  esac
+
+  # PR body section. Every failure path below is non-fatal: the prompt is
+  # still built and the review still runs. The branch is resolved explicitly
+  # and passed to gh, because gh's implicit current-branch resolution is wrong
+  # on this machine (it reports "no pull requests found for branch \"main\""
+  # even when the current branch is not main).
+  PR_STATUS=""
+  PR_BODY=""
+  PR_BRANCH=""
+  if ! command -v gh >/dev/null 2>&1; then
+    PR_STATUS="gh CLI not available"
+  elif ! git remote -v 2>/dev/null | grep -qi github; then
+    PR_STATUS="no GitHub remote configured"
+  else
+    PR_BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null || true)"
+    if [ -z "$PR_BRANCH" ]; then
+      PR_STATUS="detached HEAD, no current branch"
+    elif ! timeout 1 true >/dev/null 2>&1; then
+      PR_STATUS="timeout command not available or unsupported"
+    else
+      # gh writes "no pull requests found for branch" to stderr and exits 1.
+      # That is the normal no-PR case, not a gh failure, so capture stderr and
+      # decide the reason from the message before looking at the exit status.
+      GH_ERR_FILE=".judge/gh-err-$TS.log"
+      PR_BODY_RAW="$(timeout 15 gh pr view "$PR_BRANCH" --json body -q .body 2>"$GH_ERR_FILE")"
+      GH_RC=$?
+      GH_ERR="$(tr '\n\r' '  ' < "$GH_ERR_FILE" 2>/dev/null || true)"
+      rm -f "$GH_ERR_FILE" 2>/dev/null || true
+      if printf '%s' "$GH_ERR" | grep -qi 'no pull request'; then
+        PR_STATUS="no PR for branch $PR_BRANCH"
+      elif [ "$GH_RC" -ne 0 ]; then
+        if [ -n "$GH_ERR" ]; then
+          PR_STATUS="gh call failed or timed out (exit $GH_RC): $GH_ERR"
+        else
+          PR_STATUS="gh call failed or timed out (exit $GH_RC)"
+        fi
+      elif [ -z "$PR_BODY_RAW" ]; then
+        PR_STATUS="PR body is empty for branch $PR_BRANCH"
+      else
+        PR_BODY="$PR_BODY_RAW"
+        PR_STATUS="ok"
+      fi
+    fi
+  fi
+  if [ "$PR_STATUS" = "ok" ]; then
+    printf 'PR body (branch %s):\n````\n%s\n````\n\n' "$PR_BRANCH" "$PR_BODY"
+  else
+    printf 'PR body: not available (%s).\n\n' "$PR_STATUS"
+  fi
+
   printf 'The diff below is the complete change under review. The files on disk are the\n'
   printf 'authority: read them in full before answering. Do not trust the diff alone.\n\n'
   printf 'Files touched:\n%s\n\n' "$FILES"
