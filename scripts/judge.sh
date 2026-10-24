@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 # Build a review prompt from the REAL diff and send it to the judge model.
 # Usage:
 #   ./scripts/judge.sh                 # working tree vs HEAD (incl. staged)

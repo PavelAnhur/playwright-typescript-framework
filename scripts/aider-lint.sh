@@ -5,5 +5,6 @@
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 2
 [ "$#" -eq 0 ] && exit 0
-./node_modules/.bin/prettier --write "$@" > /dev/null 2>&1
-exec ./node_modules/.bin/prettier --check "$@"
+# --ignore-unknown: skip files prettier cannot parse (e.g. .sh) instead of failing.
+./node_modules/.bin/prettier --write --ignore-unknown "$@" > /dev/null 2>&1
+exec ./node_modules/.bin/prettier --check --ignore-unknown "$@"
