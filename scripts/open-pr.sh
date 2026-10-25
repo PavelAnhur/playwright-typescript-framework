@@ -182,11 +182,80 @@ fi
 
 PR_URL="$(printf '%s\n' "$PR_OUT" | grep -Eo 'https://github\.com/[^[:space:]]+/pull/[0-9]+' | head -n1)"
 if [ -z "$PR_URL" ]; then
-  printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
-  die "PR create step failed: no PR URL found"
+  PR_NUM=""
+  PR_LIST_ATTEMPTS=12
+  PR_LIST_SLEEP_SECONDS=5
+  PR_ATTEMPT=1
+
+  while :; do
+    if ! PR_LIST_JSON="$(gh pr list --head "$BRANCH" --json number,url 2>"$ERR_OUT")"; then
+      printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+      cat "$ERR_OUT" >&2
+      die "PR create step failed: could not list PRs for branch $BRANCH"
+    fi
+
+    # node exit contract: 0 exactly one PR, 1 parse/shape error, 2 wrong count.
+    PR_RECOVERED="$(printf '%s' "$PR_LIST_JSON" | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{try{const a=JSON.parse(d);if(!Array.isArray(a))process.exit(1);if(a.length!==1){console.log(a.length);process.exit(2);}console.log(a[0].number);console.log(a[0].url);}catch(e){process.exit(1);}});')"
+    PR_RECOVER_RC=$?
+
+    if [ "$PR_RECOVER_RC" -eq 0 ]; then
+      PR_NUM="$(printf '%s\n' "$PR_RECOVERED" | head -n1)"
+      PR_URL="$(printf '%s\n' "$PR_RECOVERED" | tail -n1)"
+      if [ -z "$PR_NUM" ] || [ -z "$PR_URL" ]; then
+        printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+        printf 'ai-commit-pr: gh pr list output:\n%s\n' "$PR_LIST_JSON" >&2
+        die "PR create step failed: could not recover PR number for branch $BRANCH"
+      fi
+      case "$PR_NUM" in
+        ''|*[!0-9]*)
+          printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+          printf 'ai-commit-pr: gh pr list output:\n%s\n' "$PR_LIST_JSON" >&2
+          die "PR create step failed: recovered PR number is not numeric for branch $BRANCH"
+          ;;
+      esac
+      break
+    elif [ "$PR_RECOVER_RC" -eq 2 ]; then
+      PR_COUNT="$PR_RECOVERED"
+      case "$PR_COUNT" in
+        ''|*[!0-9]*)
+          printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+          printf 'ai-commit-pr: gh pr list output:\n%s\n' "$PR_LIST_JSON" >&2
+          die "PR create step failed: could not parse PR list for branch $BRANCH"
+          ;;
+      esac
+
+      if [ "$PR_COUNT" -eq 0 ]; then
+        printf 'ai-commit-pr: zero PRs listed for branch %s (attempt %s/%s)\n' "$BRANCH" "$PR_ATTEMPT" "$PR_LIST_ATTEMPTS" >&2
+        if [ "$PR_ATTEMPT" -ge "$PR_LIST_ATTEMPTS" ]; then
+          printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+          die "PR create step failed: zero PRs found for branch $BRANCH"
+        fi
+        sleep "$PR_LIST_SLEEP_SECONDS"
+        PR_ATTEMPT=$((PR_ATTEMPT + 1))
+        continue
+      fi
+
+      printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+      die "PR create step failed: $PR_COUNT PRs found for branch $BRANCH"
+    else
+      printf 'ai-commit-pr: gh pr create output:\n%s\n' "$PR_OUT" >&2
+      printf 'ai-commit-pr: gh pr list output:\n%s\n' "$PR_LIST_JSON" >&2
+      die "PR create step failed: could not parse PR list for branch $BRANCH"
+    fi
+  done
+else
+  PR_NUM="${PR_URL##*/}"
 fi
 
-PR_NUM="${PR_URL##*/}"
+if [ -z "$PR_NUM" ]; then
+  die "PR create step failed: could not determine PR number"
+fi
+
+case "$PR_NUM" in
+  ''|*[!0-9]*)
+    die "PR create step failed: PR number is not numeric"
+    ;;
+esac
 
 if ! PR_BODY="$(gh pr view "$PR_NUM" --json body -q .body 2>"$ERR_OUT")"; then
   printf 'ai-commit-pr: gh pr view failed\n' >&2
