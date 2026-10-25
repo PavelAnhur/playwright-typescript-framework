@@ -222,14 +222,28 @@ if [ -z "$AHEAD_COUNT" ]; then
   die "PR create step failed: cannot count commits ahead of origin/main"
 fi
 
-if [ -z "$PR_TITLE" ] && [ "$AHEAD_COUNT" -eq 1 ]; then
-  PR_CREATE_ARGS=(--base main --head "$BRANCH" --fill)
-else
-  if [ -z "$PR_TITLE" ]; then
-    PR_TITLE="$MSG"
-  fi
-  PR_CREATE_ARGS=(--base main --head "$BRANCH" --title "$PR_TITLE" --body "")
+if [ -z "$PR_TITLE" ]; then
+  PR_TITLE="$MSG"
 fi
+
+BODY_FILE="$TMP_DIR/pr-body"
+
+# Invariant: body is non-empty by construction because MSG passed CC_RE.
+PR_BODY_CONTENT="$(printf 'Commit: %s\n' "$MSG")"
+if [ -n "$INTENT" ]; then
+  PR_BODY_CONTENT="$(printf '%s\nIntent: %s\n' "$PR_BODY_CONTENT" "$INTENT")"
+fi
+PR_BODY_CONTENT="$(printf '%s\nCommits ahead of origin/main: %s\n' "$PR_BODY_CONTENT" "$AHEAD_COUNT")"
+PR_BODY_CONTENT="$(printf '%s\n\nStaged files:\n%s\n' "$PR_BODY_CONTENT" "$STAGED_NS")"
+
+printf '%s\n' "$PR_BODY_CONTENT" > "$BODY_FILE"
+
+# Reachable if the write to BODY_FILE fails.
+if [ ! -s "$BODY_FILE" ]; then
+  die "PR create step failed: refusing to open PR with an empty body"
+fi
+
+PR_CREATE_ARGS=(--base main --head "$BRANCH" --title "$PR_TITLE" --body-file "$BODY_FILE")
 
 if ! PR_OUT="$(gh pr create "${PR_CREATE_ARGS[@]}" 2>"$ERR_OUT")"; then
   printf 'ai-commit-pr: gh pr create failed\n' >&2
