@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Finish a task after merge: verify, watch gate, cleanup.
 # ASCII only on purpose: no em-dashes, no smart quotes.
+# Usage:
+#   ./scripts/finish-task.sh <pr-number>
+#   pr-number must be a positive integer.
 set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 2
