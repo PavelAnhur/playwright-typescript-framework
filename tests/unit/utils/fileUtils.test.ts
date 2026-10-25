@@ -309,14 +309,18 @@ describe('unit', () => {
     });
 
     it('should handle nested JSON objects', () => {
-      const mockData = {
+      type NestedConfig = {
+        user: { id: number; name: string };
+        settings: { theme: string; language: string };
+      };
+      const mockData: NestedConfig = {
         user: { id: 1, name: 'John' },
         settings: { theme: 'dark', language: 'en' },
       };
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(mockData));
-      const result = readJsonFile('config.json');
+      const result = readJsonFile<NestedConfig>('config.json');
       expect(result).toEqual(mockData);
-      expect((result as any).user.name).toBe('John');
+      expect(result.user.name).toBe('John');
     });
   });
 });
