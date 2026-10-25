@@ -34,7 +34,7 @@ while [ $# -gt 0 ]; do
       shift
       ;;
     --intent)
-      if [ $# -lt 2 ]; then
+      if [ $# -lt 2 ] || [[ "$2" == -* ]]; then
         usage
         die "missing value for --intent"
       fi
@@ -52,9 +52,14 @@ while [ $# -gt 0 ]; do
     --)
       shift
       if [ $# -gt 0 ]; then
+        if [ -n "$PR_TITLE" ]; then
+          usage
+          die "too many arguments"
+        fi
         PR_TITLE="$1"
         shift
       fi
+      break
       ;;
     *)
       if [ -n "$PR_TITLE" ]; then
@@ -66,6 +71,11 @@ while [ $# -gt 0 ]; do
       ;;
   esac
 done
+
+if [ $# -gt 0 ]; then
+  usage
+  die "too many arguments"
+fi
 
 if ! command -v node >/dev/null 2>&1; then
   die "preflight failed: node is not available"
