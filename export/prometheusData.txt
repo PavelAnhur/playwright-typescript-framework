@@ -3,12 +3,12 @@ launch_status_broken 0
 launch_status_passed 372
 launch_status_skipped 5
 launch_status_unknown 0
-launch_time_duration 50111
+launch_time_duration 47199
 launch_time_min_duration 0
-launch_time_max_duration 2885
-launch_time_sum_duration 76026
-launch_time_start 1792925429181
-launch_time_stop 1792925479292
+launch_time_max_duration 2782
+launch_time_sum_duration 69598
+launch_time_start 1792929477200
+launch_time_stop 1792929524399
 launch_problems_known_bug:_pagination_and_filtering 1
 launch_problems_known_bug:_product_discount_management 1
 launch_problems_known_bug:_cors_headers 1
