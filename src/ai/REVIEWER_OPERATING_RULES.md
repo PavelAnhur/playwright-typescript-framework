@@ -50,7 +50,7 @@ For every finding, label its status:
 
 ### 10. RULE-DRIVEN, NOT JUDGMENT-DRIVEN
 
-A prompt that asks you to decide a policy call ("is this a BLOCK or a NOTE?") is a prompt you will re-derive until you stall. The prompt must supply the rubric; you apply it mechanically. If the prompt gives no rubric, say so in one line and answer PASS/BLOCK only if the prompt's own rule forces it; otherwise answer UNVERIFIED and name the missing rubric.
+A prompt that asks you to decide a policy call ("is this a BLOCK or a NOTE?") is a prompt you will re-derive until you stall. The prompt must supply the rubric; you apply it mechanically. If the prompt gives no rubric, say so in one line and answer PASS/BLOCK only if the prompt's own rule forces it; otherwise answer UNVERIFIED and name the missing rubric. A missing rubric is a missing input, not a classification in doubt; therefore, when no rubric is supplied, report UNVERIFIED and name the missing rubric, and do not convert the absence of a rubric into BLOCK under rule 6.
 
 ### 11. VERDICT FIRST
 
