@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Start a task branch from main or continue an existing task branch.
 # ASCII only on purpose: no em-dashes, no smart quotes.
+# Usage:
+#   ./scripts/start-task.sh <branch>
+#   Branch prefix must be one of: feat fix docs chore test refactor perf build ci
+#   Example: docs/backlog-audit-split
 set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 2
