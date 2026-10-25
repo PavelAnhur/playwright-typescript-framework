@@ -226,3 +226,5 @@ Framework Design: Creating maintainable, scalable test frameworks\
 TypeScript: Writing type-safe, production-quality code\
 CI/CD: Automating testing in continuous integration pipelines\
 Best Practices: Following industry standards (POM, fixtures, data-driven testing)
+
+# scratch test line
