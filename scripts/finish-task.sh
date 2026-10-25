@@ -81,12 +81,29 @@ case "$MERGE_SHA" in
 esac
 
 RUN_Q=".[] | select(.headSha == \"$MERGE_SHA\") | [.databaseId, .status, .conclusion] | @tsv"
-RUN_LIST_OUT="$(gh run list --branch main --limit 10 --json databaseId,headSha,status,conclusion --jq "$RUN_Q" 2>&1)"
-RUN_RC=$?
-if [ "$RUN_RC" -ne 0 ]; then
-  printf 'Run list output:\n%s\n' "$RUN_LIST_OUT" >&2
-  die "gh run list failed for merge commit $MERGE_SHA"
-fi
+RUN_LIST_OUT=""
+RUN_RC=0
+ATTEMPT=0
+START_TS=$(date +%s)
+DEADLINE=$((START_TS + 60))
+while :; do
+  ATTEMPT=$((ATTEMPT + 1))
+  RUN_LIST_OUT="$(gh run list --branch main --limit 100 --json databaseId,headSha,status,conclusion --jq "$RUN_Q" 2>&1)"
+  RUN_RC=$?
+  if [ "$RUN_RC" -ne 0 ]; then
+    printf 'Run list output:\n%s\n' "$RUN_LIST_OUT" >&2
+    die "gh run list failed for merge commit $MERGE_SHA"
+  fi
+  if [ -n "$RUN_LIST_OUT" ]; then
+    break
+  fi
+  printf 'Waiting for gate run for merge commit %s (attempt %s)\n' "$MERGE_SHA" "$ATTEMPT" >&2
+  NOW=$(date +%s)
+  if [ "$NOW" -ge "$DEADLINE" ]; then
+    break
+  fi
+  sleep 5
+done
 
 if [ -z "$RUN_LIST_OUT" ]; then
   printf 'Run list output:\n%s\n' "$RUN_LIST_OUT" >&2
