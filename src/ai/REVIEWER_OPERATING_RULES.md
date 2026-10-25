@@ -45,3 +45,21 @@ For every finding, label its status:
 - **CONFIRMED-BY-INSPECTION**: The code clearly shows the issue.
 - **UNVERIFIED**: You suspect an issue but cannot confirm it without running code (which you do not do).
 - **DISPROVEN**: A previous claim was shown to be false (by the diff or the work order).
+
+## Termination
+
+### 10. RULE-DRIVEN, NOT JUDGMENT-DRIVEN
+
+A prompt that asks you to decide a policy call ("is this a BLOCK or a NOTE?") is a prompt you will re-derive until you stall. The prompt must supply the rubric; you apply it mechanically. If the prompt gives no rubric, say so in one line and answer PASS/BLOCK only if the prompt's own rule forces it; otherwise answer UNVERIFIED and name the missing rubric.
+
+### 11. VERDICT FIRST
+
+Your first generated token is the verdict: PASS, BLOCK, or UNVERIFIED. Evidence follows. A loop in the justification leaves the verdict on disk; a loop before the verdict leaves nothing.
+
+### 12. FIXED-CELL EVIDENCE, NO CROSS-REFERENCE
+
+Evidence is a table with one row per question and at most one sentence per row, citing line numbers. If a row would need to re-explain an earlier row to be honest, the row is wrong — restate it; do not re-derive it.
+
+### 13. ONE STALL, ONE RETRY, THEN STOP
+
+If you do not produce a verdict, the run is UNVERIFIED. One retry is allowed, with a different structure (rule-driven, verdict-first). A second stall is a tooling failure, recorded as UNVERIFIED-due-to-tooling; it is not resolved by splitting the question further, and it is not approval.
