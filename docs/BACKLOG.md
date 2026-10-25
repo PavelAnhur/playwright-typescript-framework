@@ -83,11 +83,14 @@ P4 (defer).
 - [ ] Replace the manual `npm start &` + curl loop in CI with `webServer` in
       `playwright.config.ts`.
 - [x] Audit the npm dependency tree and clear reachable advisories. Fixed:
-      zod `4.6.5` -> `4.6.6` (GHSA-mrhx-c7xc-m3w5, high, commit `fc5028f6`);
-      vitest/`@vitest/coverage-v8` `3.2.7` -> `5.0.5` (clears the two tinypool
-      prototype-pollution criticals by dropping tinypool, and drops the inlined
-      `@vitest/runner`, commit `f0bf7e69`). Method: `npm audit` plus reachability,
-      not `audit fix`.
+      zod `4.6.5` -> `4.6.6` (GHSA-mrhx-c7xc-m3w5, high, commit `fc5028f6`).
+      Method: `npm audit` plus reachability, not `audit fix`.
+- [ ] 2 critical / 2 high tinypool prototype-pollution advisories remain
+      reachable under vitest `3.2.7`. The `3.2.7` -> `5.0.5` upgrade (commit
+      `f0bf7e69`) was rolled back in `c72da9eb` (PR #60) because `allure-vitest`
+      declares a peer dep on `@vitest/runner`, which vitest 5 no longer publishes
+      as a stable package. Blocked on `allure-vitest` dropping that peer dep.
+      See the rollback note in P3 below.
 
 ## P3 — Opportunistic
 
