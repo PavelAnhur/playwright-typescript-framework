@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { detectSpecPath } from '@utils/stackTrace';
 
@@ -10,6 +9,7 @@ describe('unit', () => {
 
     afterEach(() => {
       vi.resetAllMocks();
+      vi.unstubAllGlobals();
     });
 
     it('should detect spec file path from file:// URL pattern', () => {
@@ -21,15 +21,18 @@ describe('unit', () => {
             at async Promise.all (index 0)
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      // Accepted trade-off: stubbing global Error means an assertion failure inside these tests will report the mock stack.
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toBe('tests/specs/ui/home-page/catalog-toolbar.spec.ts');
-      global.Error = originalError;
     });
 
     it('should detect spec file path from relative path pattern', () => {
@@ -40,15 +43,17 @@ describe('unit', () => {
             at async Promise.all (index 0)
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toBe('tests/specs/api/articles.spec.ts');
-      global.Error = originalError;
     });
 
     it('should fallback to any .spec.ts file pattern', () => {
@@ -59,15 +64,17 @@ describe('unit', () => {
             at async Promise.all (index 0)
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toBe('/home/project/tests/specs/ui/home-page/hero-section.spec.ts');
-      global.Error = originalError;
     });
 
     it('should throw error when no spec file path can be detected', () => {
@@ -78,38 +85,44 @@ describe('unit', () => {
             at async Promise.all (index 0)
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       expect(() => detectSpecPath()).toThrow();
-      global.Error = originalError;
     });
 
     it('should handle empty stack trace', () => {
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = '';
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = '';
+          }
         }
-      } as any;
+      );
       expect(() => detectSpecPath()).toThrow();
-      global.Error = originalError;
     });
 
     it('should handle undefined stack trace', () => {
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          delete this.stack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            delete this.stack;
+          }
         }
-      } as any;
+      );
       expect(() => detectSpecPath()).toThrow();
-      global.Error = originalError;
     });
 
     it('should detect spec file path with Windows-style paths', () => {
@@ -120,15 +133,17 @@ describe('unit', () => {
             at async Promise.all (index 0)
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toContain('tests/specs/ui/home-page/catalog-toolbar.spec.ts');
-      global.Error = originalError;
     });
 
     it('should detect spec file path from different spec extensions', () => {
@@ -138,15 +153,17 @@ describe('unit', () => {
             at tests/specs/ui/home-page/feature.spec.ts:12:20
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toBe('tests/specs/ui/home-page/feature.spec.ts');
-      global.Error = originalError;
     });
 
     it('should detect first spec file path in stack', () => {
@@ -157,15 +174,17 @@ describe('unit', () => {
             at tests/specs/ui/home-page/catalog-toolbar.spec.ts:12:20
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toBe('tests/specs/api/products.spec.ts');
-      global.Error = originalError;
     });
 
     it('should detect spec file path with additional query params', () => {
@@ -175,15 +194,17 @@ describe('unit', () => {
             at file:///home/project/tests/specs/ui/home-page/catalog.spec.ts?test=1:12:20
       `;
       const originalError = global.Error;
-      global.Error = class extends originalError {
-        constructor() {
-          super();
-          this.stack = mockStack;
+      vi.stubGlobal(
+        'Error',
+        class extends originalError {
+          constructor() {
+            super();
+            this.stack = mockStack;
+          }
         }
-      } as any;
+      );
       const result = detectSpecPath();
       expect(result).toContain('tests/specs/ui/home-page/catalog.spec.ts');
-      global.Error = originalError;
     });
   });
 });
