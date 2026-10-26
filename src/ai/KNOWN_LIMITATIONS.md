@@ -4,7 +4,7 @@ An honest inventory of what this harness does not do, does inconsistently, or do
 
 - **Future me** — when I return to the code after months away, I want to know where the rough edges are before I trip over them.
 - **Reviewers** — what a reader should know about this project beyond what the README advertises.
-- **Interviews** — the honest answer to "what would you improve" starts here, not in a marketing pitch.
+- **Interviews** — the honest answer to "what would I improve" starts here, not in a marketing pitch.
 
 Each entry follows the same shape: where it is, what the issue is, why it exists, how to fix it, and how urgent it is.
 
@@ -404,3 +404,20 @@ Origin: refinement decomposition, commit `9ded8184`.
 - **Classification:** defense-in-depth — document, do not fix (rule 8). A sanitizing
   guard would be appropriate if `caseId` could originate from an untrusted source;
   today it is trusted input from the YAML pipeline.
+
+### mockParseReturn asserts against the wrong csv-parse overload
+
+- **Where:** `tests/unit/utils/fileUtils.test.ts`, `mockParseReturn` -
+  `vi.mocked(parse).mockReturnValue(rows as ReturnType<typeof parse>)`.
+  `ReturnType<typeof parse>` resolves one csv-parse overload (the `string[][]`
+  one), not the `columns: true` object-row overload the tests actually exercise,
+  so the helper asserts object rows against a type that does not describe them.
+- **Why it is not a live bug:** the helper only runs in unit tests where `parse`
+  is mocked via `vi.mock('csv-parse/sync')`. No production code path reads this
+  type, and the mock's return value is what the test controls, so the mismatch
+  cannot affect runtime behavior.
+- **Residual risk:** if the mock were ever reused outside a mocked context, or if
+  a future refactor typed the helper's return as the real `parse` result, the
+  wrong overload would surface as a type error or a misleading signature. The
+  single cast is the only place the overload is reconciled.
+- **Classification:** known library-typing gap - documented, do not fix.
