@@ -138,11 +138,11 @@ if ! gh poi; then
   die "gh poi failed"
 fi
 
-printf '--- origin/main head ---\n'
+printf '%s\n' '--- origin/main head ---'
 git log --oneline -1 origin/main || true
-printf '--- remote heads ---\n'
+printf '%s\n' '--- remote heads ---'
 git ls-remote --heads origin | sed -E 's#.*refs/heads/##' || true
-printf '--- git status ---\n'
+printf '%s\n' '--- git status ---'
 git status -sb || true
 
 printf 'PR %s merged at %s; run %s gate PASS; cleanup done.\n' "$PR" "$MERGE_SHA" "$RUN_ID"
