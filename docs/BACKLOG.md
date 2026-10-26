@@ -41,8 +41,8 @@ P4 (defer).
 
 - [ ] Add Zod response-schema validation to API tests
       (`api/schemas/*.schema.ts`, `parse`/`safeParse`).
-- [ ] Replace `as any` in unit tests with `satisfies`/`Partial`/typed mocks;
-      tighten `no-explicit-any` from `warn` to `error`.
+- [x] Replace `as any` in unit tests with `satisfies`/`Partial`/typed mocks;
+      tighten `no-explicit-any` from `warn` to `error`. (commit: e31191ee, #89)
 - [ ] Add Playwright browser cache to CI (`actions/cache` on
       `~/.cache/ms-playwright`, key by lockfile hash).
 - [ ] Wire `test:all` as a single step in CI (currently three separate steps).
