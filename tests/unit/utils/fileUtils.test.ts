@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   fileExists,
   getFileModifiedTime,
@@ -20,6 +19,12 @@ vi.mock('path');
 vi.mock('csv-parse/sync');
 vi.mock('@utils/pathUtils');
 
+// csv-parse's `parse` is typed as returning string[][], but with `columns: true`
+// it returns object rows. Centralize the one necessary cast here.
+function mockParseReturn<T>(rows: T[]): void {
+  vi.mocked(parse).mockReturnValue(rows as ReturnType<typeof parse>);
+}
+
 describe('unit', () => {
   const mockAbsolutePath = '/absolute/path/to/test/data.csv';
 
@@ -40,7 +45,7 @@ describe('unit', () => {
     it('should read CSV file based on extension', () => {
       const mockCsvData = [{ id: '1', name: 'Test' }];
       vi.mocked(fs.readFileSync).mockReturnValue('id,name\n1,Test');
-      vi.mocked(parse).mockReturnValue(mockCsvData as any);
+      mockParseReturn(mockCsvData);
       vi.mocked(path.extname).mockReturnValue('.csv');
       const result = readFile('data.csv');
       expect(getAbsolutePath).toHaveBeenCalledWith('data.csv');
@@ -114,7 +119,7 @@ describe('unit', () => {
         { id: '2', name: 'Jane', age: '25' },
       ];
       vi.mocked(fs.readFileSync).mockReturnValue(mockCsvContent);
-      vi.mocked(parse).mockReturnValue(mockParsedData as any);
+      mockParseReturn(mockParsedData);
       const result = readCsvFile('data.csv');
       expect(getAbsolutePath).toHaveBeenCalledWith('data.csv');
       expect(fs.readFileSync).toHaveBeenCalledWith(mockAbsolutePath, 'utf-8');
@@ -271,9 +276,7 @@ describe('unit', () => {
     it('should handle real-world CSV with special characters', () => {
       const mockCsvContent = 'id,name,description\n1,"John Doe, Jr.","Test, with comma"';
       vi.mocked(fs.readFileSync).mockReturnValue(mockCsvContent);
-      vi.mocked(parse).mockReturnValue([
-        { id: '1', name: 'John Doe, Jr.', description: 'Test, with comma' },
-      ] as any);
+      mockParseReturn([{ id: '1', name: 'John Doe, Jr.', description: 'Test, with comma' }]);
       const result = readCsvFile('data.csv');
       expect(result).toEqual([{ id: '1', name: 'John Doe, Jr.', description: 'Test, with comma' }]);
     });
@@ -281,11 +284,11 @@ describe('unit', () => {
     it('should handle CSV with empty values', () => {
       const mockCsvContent = 'id,name,age\n1,John,\n2,,25\n3,,';
       vi.mocked(fs.readFileSync).mockReturnValue(mockCsvContent);
-      vi.mocked(parse).mockReturnValue([
+      mockParseReturn([
         { id: '1', name: 'John', age: '' },
         { id: '2', name: '', age: '25' },
         { id: '3', name: '', age: '' },
-      ] as any);
+      ]);
       const result = readCsvFile('data.csv');
       expect(result).toEqual([
         { id: '1', name: 'John', age: '' },
@@ -297,10 +300,10 @@ describe('unit', () => {
     it('should handle CSV with different line endings', () => {
       const mockCsvContent = 'id,name\n1,John\r\n2,Jane';
       vi.mocked(fs.readFileSync).mockReturnValue(mockCsvContent);
-      vi.mocked(parse).mockReturnValue([
+      mockParseReturn([
         { id: '1', name: 'John' },
         { id: '2', name: 'Jane' },
-      ] as any);
+      ]);
       const result = readCsvFile('data.csv');
       expect(result).toEqual([
         { id: '1', name: 'John' },
