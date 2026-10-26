@@ -19,8 +19,6 @@ vi.mock('path');
 vi.mock('csv-parse/sync');
 vi.mock('@utils/pathUtils');
 
-// csv-parse's `parse` is typed as returning string[][], but with `columns: true`
-// it returns object rows. Centralize the one necessary cast here.
 function mockParseReturn<T>(rows: T[]): void {
   vi.mocked(parse).mockReturnValue(rows as ReturnType<typeof parse>);
 }
@@ -38,7 +36,7 @@ describe('unit', () => {
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('readFile', () => {
@@ -193,6 +191,10 @@ describe('unit', () => {
         throw 'String error';
       });
       expect(() => readJsonFile('invalid.json')).toThrow();
+    });
+
+    it('should restore the real JSON.parse after the spy test', () => {
+      expect(JSON.parse('{"a":1}')).toEqual({ a: 1 });
     });
   });
 
