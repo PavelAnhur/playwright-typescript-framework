@@ -23,20 +23,31 @@ if (!key) {
 
 const base = (process.env.AIAI_BASE_URL || 'https://api.aiai.by/v1').replace(/\/$/, '');
 const model = process.env.COMMIT_MODEL || process.env.JUDGE_MODEL || 'deepseek-v3.2';
+const timeoutMs = Number.parseInt(process.env.COMMIT_MSG_TIMEOUT_MS || '', 10) || 120000;
 const prompt = fs.readFileSync(0, 'utf8');
 
-const res = await fetch(base + '/chat/completions', {
-  method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-    authorization: 'Bearer ' + key,
-  },
-  body: JSON.stringify({
-    model,
-    temperature: 0,
-    messages: [{ role: 'user', content: prompt }],
-  }),
-});
+let res;
+try {
+  res = await fetch(base + '/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: 'Bearer ' + key,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+} catch (err) {
+  if (err && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+    console.error('commit-msg: request timed out after ' + Math.round(timeoutMs / 1000) + 's');
+    process.exit(1);
+  }
+  throw err;
+}
 
 if (!res.ok) {
   console.error('commit-msg: HTTP ' + res.status + ' ' + (await res.text()).slice(0, 2000));
