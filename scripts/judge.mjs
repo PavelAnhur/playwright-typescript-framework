@@ -15,6 +15,14 @@ function envFromFile(file, key) {
   return undefined;
 }
 
+const REQUIRED_MARKERS = ['## 1.', '## 2.', '## 3.', '## 4.', '## 5.', '## 6.'];
+const MIN_REVIEW_LENGTH = 500;
+
+function isReview(text) {
+  if (text.length < MIN_REVIEW_LENGTH) return false;
+  return REQUIRED_MARKERS.every(m => text.includes(m));
+}
+
 const promptPath = process.argv[2];
 if (!promptPath) {
   console.error('usage: node scripts/judge.mjs <prompt-file>');
@@ -75,7 +83,20 @@ const reasoning =
       : '';
 
 if (content.trim()) {
-  process.stdout.write(content.trim() + '\n');
+  const review = content.trim();
+  if (isReview(review)) {
+    process.stdout.write(review + '\n');
+  } else {
+    const missing = REQUIRED_MARKERS.filter(m => !review.includes(m));
+    console.error(
+      'judge: content is not a review (length ' +
+        review.length +
+        '; missing markers: ' +
+        (missing.length ? missing.join(', ') : 'none') +
+        ')'
+    );
+    process.exit(1);
+  }
 } else if (reasoning.trim()) {
   console.error('judge: content was empty; reasoning is not a review (UNVERIFIED)');
   console.error(reasoning.trim());
