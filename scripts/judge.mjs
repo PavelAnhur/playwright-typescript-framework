@@ -29,20 +29,31 @@ if (!key) {
 
 const base = (process.env.AIAI_BASE_URL || 'https://api.aiai.by/v1').replace(/\/$/, '');
 const model = process.env.JUDGE_MODEL || 'deepseek-v3.2';
+const timeoutMs = Number.parseInt(process.env.JUDGE_TIMEOUT_MS || '', 10) || 120000;
 const prompt = fs.readFileSync(promptPath, 'utf8');
 
-const res = await fetch(base + '/chat/completions', {
-  method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-    authorization: 'Bearer ' + key,
-  },
-  body: JSON.stringify({
-    model,
-    temperature: 0,
-    messages: [{ role: 'user', content: prompt }],
-  }),
-});
+let res;
+try {
+  res = await fetch(base + '/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: 'Bearer ' + key,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+} catch (err) {
+  if (err && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+    console.error('judge: request timed out after ' + Math.round(timeoutMs / 1000) + 's');
+    process.exit(1);
+  }
+  throw err;
+}
 
 if (!res.ok) {
   console.error('judge: HTTP ' + res.status + ' ' + (await res.text()).slice(0, 2000));
@@ -50,13 +61,26 @@ if (!res.ok) {
 }
 
 const data = await res.json();
-const text =
+const message =
   data && data.choices && data.choices[0] && data.choices[0].message
-    ? data.choices[0].message.content
+    ? data.choices[0].message
     : undefined;
 
-if (!text) {
+const content = message && typeof message.content === 'string' ? message.content : '';
+const reasoning =
+  message && typeof message.reasoning === 'string' && message.reasoning.trim()
+    ? message.reasoning
+    : message && typeof message.reasoning_content === 'string' && message.reasoning_content.trim()
+      ? message.reasoning_content
+      : '';
+
+if (content.trim()) {
+  process.stdout.write(content.trim() + '\n');
+} else if (reasoning.trim()) {
+  console.error('judge: content was empty; reasoning is not a review (UNVERIFIED)');
+  console.error(reasoning.trim());
+  process.exit(1);
+} else {
   console.error('judge: no content in response: ' + JSON.stringify(data).slice(0, 2000));
   process.exit(1);
 }
-process.stdout.write(text.trim() + '\n');
