@@ -51,6 +51,30 @@ Three design decisions make this different from "call a model and trust the outp
 
 Every agent is also exposed through an MCP server — any MCP-compatible AI client (Klepa AI, Claude Desktop, Cursor) can call them directly. Run the full CLI pipeline with `npm run ai:demo`. Design notes in [`src/ai/README.md`](src/ai/README.md) and frozen sample runs in `samples/sample-output/`.
 
+## 🔧 Driver Workflow (scripts/)
+
+`scripts/` holds the driver tools that gate and land every change. They are not test code and not Aider plugins. Full inventory: [`scripts/README.md`](scripts/README.md).
+
+The flow, one line per step:
+
+- Start a task branch: `scripts/start-task.sh`
+- The Coder edits (Aider), not a script
+- Local gate + Judge review: `scripts/flow.sh` (runs `verify.sh`, then `judge.sh`)
+- Adversarial Reviewer: separate agent, inspection-only, pre-commit
+- Commit + push + PR: `scripts/commit.sh` / `scripts/ai-commit-pr.sh`, `scripts/open-pr.sh`
+- Merge + gate poll + cleanup: `scripts/finish-task.sh`
+- All of the above in one command: `scripts/land-task.sh`
+
+Honesty rules:
+
+- The gate is `verify.sh` (tsc, vitest, prettier, eslint, `npm ci --dry-run`, `bash -n`, mojibake check).
+- The local gate CANNOT see runtime behavior. New script paths are proven by execution on a throwaway branch.
+- A green check is not acceptance. Read the artifact, not the signal.
+
+Two things are called "judge". The harness judge (above) scores failure-analyst hypotheses and returns JSON. The review Judge (`scripts/judge.sh`, `scripts/judge.mjs`) reviews the staged diff and must produce a six-section markdown review; a content-shape guard refuses anything without all six sections and a minimum length. Honest limitation: the Judge lane currently fails closed on the AIAI gateway (timeout / partial output). That is a recorded standing limitation, not a pass.
+
+`scripts/land-task.sh` chains commit -> PR -> merge, streams output, and sets ASCII `[ok]` / `[FAIL]` / `[--]` markers only after state verification. The happy path is proven by smoke test (#95); failure paths are not exercised.
+
 ## 📁 Project Structure
 
 <details>
@@ -130,6 +154,20 @@ playwright-typescript-framework/
 │           ├── fileUtils.test.ts
 │           ├── pathUtils.test.ts
 │           └── stackTrace.test.ts
+├── scripts/
+│   ├── ai-commit-pr.sh
+│   ├── aider-lint.sh
+│   ├── commit-msg.mjs
+│   ├── commit.sh
+│   ├── finish-task.sh
+│   ├── flow.sh
+│   ├── gate-watch.sh
+│   ├── judge.mjs
+│   ├── judge.sh
+│   ├── land-task.sh
+│   ├── open-pr.sh
+│   ├── start-task.sh
+│   └── verify.sh
 ├── playwright.config.ts
 ├── vitest.config.ts
 ├── tsconfig.json
