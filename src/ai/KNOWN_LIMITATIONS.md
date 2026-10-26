@@ -12,14 +12,6 @@ Each entry follows the same shape: where it is, what the issue is, why it exists
 
 Missing capabilities that a production harness would have.
 
-### No fetch timeout in dshClient
-
-- **Where:** `src/ai/dshClient.ts`, `callOnce`
-- **What:** `fetch` has no `AbortSignal.timeout()`. If the provider accepts the connection and then hangs, the script hangs until the CI job times out.
-- **Why:** the local provider has been reliable enough at demo scale that this has not triggered.
-- **Fix:** add `signal: AbortSignal.timeout(60_000)` to the fetch options in `callOnce`. Consider making it configurable via `aiConfig`.
-- **Priority:** high
-
 ### No quality metrics aggregation
 
 - **Where:** not implemented

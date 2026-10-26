@@ -10,10 +10,18 @@ if (!ENV.hasAiConfig && !ENV.isCI) {
 
 const projectRoot = process.cwd();
 
+const DEFAULT_TIMEOUT_MS = 60_000;
+
+function readTimeoutMs(): number {
+  const parsed = Number.parseInt(process.env['DSH_TIMEOUT_MS'] ?? '', 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
+}
+
 export const aiConfig = {
   baseUrl: ENV.aiConfig.baseUrl || 'http://localhost:8080',
   model: ENV.aiConfig.model || 'deepseek-model',
   apiKey: ENV.aiConfig.apiKey || 'dummy-key-for-ci',
+  timeoutMs: readTimeoutMs(),
   projectRoot,
   logsDir: resolve(projectRoot, 'logs', 'ai'),
   requirementsDir: resolve(projectRoot, 'fixtures', 'requirements'),

@@ -46,14 +46,26 @@ async function callOnce(options: CallOptions): Promise<CallResult> {
   if (options.jsonMode ?? true) {
     body['response_format'] = { type: 'json_object' };
   }
-  const response = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${aiConfig.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  let response: Awaited<ReturnType<typeof fetch>>;
+  try {
+    response = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${aiConfig.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(aiConfig.timeoutMs),
+    });
+  } catch (error) {
+    const name = (error as { name?: string }).name;
+    if (name === 'TimeoutError' || name === 'AbortError') {
+      throw new Error(`AI request timed out after ${Math.round(aiConfig.timeoutMs / 1000)}s`, {
+        cause: error,
+      });
+    }
+    throw error;
+  }
   const durationMs = Date.now() - started;
   if (!response.ok) {
     const text = await response.text();
