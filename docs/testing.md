@@ -27,3 +27,5 @@ The files in `scripts/` are driver tools, not Aider plugins. Two are wired into 
 - `judge.mjs` — minimal chat-completions client. Called only by `judge.sh`.
 - `flow.sh` — one command per turn: runs `verify.sh`, stops on failure, then `judge.sh` on the staged diff. Run by the driver.
 - `gate-watch.sh` — polls a GitHub Actions run to terminal state. Run by the driver.
+
+<!-- land-task smoke test: safe to remove -->
