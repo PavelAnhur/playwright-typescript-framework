@@ -1,5 +1,5 @@
 import { expect, test } from '@fixtures';
-import type { Product } from '@src/types/product';
+import { productSchema } from '../schemas/product.schema';
 
 test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
   test('should return a single product by ID', async ({ api }) => {
@@ -7,7 +7,13 @@ test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
     const response = await api.get(`products/${productId}`);
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
-    const product: Product = data.product;
+    const result = productSchema.safeParse(data.product);
+    if (!result.success) {
+      throw new Error(
+        `Product response failed schema validation: ${JSON.stringify(result.error.issues, null, 2)}`
+      );
+    }
+    const product = result.data;
     expect(product.category).toBe('Footwear');
     expect(product.discount?.type).toBe('fixed');
     expect(product.discount?.value).toEqual(20000);
@@ -28,5 +34,25 @@ test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
     expect(response.status()).toBe(404);
     const data = await response.json();
     expect(data.error.code).toBe('PRODUCT_NOT_FOUND');
+  });
+
+  test('should reject a malformed product', () => {
+    const missingPriceCents = {
+      id: 1,
+      name: 'Test Product',
+      sellerName: 'Test Seller',
+      category: 'Footwear',
+      discount: null,
+    };
+    expect(productSchema.safeParse(missingPriceCents).success).toBe(false);
+    const stringPriceCents = {
+      id: 1,
+      name: 'Test Product',
+      sellerName: 'Test Seller',
+      category: 'Footwear',
+      priceCents: '1000',
+      discount: null,
+    };
+    expect(productSchema.safeParse(stringPriceCents).success).toBe(false);
   });
 });
