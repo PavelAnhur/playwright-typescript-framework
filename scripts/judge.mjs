@@ -36,7 +36,7 @@ if (!key) {
 }
 
 const base = (process.env.AIAI_BASE_URL || 'https://api.aiai.by/v1').replace(/\/$/, '');
-const model = process.env.JUDGE_MODEL || 'deepseek-v3.2';
+const model = process.env.JUDGE_MODEL || 'deepseek-v4-flash';
 const timeoutMs = Number.parseInt(process.env.JUDGE_TIMEOUT_MS || '', 10) || 120000;
 const prompt = fs.readFileSync(promptPath, 'utf8');
 
