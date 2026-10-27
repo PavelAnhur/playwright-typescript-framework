@@ -65,10 +65,12 @@ P4 (defer).
 
 ## P2 — Worth doing
 
-- [ ] Document that `scripts/` are driver tools, not Aider plugins.
+- [x] Document that `scripts/` are driver tools, not Aider plugins.
       `verify.sh`, `judge.sh`, `gate-watch.sh` are run by the driver; `judge.mjs`
       is called only by `judge.sh`; `aider-lint.sh` is the sole Aider hook.
       Place the note in `docs/testing.md` or a scripts README.
+      Completed by the "Driver Workflow (scripts/)" section in the root
+      README.md (commit 128ecfb6 / PR #97).
 
 - [ ] Add hybrid tests (API seed → UI verify → API post-condition) for
       checkout/order flows.

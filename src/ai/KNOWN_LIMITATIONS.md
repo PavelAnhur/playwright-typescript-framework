@@ -112,6 +112,15 @@ Missing capabilities that a production harness would have.
 - **Recorded:** 2026-10-24
 - **Fixed:** 2026-10-24, commit 0df57969 (commit-message half: 2fe019c4)
 
+### judge lane prompt/guard shape mismatch
+
+- **Where:** `scripts/judge.sh` (prompt build) and `scripts/judge.mjs` (`REQUIRED_MARKERS` / `isReview`).
+- **What:** the prompt asked the model six numbered questions (1. … 6.), but `isReview` required the literal headings `## 1.` … `## 6.` in the response. A model answering the questions as asked could never satisfy the guard, so valid reviews were rejected as "not a review". Observed on three runs — content lengths 2269, 2671 and 2705 characters, all six markers missing each time — including after the judge model was changed to `deepseek-v4-flash`, which proved the failure was output shape, not model strength.
+- **Why:** the guard and the prompt were written to different contracts and never reconciled; the guard was a check that could not be satisfied by the correct action.
+- **Fix:** the prompt now instructs the model to put each answer under the literal headings `## 1.` through `## 6.`; `judge.mjs` now also saves rejected content to `.judge/rejected-<timestamp>.md` so a future rejection is diagnosable; and `flow.sh` now judges the worktree (`git diff HEAD`) instead of only the staged diff. Verified by execution: a live judge run returned a review with all six headings.
+- **Priority:** high.
+- **Recorded:** 2026-10-27, commit `caa65e81`.
+
 ## Inconsistencies
 
 Places where similar tasks are handled differently.
