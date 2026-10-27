@@ -1,6 +1,7 @@
 import { expect, test } from '@fixtures';
 import type { Cart } from '@src/types/cart';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Buyer API -- Cart Operations', () => {
   let testProduct: Product;
@@ -86,6 +87,7 @@ test.describe('Buyer API -- Cart Operations', () => {
     });
     expect(response.status()).toBe(400);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('INVALID_QUANTITY');
   });
 
@@ -95,6 +97,7 @@ test.describe('Buyer API -- Cart Operations', () => {
     });
     expect(response.status()).toBe(404);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('PRODUCT_NOT_FOUND');
   });
 

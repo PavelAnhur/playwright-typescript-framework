@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Buyer API -- Error Envelope Compliance', () => {
   let testProduct: Product;
@@ -17,11 +18,7 @@ test.describe('Buyer API -- Error Envelope Compliance', () => {
       data: { productId: 'invalid', quantity: 1 },
     });
     expect(response.status()).toBe(404);
-    const error = await response.json();
-    expect(error).toHaveProperty('error');
-    expect(error.error).toHaveProperty('code');
-    expect(error.error).toHaveProperty('message');
-    expect(error.error.code).toMatch(/^[A-Z_]+$/); // SCREAMING_SNAKE_CASE
+    parseErrorEnvelope(await response.json());
   });
 
   test('should return 404 error envelope for non-existent product', async ({ authedBuyer }) => {
@@ -29,9 +26,8 @@ test.describe('Buyer API -- Error Envelope Compliance', () => {
       data: { productId: 99999, quantity: 1 },
     });
     expect(response.status()).toBe(404);
-    const error = await response.json();
+    const error = parseErrorEnvelope(await response.json());
     expect(error.error.code).toBe('PRODUCT_NOT_FOUND');
-    expect(error.error.message).toBeDefined();
   });
 
   test('should return consistent error envelope for invalid quantity', async ({ authedBuyer }) => {
@@ -39,10 +35,8 @@ test.describe('Buyer API -- Error Envelope Compliance', () => {
       data: { productId: testProduct.id, quantity: 0 },
     });
     expect(response.status()).toBe(400);
-    const error = await response.json();
-    expect(error).toHaveProperty('error');
-    expect(error.error).toHaveProperty('code', 'INVALID_QUANTITY');
-    expect(error.error).toHaveProperty('message');
+    const error = parseErrorEnvelope(await response.json());
+    expect(error.error.code).toBe('INVALID_QUANTITY');
   });
 
   test('should return consistent error envelope for insufficient stock', async ({
@@ -55,27 +49,21 @@ test.describe('Buyer API -- Error Envelope Compliance', () => {
       data: { productId: 1, quantity: stock + 1 },
     });
     expect(response.status()).toBe(409);
-    const error = await response.json();
-    expect(error).toHaveProperty('error');
-    expect(error.error).toHaveProperty('code', 'INSUFFICIENT_STOCK');
-    expect(error.error).toHaveProperty('message');
+    const error = parseErrorEnvelope(await response.json());
+    expect(error.error.code).toBe('INSUFFICIENT_STOCK');
   });
 
   test('should return consistent error envelope for unauthorized access', async ({ api }) => {
     const response = await api.get('cart');
     expect(response.status()).toBe(401);
-    const error = await response.json();
-    expect(error).toHaveProperty('error');
-    expect(error.error).toHaveProperty('code', 'UNAUTHENTICATED');
-    expect(error.error).toHaveProperty('message');
+    const error = parseErrorEnvelope(await response.json());
+    expect(error.error.code).toBe('UNAUTHENTICATED');
   });
 
   test('should return consistent error envelope for order not found', async ({ authedBuyer }) => {
     const response = await authedBuyer.get('orders/NONEXISTENT-123');
     expect(response.status()).toBe(404);
-    const error = await response.json();
-    expect(error).toHaveProperty('error');
-    expect(error.error).toHaveProperty('code', 'ORDER_NOT_FOUND');
-    expect(error.error).toHaveProperty('message');
+    const error = parseErrorEnvelope(await response.json());
+    expect(error.error.code).toBe('ORDER_NOT_FOUND');
   });
 });

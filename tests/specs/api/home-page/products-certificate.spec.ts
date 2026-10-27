@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Certificate } from '@src/types/certificate';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Home Page API -- GET /api/v1/products/:id/certificate', () => {
   test('should return certificate for product owned by seller1', async ({ api }) => {
@@ -19,6 +20,7 @@ test.describe('Home Page API -- GET /api/v1/products/:id/certificate', () => {
     const response = await api.get(`products/${productId}/certificate`);
     expect(response.status()).toBe(404);
     const data = await response.json();
+    parseErrorEnvelope(data);
     expect(data.error).toMatchObject({
       code: 'CERTIFICATE_NOT_FOUND',
       message: expect.stringContaining('certificate'),
@@ -29,6 +31,7 @@ test.describe('Home Page API -- GET /api/v1/products/:id/certificate', () => {
     const response = await api.get('products/9999999999/certificate');
     expect(response.status()).toBe(404);
     const data = await response.json();
+    parseErrorEnvelope(data);
     expect(data.error.code).toBe('CERTIFICATE_NOT_FOUND');
   });
 });
