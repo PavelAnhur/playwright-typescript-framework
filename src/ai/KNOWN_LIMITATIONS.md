@@ -121,6 +121,16 @@ Missing capabilities that a production harness would have.
 - **Priority:** high.
 - **Recorded:** 2026-10-27, commit `caa65e81`.
 
+### judge review lane: four-question split, and the costs accepted
+
+- **Where:** `scripts/judge.sh`, `scripts/judge.mjs`
+- **What:** the review lane was one prompt with six questions and one model call. It now makes four calls, one per question, and assembles the answers into a four-section review. Two questions were dropped: "will it typecheck" (the gate's `tsc` already checks this; an LLM reading text cannot out-check the compiler) and "is there a claim in the commit message / PR body the code does not support" (unanswerable in worktree mode, where no commit exists, so it always returned UNVERIFIED).
+- **Why:** under `deepseek-v4-flash` the single-call design failed repeatedly — two 120s timeouts and one non-conforming 1327-char response, while a 791-line prompt succeeded the same session. Decomposing the review into per-question calls shortens each reasoning path.
+- **Accepted costs:** (a) the guard is weaker — `REQUIRED_MARKERS` is four, not six, and `MIN_REVIEW_LENGTH` is 350; a four-section review is easier to satisfy than a six-section one. This was a deliberate decision, not a side effect. (b) the per-section model call timeout is 300s, below the ~600s reasoning-model floor documented for `deepseek-v4-flash`; a long-thinking section may still time out. (c) one non-conforming section aborts the whole review with no file written, even if the other three are valid — the judge itself named this in its review. A partial-sections fix is a follow-up.
+- **Fix:** landed in this PR. Each section must carry a verdict label (`CONFIRMED-BY-READING` / `UNVERIFIED` / `DISPROVEN`) and be ≥20 chars; the assembled review must carry all four headings and be ≥100 chars.
+- **Priority:** high.
+- **Recorded:** 2026-10-27.
+
 ## Inconsistencies
 
 Places where similar tasks are handled differently.

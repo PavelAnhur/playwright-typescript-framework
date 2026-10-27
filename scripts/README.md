@@ -13,7 +13,7 @@ whether it is run by hand, and what its header comment says it does.
 | flow.sh         | yes          | Gate first, then Judge review of the worktree vs HEAD (staged and unstaged changes).                                                                                                                                                   |
 | gate-watch.sh   | yes          | Wait for a GitHub run to finish, then report PASS/FAIL.                                                                                                                                                                                |
 | judge.mjs       | no           | Chat-completions client for the judge step; prompt file arg. Called by judge.sh.                                                                                                                                                       |
-| judge.sh        | yes          | Build a review prompt from the REAL diff and send it to the judge model.                                                                                                                                                               |
+| judge.sh        | yes          | Build four per-question prompts, call judge.mjs once per question with --section, validate each section, and assemble the four answers into one review.                                                                                |
 | land-task.sh    | yes          | Chain commit -> push -> PR -> merge with streamed output, ASCII step markers, and state checks. Lands a single commit by default; with repeatable --commit "<intent>" / --paths "<pathspec>" pairs it lands several commits in one PR. |
 | open-pr.sh      | yes          | Push the current branch and open a PR for committed changes.                                                                                                                                                                           |
 | start-task.sh   | yes          | Start a task branch from main or continue an existing task branch.                                                                                                                                                                     |
@@ -62,6 +62,8 @@ usage: `./scripts/gate-watch.sh [run-id] [timeout-seconds]`
 usage: `./scripts/judge.sh` # working tree vs HEAD (incl. staged)
 usage: `./scripts/judge.sh --staged` # staged only
 usage: `./scripts/judge.sh --range A..B` # commit range
+
+- Note: makes four per-question calls (--section) and assembles the four answers into a single review with headings ## 1. through ## 4.
 
 ### land-task.sh
 
