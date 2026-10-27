@@ -195,7 +195,11 @@ Do not claim tests pass. Do not propose edits. If the question cannot be answere
 from the files, say UNVERIFIED rather than inferring.
 Return only the labelled answer — no XML tags, no wrapper elements.'
 
+# A section that cannot be used no longer aborts the run: it is recorded as a
+# placeholder and the failure flag is set, so the other sections are not lost.
+# The review is still written; the non-zero exit at the end makes the run red.
 SECTIONS=()
+FAILED=0
 i=0
 for q in "$Q1" "$Q2" "$Q3" "$Q4"; do
   i=$((i + 1))
@@ -208,23 +212,30 @@ for q in "$Q1" "$Q2" "$Q3" "$Q4"; do
   if [ "$RC" -ne 0 ]; then
     printf 'judge: section %s call failed (exit %s)\n' "$i" "$RC" >&2
     if [ -s "$EF" ]; then cat "$EF" >&2; fi
-    exit "$RC"
+    FAILED=1
+    SECTIONS+=("UNVERIFIED — section failed validation (call failed)")
+    continue
   fi
   if [ ! -s "$EF" ]; then rm -f "$EF"; fi
   # Per-section check: the answer must be non-empty and at least 20 chars
-  # after trimming, and must carry one of the required verdict labels. A blank,
-  # stub, or unlabeled answer means the section is unusable, so stop before
-  # assembling or writing anything.
+  # after trimming, and must carry one of the required verdict labels. This is
+  # now a backstop behind the validation in judge.mjs and should rarely fire.
+  # A blank, stub, or unlabeled answer means the section is unusable: record a
+  # placeholder naming the reason and keep going so the other sections survive.
   TRIMMED="$(printf '%s' "$OUT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
   if [ "${#TRIMMED}" -lt 20 ]; then
-    printf 'judge: section %s output is empty or too short (%s chars after trim); no review file written\n' "$i" "${#TRIMMED}" >&2
-    exit 1
+    printf 'judge: section %s output is empty or too short (%s chars after trim)\n' "$i" "${#TRIMMED}" >&2
+    FAILED=1
+    SECTIONS+=("UNVERIFIED — section failed validation (too short)")
+    continue
   fi
   case "$TRIMMED" in
     *CONFIRMED-BY-READING*|*UNVERIFIED*|*DISPROVEN*) ;;
     *)
-      printf 'judge: section %s output is missing a verdict label (CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN); no review file written\n' "$i" >&2
-      exit 1
+      printf 'judge: section %s output is missing a verdict label (CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN)\n' "$i" >&2
+      FAILED=1
+      SECTIONS+=("UNVERIFIED — section failed validation (missing label)")
+      continue
       ;;
   esac
   SECTIONS+=("$OUT")
@@ -235,7 +246,8 @@ REVIEW_TEXT="$(printf '## 1.\n\n%s\n\n## 2.\n\n%s\n\n## 3.\n\n%s\n\n## 4.\n\n%s\
 
 # Validate the assembled review exactly once, before writing anything. The
 # floor is 100 chars: four sections that each passed the per-section check
-# (>=20 chars each) can never be rejected here.
+# (>=20 chars each) can never be rejected here. A failure here is a structural
+# bug, not a bad section, so it still exits 1 with no review written.
 if [ "${#REVIEW_TEXT}" -lt 100 ]; then
   printf 'judge: assembled review is too short (%s chars); no review file written\n' "${#REVIEW_TEXT}" >&2
   exit 1
@@ -250,6 +262,10 @@ for m in '## 1.' '## 2.' '## 3.' '## 4.'; do
   esac
 done
 
+# The review is written whenever assembly succeeded, even if a section was a
+# placeholder. The exit code carries the failure: a partial review produces a
+# red run but a real artifact.
 printf '%s\n' "$REVIEW_TEXT" > "$REVIEW"
 printf 'judge: review %s\n\n' "$REVIEW"
 printf '%s\n' "$REVIEW_TEXT"
+exit "$FAILED"
