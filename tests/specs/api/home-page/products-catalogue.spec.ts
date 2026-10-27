@@ -2,6 +2,7 @@ import { expect, test } from '@fixtures';
 import type { CsvRow } from '@src/types/csv';
 import type { Product, ProductFields } from '@src/types/product';
 import { productListSchema } from '../schemas/product.schema';
+import { flatErrorEnvelopeSchema } from '../schemas/flat-error-envelope.schema';
 
 test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
   test('should return all products with correct shape - parameterized', async ({
@@ -116,15 +117,21 @@ test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
   test('should handle invalid sort parameter', async ({ api }) => {
     const response = await api.get('products?sort=invalid');
     expect(response.ok()).toBeFalsy();
-    const data = await response.json();
-    expect(data.error).toBe('INVALID_SORT_OPTION');
-    expect(data.message).toContain('Invalid sort option:');
+    const parsed = flatErrorEnvelopeSchema.safeParse(await response.json());
+    if (!parsed.success) {
+      throw new Error(`Invalid flat error envelope: ${JSON.stringify(parsed.error.issues)}`);
+    }
+    expect(parsed.data.error).toBe('INVALID_SORT_OPTION');
+    expect(parsed.data.message).toContain('Invalid sort option:');
   });
 
   test('should handle invalid price filters', async ({ api }) => {
     const response = await api.get('products?minPrice=not-a-number');
     expect(response.status()).toBe(400);
-    const data = await response.json();
-    expect(data.error).toBe('INVALID_MIN_PRICE');
+    const parsed = flatErrorEnvelopeSchema.safeParse(await response.json());
+    if (!parsed.success) {
+      throw new Error(`Invalid flat error envelope: ${JSON.stringify(parsed.error.issues)}`);
+    }
+    expect(parsed.data.error).toBe('INVALID_MIN_PRICE');
   });
 });

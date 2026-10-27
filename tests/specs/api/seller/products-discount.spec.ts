@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Seller API -- Product Discount Management', () => {
   test.describe('PUT /api/v1/products/:id/discount', () => {
@@ -74,6 +75,7 @@ test.describe('Seller API -- Product Discount Management', () => {
       });
       expect(response.status()).toBe(400);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('VALIDATION_ERROR');
     });
 
@@ -100,6 +102,7 @@ test.describe('Seller API -- Product Discount Management', () => {
         });
         expect(response.status()).toBe(400);
         const body = await response.json();
+        parseErrorEnvelope(body);
         expect(body.error.code).toBe('INVALID_DISCOUNT_VALUE');
       }
     });
@@ -120,6 +123,7 @@ test.describe('Seller API -- Product Discount Management', () => {
       });
       expect(response.status()).toBe(403);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('NOT_OWNER');
     });
   });
@@ -155,6 +159,7 @@ test.describe('Seller API -- Product Discount Management', () => {
       const response = await authedSeller2.delete(`products/${productId}/discount`);
       expect(response.status()).toBe(403);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('NOT_OWNER');
     });
 
@@ -162,6 +167,7 @@ test.describe('Seller API -- Product Discount Management', () => {
       const response = await authedBuyer.delete(`products/${productId}/discount`);
       expect(response.status()).toBe(403);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('FORBIDDEN_ROLE');
     });
   });

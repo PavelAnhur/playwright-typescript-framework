@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Seller API -- Edge Cases and Error Handling', () => {
   test('seller cannot create product with missing required fields', async ({ authedSeller1 }) => {
@@ -15,6 +16,7 @@ test.describe('Seller API -- Edge Cases and Error Handling', () => {
       });
       expect(response.status()).toBe(400);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe(error);
     }
   });
@@ -36,6 +38,7 @@ test.describe('Seller API -- Edge Cases and Error Handling', () => {
     });
     expect(response.status()).toBe(400);
     const body = await response.json();
+    parseErrorEnvelope(body);
     expect(body.error.code).toBe('INVALID_STOCK');
   });
 });

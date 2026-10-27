@@ -41,10 +41,19 @@ P4 (defer).
 
 - [~] Add Zod response-schema validation to API tests
   (`api/schemas/*.schema.ts`, `parse`/`safeParse`).
-  Partial: product response schemas were added in
-  `tests/specs/api/schemas/product.schema.ts` and wired into
+  Done: product response schemas (`product.schema.ts`) wired into
   `products-id.spec.ts` and `products-catalogue.spec.ts`; error-envelope
-  schemas and the remaining API specs are not yet covered.
+  schemas added in `error-envelope.schema.ts` (nested `{error:{code,message}}`,
+  `code` a closed enum + `parseErrorEnvelope`) and `flat-error-envelope.schema.ts`
+  (flat `{error:string,message}`), wired into every API spec that asserts an
+  error body (buyer, home-page, seller).
+  Remaining: success-response schemas for the other success bodies
+  (`categories`, `seed-info`, `health`, cart/order success, pagination,
+  seller-get success).
+  Known API inconsistency: Maison emits TWO error-envelope shapes — nested
+  `{error:{code,message}}` on most endpoints and flat `{error:string,message}`
+  on `products?sort=` / `products?minPrice=` — covered by two separate schemas.
+  The nested schema's `code` is a closed enum (fails closed on an unknown code).
 - [x] Replace `as any` in unit tests with `satisfies`/`Partial`/typed mocks;
       tighten `no-explicit-any` from `warn` to `error`. (commit: e31191ee, #89)
 - [ ] Add Playwright browser cache to CI (`actions/cache` on

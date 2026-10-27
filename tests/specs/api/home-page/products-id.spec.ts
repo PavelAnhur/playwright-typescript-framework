@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import { productSchema } from '../schemas/product.schema';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
   test('should return a single product by ID', async ({ api }) => {
@@ -23,6 +24,7 @@ test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
     const response = await api.get('products/99999');
     expect(response.status()).toBe(404);
     const data = await response.json();
+    parseErrorEnvelope(data);
     expect(data.error).toMatchObject({
       code: 'PRODUCT_NOT_FOUND',
       message: 'That product does not exist.',
@@ -33,6 +35,7 @@ test.describe('Hoem Page API -- GET /api/v1/products/:id', () => {
     const response = await api.get('products/invalid');
     expect(response.status()).toBe(404);
     const data = await response.json();
+    parseErrorEnvelope(data);
     expect(data.error.code).toBe('PRODUCT_NOT_FOUND');
   });
 

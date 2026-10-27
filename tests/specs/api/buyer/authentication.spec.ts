@@ -1,4 +1,5 @@
 import { ENV, expect, test, request } from '@fixtures';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 import type { User } from '@src/types/account';
 
 test.describe('Buyer API -- Authentication & Authorization', () => {
@@ -6,6 +7,7 @@ test.describe('Buyer API -- Authentication & Authorization', () => {
     const response = await api.get('cart');
     expect(response.status()).toBe(401);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('UNAUTHENTICATED');
   });
 
@@ -13,6 +15,7 @@ test.describe('Buyer API -- Authentication & Authorization', () => {
     const response = await api.get('orders');
     expect(response.status()).toBe(401);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('UNAUTHENTICATED');
   });
 
@@ -22,6 +25,7 @@ test.describe('Buyer API -- Authentication & Authorization', () => {
     });
     expect(response.status()).toBe(401);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('UNAUTHENTICATED');
   });
 

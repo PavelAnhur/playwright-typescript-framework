@@ -2,6 +2,7 @@ import { expect, test } from '@fixtures';
 import type { Cart } from '@src/types/cart';
 import type { Order } from '@src/types/order';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe.configure({ mode: 'serial' });
 test.describe('Buyer API -- Order Operations', () => {
@@ -76,6 +77,7 @@ test.describe('Buyer API -- Order Operations', () => {
     const response = await authedBuyer.get('orders/NONEXISTENT-123');
     expect(response.status()).toBe(404);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('ORDER_NOT_FOUND');
   });
 
@@ -83,6 +85,7 @@ test.describe('Buyer API -- Order Operations', () => {
     const response = await authedBuyer.post('orders');
     expect(response.status()).toBe(400);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('INVALID_SHIPPING');
   });
 
@@ -94,6 +97,7 @@ test.describe('Buyer API -- Order Operations', () => {
     });
     expect(response.status()).toBe(409);
     const error = await response.json();
+    parseErrorEnvelope(error);
     expect(error.error.code).toBe('INSUFFICIENT_STOCK');
   });
 
