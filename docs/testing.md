@@ -31,6 +31,17 @@ Validate with `safeParse` and surface `error.issues` on failure; do not reduce a
 
 Name inferred types `<X>Response` (`ProductResponse`, `DiscountResponse`) so they do not collide with the types in `src/types/`.
 
+Error envelopes: two shapes are covered. `error-envelope.schema.ts` (nested
+`{error:{code,message}}`) exports the schema, its inferred type, and
+`parseErrorEnvelope`; `code` is a closed enum, so a code not in the enum fails
+closed (a new Maison code is a red test until the enum is updated). The flat
+shape `{error:string,message}` is covered by `flat-error-envelope.schema.ts`
+and used only by `products-catalogue.spec.ts`.
+
+When a spec asserts exact message content (e.g. `.toContain(...)`), keep that
+pin alongside the schema parse — the schema proves `message` is a string, not
+its content.
+
 ## Tooling
 
 The files in `scripts/` are driver tools, not Aider plugins. Two are wired into `.aider.conf.yml`; neither is a plugin:
