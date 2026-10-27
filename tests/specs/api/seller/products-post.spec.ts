@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Seller API -- POST /api/v1/products', () => {
   test('seller can create a new product', async ({ authedSeller1 }) => {
@@ -37,6 +38,7 @@ test.describe('Seller API -- POST /api/v1/products', () => {
       });
       expect(response.status()).toBe(400);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('INVALID_PRICE');
     }
   });
@@ -53,6 +55,7 @@ test.describe('Seller API -- POST /api/v1/products', () => {
     });
     expect(response.status()).toBe(400);
     const body = await response.json();
+    parseErrorEnvelope(body);
     expect(body.error.code).toBe('INVALID_STOCK');
   });
 
@@ -68,6 +71,7 @@ test.describe('Seller API -- POST /api/v1/products', () => {
     });
     expect(response.status()).toBe(403);
     const body = await response.json();
+    parseErrorEnvelope(body);
     expect(body.error.code).toBe('FORBIDDEN_ROLE');
   });
 });

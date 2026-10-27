@@ -1,4 +1,5 @@
 import { ENV, expect, test, request } from '@fixtures';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Seller API -- IDOR and Security Tests', () => {
   let productIds: number[] = [];
@@ -74,36 +75,43 @@ test.describe('Seller API -- IDOR and Security Tests', () => {
       let response = await unauthenticatedContext.get('products/seller/mine');
       expect(response.status()).toBe(401);
       let body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
       // Test POST
       response = await unauthenticatedContext.post('products');
       expect(response.status()).toBe(401);
       body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
       // Test PATCH
       response = await unauthenticatedContext.patch(`products/${productIds[0]}`);
       expect(response.status()).toBe(401);
       body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
       // Test POST image
       response = await unauthenticatedContext.post(`products/${productIds[0]}/images`);
       expect(response.status()).toBe(401);
       body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
       // Test PUT discount
       response = await unauthenticatedContext.put(`products/${productIds[0]}/discount`);
       expect(response.status()).toBe(401);
       body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
       // Test DELETE discount
       response = await unauthenticatedContext.delete(`products/${productIds[0]}/discount`);
       expect(response.status()).toBe(401);
       body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
       // Test POST certificate
       response = await unauthenticatedContext.post(`products/${productIds[0]}/certificate`);
       expect(response.status()).toBe(401);
       body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('UNAUTHENTICATED');
     } finally {
       await unauthenticatedContext.dispose();

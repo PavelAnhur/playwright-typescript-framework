@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Seller API -- GET /api/v1/products/seller/mine', () => {
   test('seller can get their own listings', async ({ authedSeller1 }) => {
@@ -23,6 +24,7 @@ test.describe('Seller API -- GET /api/v1/products/seller/mine', () => {
     const response = await authedBuyer.get('products/seller/mine');
     expect(response.status()).toBe(403);
     const body = await response.json();
+    parseErrorEnvelope(body);
     expect(body.error).toBeDefined();
     expect(body.error.code).toBe('FORBIDDEN_ROLE');
     expect(body.error.message).toContain('seller');
@@ -32,6 +34,7 @@ test.describe('Seller API -- GET /api/v1/products/seller/mine', () => {
     const response = await api.get('products/seller/mine');
     expect(response.status()).toBe(401);
     const body = await response.json();
+    parseErrorEnvelope(body);
     expect(body.error.code).toBe('UNAUTHENTICATED');
   });
 });

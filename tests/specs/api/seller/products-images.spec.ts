@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures';
 import type { Product } from '@src/types/product';
+import { parseErrorEnvelope } from '../schemas/error-envelope.schema';
 
 test.describe('Seller API -- POST /api/v1/products/:id/images', () => {
   test('seller can add image to their product', async ({ createProduct, authedSeller1 }) => {
@@ -36,6 +37,7 @@ test.describe('Seller API -- POST /api/v1/products/:id/images', () => {
     });
     expect(response.status()).toBe(403);
     const body = await response.json();
+    parseErrorEnvelope(body);
     expect(body.error.code).toBe('NOT_OWNER');
   });
 
@@ -58,6 +60,7 @@ test.describe('Seller API -- POST /api/v1/products/:id/images', () => {
       });
       expect(response.status()).toBe(400);
       const body = await response.json();
+      parseErrorEnvelope(body);
       expect(body.error.code).toBe('INVALID_IMAGE');
     }
   });
