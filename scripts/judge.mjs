@@ -88,6 +88,17 @@ if (content.trim()) {
     process.stdout.write(review + '\n');
   } else {
     const missing = REQUIRED_MARKERS.filter(m => !review.includes(m));
+    try {
+      fs.mkdirSync('.judge', { recursive: true });
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      const rejectedPath = '.judge/rejected-' + ts + '.md';
+      fs.writeFileSync(rejectedPath, review + '\n');
+      console.error('judge: rejected content saved to ' + rejectedPath);
+    } catch (err) {
+      console.error(
+        'judge: could not save rejected content: ' + (err && err.message ? err.message : err)
+      );
+    }
     console.error(
       'judge: content is not a review (length ' +
         review.length +

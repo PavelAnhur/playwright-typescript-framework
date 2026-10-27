@@ -16,4 +16,4 @@ echo "flow: gate passed - running the Judge"
 if [ "$#" -gt 0 ]; then
   exec ./scripts/judge.sh "$@"
 fi
-exec ./scripts/judge.sh --staged
+exec ./scripts/judge.sh

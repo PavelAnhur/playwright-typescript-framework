@@ -148,7 +148,8 @@ FILES="$(printf '%s\n' "$NS" | awk -F'\t' '{ if ($1 ~ /^R/) print $3; else if (N
     esac
   done
   printf 'Answer these, narrowly. Label each CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN\n'
-  printf 'and cite line numbers.\n\n'
+  printf 'and cite line numbers. Put each answer under its own heading, exactly\n'
+  printf '"## 1." through "## 6.", one heading before each question, in order.\n\n'
   printf '1. Does the diff do what it claims, and only that? Name any unrelated edit,\n'
   printf '   reformatting, or scope creep.\n'
   printf '2. Will it typecheck? Name any type mismatch visible in the text.\n'
