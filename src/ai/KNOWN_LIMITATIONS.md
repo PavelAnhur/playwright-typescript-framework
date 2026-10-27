@@ -131,6 +131,16 @@ Missing capabilities that a production harness would have.
 - **Priority:** high.
 - **Recorded:** 2026-10-27.
 
+### judge review lane: partial sections now assemble instead of aborting
+
+- **Where:** `scripts/judge.sh`, `scripts/judge.mjs`
+- **What:** previously, one unusable section (a call failure, a short answer, or a missing verdict label) aborted the whole review and wrote nothing. Now each section is validated on its own terms inside `judge.mjs --section` (at least 20 characters and one of `CONFIRMED-BY-READING` / `UNVERIFIED` / `DISPROVEN`), a failing section gets one corrective retry, and if it is still unusable `judge.sh` records a placeholder `UNVERIFIED — section failed validation (<reason>)` for that section and assembles the other three. The review is always written, and `judge.sh` exits non-zero when any section failed.
+- **Why:** the #105 judge itself named this as the most likely failure — a single non-conforming section discarded three valid ones. The placeholder keeps the artifact for diagnosis while the non-zero exit keeps the gate honest.
+- **Accepted costs:** (a) a partial review can look complete at a glance; the placeholder text is the only marker, so a reader must read the section. (b) the retry adds one model call per failed section. (c) `judge.sh` still keeps its own length/label guard as a backstop behind `judge.mjs`; it should rarely fire, and it does not retry.
+- **Fix:** landed in this PR.
+- **Priority:** high.
+- **Recorded:** 2026-10-27.
+
 ## Inconsistencies
 
 Places where similar tasks are handled differently.
