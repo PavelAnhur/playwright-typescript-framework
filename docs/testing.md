@@ -37,7 +37,7 @@ The files in `scripts/` are driver tools, not Aider plugins. Two are wired into 
 
 - `verify.sh` — the single local gate (tsc, vitest, prettier, eslint, `npm ci --dry-run`, `bash -n`, mojibake on changed `.md`). Also wired as Aider's `test-cmd`.
 - `aider-lint.sh` — Aider's `lint-cmd`; prettier `--write` then `--check`, with `--ignore-unknown`.
-- `judge.sh` — builds four prompts, one per review question, calls `judge.mjs` once per question with `--section`, validates each section, and assembles the four answers into one review. Run by the driver.
+- `judge.sh` — builds four prompts, one per review question, calls `judge.mjs` once per question with `--section`, validates each section, and assembles the four answers into one review. A failed section is recorded as UNVERIFIED — section failed validation (<reason>) and the run exits non-zero, but the assembled review is still written. Run by the driver.
 - `judge.mjs` — minimal chat-completions client. Called only by `judge.sh`.
 - `flow.sh` — one command per turn: runs `verify.sh`, stops on failure, then runs `judge.sh` on the worktree vs HEAD (staged and unstaged changes); with `--range` the Judge reviews that commit range instead. Run by the driver.
 - `gate-watch.sh` — polls a GitHub Actions run to terminal state. Run by the driver.

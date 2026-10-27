@@ -71,7 +71,7 @@ Honesty rules:
 - The local gate CANNOT see runtime behavior. New script paths are proven by execution on a throwaway branch.
 - A green check is not acceptance. Read the artifact, not the signal.
 
-Two things are called "judge". The harness judge (above) scores failure-analyst hypotheses and returns JSON. The review Judge (`scripts/judge.sh`, `scripts/judge.mjs`) reviews the worktree vs HEAD (staged and unstaged) and must produce a four-section markdown review; a content-shape guard refuses anything without all four sections and a minimum length. Honest limitation: the Judge lane currently fails closed on the AIAI gateway (timeout / partial output). That is a recorded standing limitation, not a pass.
+Two things are called "judge". The harness judge (above) scores failure-analyst hypotheses and returns JSON. The review Judge (`scripts/judge.sh`, `scripts/judge.mjs`) reviews the worktree vs HEAD (staged and unstaged) and always produces a four-section markdown review: an unusable section is recorded as UNVERIFIED — section failed validation and the run exits non-zero, but the review file is still written. Honest limitation: the Judge lane currently fails closed on the AIAI gateway (timeout / partial output). That is a recorded standing limitation, not a pass.
 
 `scripts/land-task.sh` chains commit -> PR -> merge, streams output, and sets ASCII `[ok]` / `[FAIL]` / `[--]` markers only after state verification. The happy path is proven by smoke test (#95); failure paths are not exercised.
 
