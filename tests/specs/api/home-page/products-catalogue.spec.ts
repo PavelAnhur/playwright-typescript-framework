@@ -1,6 +1,7 @@
 import { expect, test } from '@fixtures';
 import type { CsvRow } from '@src/types/csv';
 import type { Product, ProductFields } from '@src/types/product';
+import { productListSchema } from '../schemas/product.schema';
 
 test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
   test('should return all products with correct shape - parameterized', async ({
@@ -12,13 +13,19 @@ test.describe('Home Page API -- GET /api/v1/products - Catalogue', () => {
     const response = await api.get('products');
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
+    const result = productListSchema.safeParse(data);
+    if (!result.success) {
+      throw new Error(
+        `Product list response failed schema validation: ${JSON.stringify(result.error.issues, null, 2)}`
+      );
+    }
     expect(data).toHaveProperty('products');
     expect(data).toHaveProperty('count');
-    const { products, count } = data;
+    const { products, count } = result.data;
     expect(count).toBe(22);
     expect(products).toHaveLength(22);
     for (const expected of productData) {
-      const product: Product = products.find((p: Product) => p.id === expected.id);
+      const product = products.find(p => p.id === expected.id);
       if (!product) {
         throw new Error(`Product with ID ${expected.id} not found in response`);
       }
