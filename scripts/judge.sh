@@ -5,7 +5,7 @@
 #   ./scripts/judge.sh                 # working tree vs HEAD (incl. staged)
 #   ./scripts/judge.sh --staged        # staged only
 #   ./scripts/judge.sh --range A..B    # commit range
-# Writes .judge/prompt-<ts>.md and .judge/review-<ts>.md
+# Writes .judge/prompt-<ts>-<n>.md and .judge/review-<ts>.md
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 2
 
@@ -19,9 +19,8 @@ esac
 
 TS="$(date +%Y%m%d-%H%M%S)"
 mkdir -p .judge
-PROMPT=".judge/prompt-$TS.md"
+CONTEXT=".judge/context-$TS.md"
 REVIEW=".judge/review-$TS.md"
-ERRLOG=".judge/err-$TS.log"
 FILE_CAP="${JUDGE_FILE_CAP:-400}"
 
 case "$MODE" in
@@ -45,11 +44,9 @@ FILES="$(printf '%s\n' "$NS" | awk -F'\t' '{ if ($1 ~ /^R/) print $3; else if (N
 
 {
   printf 'You are the Reviewer. Inspection only: do not edit, execute, or assume.\n'
-  printf 'Follow the operating rules in src/ai/REVIEWER_OPERATING_RULES.md.\n\n'
   printf 'Repo: %s\n' "$(pwd)"
   printf 'Scope: %s\n\n' "$DESC"
 
-  # Commit message section
   case "$MODE" in
     range)
       printf 'Commit message(s) for the range:\n'
@@ -147,52 +144,112 @@ FILES="$(printf '%s\n' "$NS" | awk -F'\t' '{ if ($1 ~ /^R/) print $3; else if (N
         ;;
     esac
   done
-  printf 'Answer these, narrowly. Label each CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN\n'
-  printf 'and cite line numbers. Put each answer under its own heading, exactly\n'
-  printf '"## 1." through "## 6.", one heading before each question, in order.\n\n'
-  printf '1. Does the diff do what it claims, and only that? Name any unrelated edit,\n'
-  printf '   reformatting, or scope creep.\n'
-  printf '2. Will it typecheck? Name any type mismatch visible in the text.\n'
-  printf '3. Are assertions, testids and selectors still correct, and unchanged where\n'
-  printf '   they should be? Any assertion silently narrowed or weakened?\n'
-  printf '4. Any dead code introduced? Any public API added with no call site? Any helper\n'
-  printf '   duplicating an existing one?\n'
-  printf '5. Is there any claim in the commit message, comment or PR body that the code\n'
-  printf '   does not support?\n'
-  printf '6. What is the single most likely way this change fails? Name the falsifying case.\n\n'
-  printf 'Do not claim tests pass. Do not propose edits. If a question cannot be answered\n'
-  printf 'from the files, say UNVERIFIED rather than inferring.\n\n'
   printf '```diff\n'
   printf '%s\n' "$DIFF"
   printf '```\n'
-} > "$PROMPT"
+} > "$CONTEXT"
 
 printf 'judge: scope %s\n' "$DESC"
 printf 'judge: %s\n' "$STAT"
-printf 'judge: prompt %s\n' "$PROMPT"
+printf 'judge: context %s\n' "$CONTEXT"
 
-# Capture stdout in a variable and stderr in the err file so that neither
-# review-*.md nor err-*.log is left behind unless it has real content. The
-# err file is removed when empty; the review file is written only when the
-# model call succeeded and produced text.
-REVIEW_TEXT="$(node scripts/judge.mjs "$PROMPT" 2>"$ERRLOG")"
-RC=$?
-if [ ! -s "$ERRLOG" ]; then
-  rm -f "$ERRLOG"
-fi
-if [ "$RC" -ne 0 ]; then
-  if [ -s "$ERRLOG" ]; then
-    printf 'judge: model call failed (exit %s); see %s\n' "$RC" "$ERRLOG" >&2
-    cat "$ERRLOG" >&2
-  else
-    printf 'judge: model call failed (exit %s)\n' "$RC" >&2
+# Four questions, one per model call. Each prompt is the shared context plus
+# the question. The typecheck and commit-message questions are intentionally
+# not asked.
+Q1='Answer this question narrowly. Label your answer CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN
+and cite line numbers.
+
+1. Does the diff do what it claims, and only that? Name any unrelated edit,
+   reformatting, or scope creep.
+
+Do not claim tests pass. Do not propose edits. If the question cannot be answered
+from the files, say UNVERIFIED rather than inferring.
+Return only the labelled answer — no XML tags, no wrapper elements.'
+
+Q2='Answer this question narrowly. Label your answer CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN
+and cite line numbers.
+
+2. Are assertions, testids and selectors still correct, and unchanged where
+   they should be? Any assertion silently narrowed or weakened?
+
+Do not claim tests pass. Do not propose edits. If the question cannot be answered
+from the files, say UNVERIFIED rather than inferring.
+Return only the labelled answer — no XML tags, no wrapper elements.'
+
+Q3='Answer this question narrowly. Label your answer CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN
+and cite line numbers.
+
+3. Any dead code introduced? Any public API added with no call site? Any helper
+   duplicating an existing one?
+
+Do not claim tests pass. Do not propose edits. If the question cannot be answered
+from the files, say UNVERIFIED rather than inferring.
+Return only the labelled answer — no XML tags, no wrapper elements.'
+
+Q4='Answer this question narrowly. Label your answer CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN
+and cite line numbers.
+
+4. What is the single most likely way this change fails? Name the falsifying case.
+
+Do not claim tests pass. Do not propose edits. If the question cannot be answered
+from the files, say UNVERIFIED rather than inferring.
+Return only the labelled answer — no XML tags, no wrapper elements.'
+
+SECTIONS=()
+i=0
+for q in "$Q1" "$Q2" "$Q3" "$Q4"; do
+  i=$((i + 1))
+  PF=".judge/prompt-$TS-$i.md"
+  EF=".judge/err-$TS-q$i.log"
+  { cat "$CONTEXT"; printf '\n%s\n' "$q"; } > "$PF"
+  printf 'judge: prompt %s\n' "$PF"
+  OUT="$(node scripts/judge.mjs "$PF" --section 2>"$EF")"
+  RC=$?
+  if [ "$RC" -ne 0 ]; then
+    printf 'judge: section %s call failed (exit %s)\n' "$i" "$RC" >&2
+    if [ -s "$EF" ]; then cat "$EF" >&2; fi
+    exit "$RC"
   fi
-  exit "$RC"
-fi
-if [ -z "$REVIEW_TEXT" ]; then
-  printf 'judge: model call returned no review text; no review file written\n' >&2
+  if [ ! -s "$EF" ]; then rm -f "$EF"; fi
+  # Per-section check: the answer must be non-empty and at least 20 chars
+  # after trimming, and must carry one of the required verdict labels. A blank,
+  # stub, or unlabeled answer means the section is unusable, so stop before
+  # assembling or writing anything.
+  TRIMMED="$(printf '%s' "$OUT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  if [ "${#TRIMMED}" -lt 20 ]; then
+    printf 'judge: section %s output is empty or too short (%s chars after trim); no review file written\n' "$i" "${#TRIMMED}" >&2
+    exit 1
+  fi
+  case "$TRIMMED" in
+    *CONFIRMED-BY-READING*|*UNVERIFIED*|*DISPROVEN*) ;;
+    *)
+      printf 'judge: section %s output is missing a verdict label (CONFIRMED-BY-READING / UNVERIFIED / DISPROVEN); no review file written\n' "$i" >&2
+      exit 1
+      ;;
+  esac
+  SECTIONS+=("$OUT")
+done
+
+REVIEW_TEXT="$(printf '## 1.\n\n%s\n\n## 2.\n\n%s\n\n## 3.\n\n%s\n\n## 4.\n\n%s\n' \
+  "${SECTIONS[0]}" "${SECTIONS[1]}" "${SECTIONS[2]}" "${SECTIONS[3]}")"
+
+# Validate the assembled review exactly once, before writing anything. The
+# floor is 100 chars: four sections that each passed the per-section check
+# (>=20 chars each) can never be rejected here.
+if [ "${#REVIEW_TEXT}" -lt 100 ]; then
+  printf 'judge: assembled review is too short (%s chars); no review file written\n' "${#REVIEW_TEXT}" >&2
   exit 1
 fi
+for m in '## 1.' '## 2.' '## 3.' '## 4.'; do
+  case "$REVIEW_TEXT" in
+    *"$m"*) ;;
+    *)
+      printf 'judge: assembled review is missing heading %s; no review file written\n' "$m" >&2
+      exit 1
+      ;;
+  esac
+done
+
 printf '%s\n' "$REVIEW_TEXT" > "$REVIEW"
 printf 'judge: review %s\n\n' "$REVIEW"
 printf '%s\n' "$REVIEW_TEXT"
