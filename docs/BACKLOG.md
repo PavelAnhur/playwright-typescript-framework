@@ -39,8 +39,12 @@ P4 (defer).
 
 ## P1 — Next
 
-- [ ] Add Zod response-schema validation to API tests
-      (`api/schemas/*.schema.ts`, `parse`/`safeParse`).
+- [~] Add Zod response-schema validation to API tests
+  (`api/schemas/*.schema.ts`, `parse`/`safeParse`).
+  Partial: product response schemas were added in
+  `tests/specs/api/schemas/product.schema.ts` and wired into
+  `products-id.spec.ts` and `products-catalogue.spec.ts`; error-envelope
+  schemas and the remaining API specs are not yet covered.
 - [x] Replace `as any` in unit tests with `satisfies`/`Partial`/typed mocks;
       tighten `no-explicit-any` from `warn` to `error`. (commit: e31191ee, #89)
 - [ ] Add Playwright browser cache to CI (`actions/cache` on
