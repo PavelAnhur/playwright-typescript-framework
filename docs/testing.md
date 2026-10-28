@@ -42,6 +42,14 @@ When a spec asserts exact message content (e.g. `.toContain(...)`), keep that
 pin alongside the schema parse — the schema proves `message` is a string, not
 its content.
 
+## Network mocking
+
+UI specs can mock an API response before navigating, using the network fixture. The call is `network.mock(pattern, body)`, where `pattern` matches the real request URL the app uses — for the catalogue that is the `/api/v1/products` endpoint, optionally with a query string. The `body` must satisfy the corresponding API schema shape.
+
+A spec must assert `network.wasHit(pattern)` so the test proves the mock actually intercepted the request. Without it, the test can silently pass on live backend data and no longer tests what it claims.
+
+Routes are per-page and cleared when the page closes.
+
 ## Tooling
 
 The files in `scripts/` are driver tools, not Aider plugins. Two are wired into `.aider.conf.yml`; neither is a plugin:

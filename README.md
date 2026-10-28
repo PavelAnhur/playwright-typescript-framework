@@ -95,6 +95,7 @@ playwright-typescript-framework/
 │   │   ├── auth.fixture.ts
 │   │   ├── csv.fixture.ts
 │   │   ├── index.ts
+│   │   ├── network.fixture.ts
 │   │   ├── order.fixture.ts
 │   │   ├── pages.fixture.ts
 │   │   └── product.fixture.ts
