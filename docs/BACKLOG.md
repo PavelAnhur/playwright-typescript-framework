@@ -65,8 +65,9 @@ P4 (defer).
       DSH_MODEL, DSH_API_KEY placeholder, COMMIT_MODEL, JUDGE_MODEL, the three
       timeouts); bare `.env` is now gitignored and `.env.example` stays tracked
       (this PR).
-- [ ] Introduce test-data factories (`makeUser(overrides: Partial<User>)`)
+- [x] Introduce test-data factories (`makeUser(overrides: Partial<User>)`)
       instead of static data.
+      Surveyed: every getTestUser call in tests/specs uses the configured user as-is (email and password); no spec needs overrides. The only override-like data is register.spec.ts:31, a new-account password literal, not an override of a test user. A Partial over the two-field email and password type would have no call sites. Revisit when a spec needs a varied or invalid user.
 - [x] `RegisterPage.ts:84`: `datePickerDialog.waitFor({ state: 'visible' })`
       asserts nothing — `.dob-popup { opacity: 0 }` means the element is always
       visible to Playwright. Drop it or assert `aria-hidden='false'`.
