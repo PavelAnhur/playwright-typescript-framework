@@ -102,8 +102,8 @@ export class HomePage extends BasePage {
   }
 
   @Step('Open mobile menu')
-  async openMobileMenu(): Promise<void> {
-    await this.navToggle.click();
+  override async openMobileMenu(): Promise<void> {
+    await super.openMobileMenu();
     await this.expectMobileMenuVisible();
     await this.expectNavToggleAriaExpanded('true');
   }

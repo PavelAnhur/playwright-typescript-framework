@@ -74,9 +74,10 @@ P4 (defer).
 - [ ] `home-page/authenticated-buyer.spec.ts:6`: `currentUser` `toBeVisible()`
       passes on Mobile Chrome while the same assertion failed elsewhere. Find
       out why before changing it; do not "fix" a passing assertion.
-- [ ] Add a non-asserting `openMobileMenu()` to `BasePage`
+- [x] Add a non-asserting `openMobileMenu()` to `BasePage`
       (`HomePage`'s version asserts `navShop`/`navLogin`, so it is not
       reusable from `LoginPage`).
+      Done: `BasePage.openMobileMenu()` is a non-asserting click; `HomePage.openMobileMenu()` overrides it and keeps its assertions; `tests/specs/ui/login-page/mobile-menu.spec.ts` proves reuse from `LoginPage` with assertions in the test.
 - [ ] Playwright projects `firefox`, `webkit`, `Mobile Chrome` have no
       `testDir`; they inherit `./tests/specs` and run `api/` and `review/`
       suites. Decide intended matrix and scope with `testDir`/`testMatch`.
