@@ -105,8 +105,9 @@ P4 (defer).
       Surveyed: no 3+ near-identical data-only test blocks within a single file. Apparent duplicates are cross-file or differ in assertions (e.g. login-page/responsive.spec.ts three viewport tests each assert differently), so not table-driven.
 - [x] Use `satisfies` for test data, config, and mock shapes.
       Surveyed: no applicable sites remain; the surviving as / as unknown as casts are intentional (mock structural types, narrowing), not unchecked shapes. Overlaps the completed line 57 item (#89).
-- [ ] Add `--shuffle` and/or `--repeat-each` run (nightly or scheduled) to
-      surface hidden state dependencies.
+- [~] Add `--shuffle` and/or `--repeat-each` run (nightly or scheduled) to
+  surface hidden state dependencies.
+  Deprioritized by Pavel on 2026-10-28: not planned now; revisit only if hidden state-dependency flakiness appears.
 - [x] Replace the manual `npm start &` + curl loop in CI with `webServer` in
       `playwright.config.ts`.
       Done: added webServer to playwright.config.ts (command npm start, url http://localhost:4000/api/v1/health, reuseExistingServer !isCI, timeout 60s) and removed the Start app and Wait for app to be ready steps from the CI workflow; the server start path is proven by the post-merge CI run.
