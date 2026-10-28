@@ -25,8 +25,8 @@ P4 (defer).
 - [x] Route the remaining chained `.locator(...)` calls in specs through the
       per-card POM surface. `ProductCard` exists and `HomePage` exposes
       `firstCard` (getter) and `cardById(id)`; `ProductCard` gained
-      `saleBadge()`/`soldOutBadge()`. Migrated: the three
-      chained `.locator(...)` calls in `product-card.spec.ts` (two tests), the
+      `saleBadge()`/`soldOutBadge()`. Migrated: the three chained `.locator(...)`
+      calls in `product-card.spec.ts` (two tests), the
       `price-was` test, and `authenticated-buyer.spec.ts:183` (commits: 8accb9ed,
       4276f598).
 - [x] `catalog-toolbar.spec.ts:15` uses
@@ -59,13 +59,18 @@ P4 (defer).
 - [x] Add Playwright browser cache to CI (`actions/cache` on
       `~/.cache/ms-playwright`, key by lockfile hash).
 - [x] Wire `test:all` as a single step in CI (currently three separate steps).
-- [ ] Add `.env.example` (variables only, no secrets) and confirm `.env*`
-      ignored.
+- [x] Add `.env.example` (variables only, no secrets) and confirm `.env*`
+      ignored. The example now documents the 14 variables the code/config reads
+      (Maison URLs, ENV_NAME, TEST_ENV, BROWSER, AIAI_BASE_URL, DSH_BASE_URL,
+      DSH_MODEL, DSH_API_KEY placeholder, COMMIT_MODEL, JUDGE_MODEL, the three
+      timeouts); bare `.env` is now gitignored and `.env.example` stays tracked
+      (this PR).
 - [ ] Introduce test-data factories (`makeUser(overrides: Partial<User>)`)
       instead of static data.
-- [ ] `RegisterPage.ts:84`: `datePickerDialog.waitFor({ state: 'visible' })`
+- [x] `RegisterPage.ts:84`: `datePickerDialog.waitFor({ state: 'visible' })`
       asserts nothing — `.dob-popup { opacity: 0 }` means the element is always
       visible to Playwright. Drop it or assert `aria-hidden='false'`.
+      Removed the no-op wait (commit a40c6d64, #109).
 - [ ] `home-page/authenticated-buyer.spec.ts:6`: `currentUser` `toBeVisible()`
       passes on Mobile Chrome while the same assertion failed elsewhere. Find
       out why before changing it; do not "fix" a passing assertion.
