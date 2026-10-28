@@ -81,7 +81,6 @@ export class RegisterPage extends BasePage {
   async selectDateOfBirth(dob: string): Promise<boolean> {
     const [year, month, day] = dob.split('-').map(Number);
     await this.dobDisplay.click();
-    await this.datePickerDialog.waitFor({ state: 'visible' });
     if (this.dobYearSelect) {
       const timeout = TIMEOUTS.SHORT;
       try {
