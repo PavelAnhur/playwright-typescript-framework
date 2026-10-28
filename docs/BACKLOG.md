@@ -99,7 +99,8 @@ P4 (defer).
 - [ ] Use `expect.poll` / `toPass` where async conditions are currently awaited
       manually.
 - [ ] Use `test.each` for repeated table-driven cases.
-- [ ] Use `satisfies` for test data, config, and mock shapes.
+- [x] Use `satisfies` for test data, config, and mock shapes.
+      Surveyed: no applicable sites remain; the surviving as / as unknown as casts are intentional (mock structural types, narrowing), not unchecked shapes. Overlaps the completed line 57 item (#89).
 - [ ] Add `--shuffle` and/or `--repeat-each` run (nightly or scheduled) to
       surface hidden state dependencies.
 - [ ] Replace the manual `npm start &` + curl loop in CI with `webServer` in
