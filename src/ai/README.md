@@ -30,7 +30,11 @@ One-time setup:
     npm install
     cp .env.example .env.local
 
-Then edit .env.local and fill in DSH_BASE_URL, DSH_MODEL, DSH_API_KEY.
+The `DSH_API_KEY` value in `.env.example` is a placeholder — replace it with a real key, or omit it entirely to disable AI triage.
+
+Then edit .env.local and fill in DSH_BASE_URL, DSH_MODEL, DSH_API_KEY, plus AIAI_BASE_URL (used by scripts/commit-msg.mjs and scripts/judge.mjs). COMMIT_MODEL and JUDGE_MODEL select the models for those driver scripts.
+
+DSH_MODEL is the app-side AI client model; COMMIT_MODEL and JUDGE_MODEL are the driver-script models. This split is intentional.
 
 Run the CLI pipeline:
 
