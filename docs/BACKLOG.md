@@ -135,9 +135,10 @@ P4 (defer).
 - [x] Split shared fragments (header, nav, modal, cookie banner) into component
       objects taking `root: Locator`.
       Surveyed: no locator is defined in more than one page object. Header, nav, and cookie locators are already centralized in BasePage; ProductCard is already a scoped component. Nothing to extract without duplicating what exists.
-- [ ] Modal component object taking `root: Locator` — build when a seller POM exists.
+- [x] Modal component object taking `root: Locator` — build when a seller POM exists.
       The app has three modals (data-testid modal-price, modal-stock, modal-discount-*)
       with no POM coverage today.
+      Done: src/pages/components/Modal.ts (root: Locator, save, cancel, isOpen), src/pages/SellerPage.ts (listingRow by product id, openPriceModal, listingPrice), proof spec tests/specs/ui/seller-page/price-modal.spec.ts; sellerHomePage now yields SellerPage. Price modal proven by execution.
 - [ ] `ProductCard` uses CSS selectors for `category`/`media`/`image`
       (`.card__cat`, `.card__media`, `.card__media img`). Parked: the app
       exposes no `data-testid` for these elements (`maison/web/src/app.ts:218-225`);
