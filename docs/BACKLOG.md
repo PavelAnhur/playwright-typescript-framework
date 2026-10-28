@@ -94,8 +94,9 @@ P4 (defer).
 
 - [ ] Add hybrid tests (API seed → UI verify → API post-condition) for
       checkout/order flows.
-- [ ] Add network interception for UI tests: `page.route` for API mocks,
+- [x] Add network interception for UI tests: `page.route` for API mocks,
       `context.route` to block analytics.
+      Done: added a generic network fixture (src/fixtures/network.fixture.ts) exposing network.mock(pattern, body, opts) over page.route, composed into the merged test; proven by tests/specs/ui/home-page/network-mock.spec.ts. The analytics half is not applicable: the framework loads no analytics to block.
 - [ ] Use `expect.poll` / `toPass` where async conditions are currently awaited
       manually.
 - [ ] Use `test.each` for repeated table-driven cases.
