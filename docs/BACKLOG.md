@@ -78,9 +78,10 @@ P4 (defer).
       (`HomePage`'s version asserts `navShop`/`navLogin`, so it is not
       reusable from `LoginPage`).
       Done: `BasePage.openMobileMenu()` is a non-asserting click; `HomePage.openMobileMenu()` overrides it and keeps its assertions; `tests/specs/ui/login-page/mobile-menu.spec.ts` proves reuse from `LoginPage` with assertions in the test.
-- [ ] Playwright projects `firefox`, `webkit`, `Mobile Chrome` have no
+- [x] Playwright projects `firefox`, `webkit`, `Mobile Chrome` have no
       `testDir`; they inherit `./tests/specs` and run `api/` and `review/`
       suites. Decide intended matrix and scope with `testDir`/`testMatch`.
+      Done: added `testDir: './tests/specs/ui'` to firefox, webkit, and Mobile Chrome; collected tests per browser project dropped from 179 to 92 (UI only).
 
 ## P2 — Worth doing
 
