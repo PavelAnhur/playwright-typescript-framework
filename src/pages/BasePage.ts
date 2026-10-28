@@ -189,6 +189,10 @@ export abstract class BasePage {
     await this.page.waitForURL(/#\/login/);
   }
 
+  async openMobileMenu(): Promise<void> {
+    await this.navToggle.click();
+  }
+
   @Step('Assert URL contains "{0}"')
   async expectUrlToContain(path: string): Promise<void> {
     await expect(this.page).toHaveURL(new RegExp(path));
