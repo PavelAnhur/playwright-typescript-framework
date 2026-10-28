@@ -1,6 +1,7 @@
 import { getTestUser } from '@config/env';
 import { HomePage } from '@pages/HomePage';
 import { LoginPage } from '@pages/LoginPage';
+import { SellerPage } from '@pages/SellerPage';
 import { test as base, type Browser } from '@playwright/test';
 import type { Account } from '@src/types/account';
 import type { StorageState } from '@src/types/storage-state';
@@ -10,7 +11,7 @@ import path from 'path';
 
 export interface AuthBrowserFixtures {
   buyerHomePage: HomePage;
-  sellerHomePage: HomePage;
+  sellerHomePage: SellerPage;
 }
 
 const buyer = getTestUser('buyer');
@@ -51,9 +52,9 @@ export const test = base.extend<AuthBrowserFixtures>({
       storageState: SELLER_STORAGE,
     });
     const page = await context.newPage();
-    const homePage = new HomePage(page);
-    await homePage.open();
-    await use(homePage);
+    const sellerPage = new SellerPage(page);
+    await sellerPage.open();
+    await use(sellerPage);
     await context.close();
   },
 });
@@ -105,26 +106,26 @@ async function createStorageState(
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
   });
-  const page = await context.newPage();
   try {
+    const page = await context.newPage();
     const loginPage = new LoginPage(page);
     await loginPage.open();
     await loginPage.login(account.email, account.password);
     await loginPage.waitForLoginSuccess();
-    const homePage = new HomePage(page);
-    await homePage.waitForLoad();
-    const isLoggedIn = await homePage.isUserLoggedIn();
+    await page.getByTestId('current-user').waitFor({ state: 'attached' });
+    const isLoggedIn = await new HomePage(page).isUserLoggedIn();
     if (!isLoggedIn) {
       throw new Error(`Login verification failed for ${account.email}`);
     }
     await context.storageState({ path: storagePath });
     console.log(`✅ Storage state created for ${account.email} at ${storagePath}`);
-    await page.close();
-  } catch (error) {
-    await context.close();
-    throw new Error(`Failed to create storage state for ${account.email}: `, { cause: error });
+  } finally {
+    try {
+      await context.close();
+    } catch (closeError) {
+      console.warn(`⚠️ Failed to close context for ${account.email}:`, { cause: closeError });
+    }
   }
-  await context.close();
 }
 
 function ensureStorageDir(): void {
