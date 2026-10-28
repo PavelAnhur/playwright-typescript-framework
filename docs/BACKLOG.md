@@ -132,8 +132,12 @@ P4 (defer).
 
 - [ ] Add sharding (`--shard`) + `blob` reporter + `merge-reports` for the UI
       suite.
-- [ ] Split shared fragments (header, nav, modal, cookie banner) into component
+- [x] Split shared fragments (header, nav, modal, cookie banner) into component
       objects taking `root: Locator`.
+      Surveyed: no locator is defined in more than one page object. Header, nav, and cookie locators are already centralized in BasePage; ProductCard is already a scoped component. Nothing to extract without duplicating what exists.
+- [ ] Modal component object taking `root: Locator` — build when a seller POM exists.
+      The app has three modals (data-testid modal-price, modal-stock, modal-discount-*)
+      with no POM coverage today.
 - [ ] `ProductCard` uses CSS selectors for `category`/`media`/`image`
       (`.card__cat`, `.card__media`, `.card__media img`). Parked: the app
       exposes no `data-testid` for these elements (`maison/web/src/app.ts:218-225`);
