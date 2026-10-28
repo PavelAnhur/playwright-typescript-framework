@@ -36,6 +36,12 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
+  webServer: {
+    command: 'npm start',
+    url: 'http://localhost:4000/api/v1/health',
+    reuseExistingServer: !ENV.isCI,
+    timeout: 60_000,
+  },
   projects: [
     {
       name: 'ui',

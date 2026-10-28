@@ -83,19 +83,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start app
-        run: npm start &
-
-      - name: Wait for app to be ready
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:4000/api/v1/health > /dev/null; then
-              echo "App is up (attempt $i)"; exit 0
-            fi
-            echo "  attempt $i/30 — retrying in 1s"; sleep 1
-          done
-          echo "App never came up after 30s"; exit 1
-
       - name: Run all tests
         run: npm run test:all
 
