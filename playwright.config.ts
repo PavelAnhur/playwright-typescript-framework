@@ -53,14 +53,17 @@ export default defineConfig({
     },
     {
       name: 'firefox',
+      testDir: './tests/specs/ui',
       use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
+      testDir: './tests/specs/ui',
       use: { ...devices['Desktop Safari'] },
     },
     {
       name: 'Mobile Chrome',
+      testDir: './tests/specs/ui',
       use: { ...devices['Pixel 7a'] },
     },
   ],
