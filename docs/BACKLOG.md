@@ -56,9 +56,9 @@ P4 (defer).
   The nested schema's `code` is a closed enum (fails closed on an unknown code).
 - [x] Replace `as any` in unit tests with `satisfies`/`Partial`/typed mocks;
       tighten `no-explicit-any` from `warn` to `error`. (commit: e31191ee, #89)
-- [ ] Add Playwright browser cache to CI (`actions/cache` on
+- [x] Add Playwright browser cache to CI (`actions/cache` on
       `~/.cache/ms-playwright`, key by lockfile hash).
-- [ ] Wire `test:all` as a single step in CI (currently three separate steps).
+- [x] Wire `test:all` as a single step in CI (currently three separate steps).
 - [ ] Add `.env.example` (variables only, no secrets) and confirm `.env*`
       ignored.
 - [ ] Introduce test-data factories (`makeUser(overrides: Partial<User>)`)
