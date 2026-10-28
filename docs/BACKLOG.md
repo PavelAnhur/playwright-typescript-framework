@@ -71,9 +71,10 @@ P4 (defer).
       asserts nothing — `.dob-popup { opacity: 0 }` means the element is always
       visible to Playwright. Drop it or assert `aria-hidden='false'`.
       Removed the no-op wait (commit a40c6d64, #109).
-- [ ] `home-page/authenticated-buyer.spec.ts:6`: `currentUser` `toBeVisible()`
+- [x] `home-page/authenticated-buyer.spec.ts:6`: `currentUser` `toBeVisible()`
       passes on Mobile Chrome while the same assertion failed elsewhere. Find
       out why before changing it; do not "fix" a passing assertion.
+      Investigated: ran authenticated-buyer.spec.ts 10x under ui and 10x under Mobile Chrome, all 20 passed; not reproducible on the current tree. Line 6 is the only toBeVisible on currentUser while the POM asserts toBeAttached instead (LoginPage.ts:98, RegisterPage.ts:123), and the element is conditionally rendered (Maison app.ts:149), so the assertion is a latent race even though it passes today. Left unchanged per do not fix a passing assertion; if it recurs, capture the failing project and run id.
 - [x] Add a non-asserting `openMobileMenu()` to `BasePage`
       (`HomePage`'s version asserts `navShop`/`navLogin`, so it is not
       reusable from `LoginPage`).
