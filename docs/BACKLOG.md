@@ -98,9 +98,11 @@ P4 (defer).
 - [x] Add network interception for UI tests: `page.route` for API mocks,
       `context.route` to block analytics.
       Done: added a generic network fixture (src/fixtures/network.fixture.ts) exposing network.mock(pattern, body, opts) over page.route, composed into the merged test; proven by tests/specs/ui/home-page/network-mock.spec.ts. The analytics half is not applicable: the framework loads no analytics to block.
-- [ ] Use `expect.poll` / `toPass` where async conditions are currently awaited
+- [x] Use `expect.poll` / `toPass` where async conditions are currently awaited
       manually.
-- [ ] Use `test.each` for repeated table-driven cases.
+      Surveyed: no waitForFunction, while loop, toPass, expect.poll, or waitForTimeout exists in tests/specs or src/pages. The waitForTimeout purge already covered this; not applicable.
+- [x] Use `test.each` for repeated table-driven cases.
+      Surveyed: no 3+ near-identical data-only test blocks within a single file. Apparent duplicates are cross-file or differ in assertions (e.g. login-page/responsive.spec.ts three viewport tests each assert differently), so not table-driven.
 - [x] Use `satisfies` for test data, config, and mock shapes.
       Surveyed: no applicable sites remain; the surviving as / as unknown as casts are intentional (mock structural types, narrowing), not unchecked shapes. Overlaps the completed line 57 item (#89).
 - [ ] Add `--shuffle` and/or `--repeat-each` run (nightly or scheduled) to
