@@ -103,8 +103,9 @@ P4 (defer).
       Surveyed: no applicable sites remain; the surviving as / as unknown as casts are intentional (mock structural types, narrowing), not unchecked shapes. Overlaps the completed line 57 item (#89).
 - [ ] Add `--shuffle` and/or `--repeat-each` run (nightly or scheduled) to
       surface hidden state dependencies.
-- [ ] Replace the manual `npm start &` + curl loop in CI with `webServer` in
+- [x] Replace the manual `npm start &` + curl loop in CI with `webServer` in
       `playwright.config.ts`.
+      Done: added webServer to playwright.config.ts (command npm start, url http://localhost:4000/api/v1/health, reuseExistingServer !isCI, timeout 60s) and removed the Start app and Wait for app to be ready steps from the CI workflow; the server start path is proven by the post-merge CI run.
 - [x] Audit the npm dependency tree and clear reachable advisories. Fixed:
       zod `4.6.5` -> `4.6.6` (GHSA-mrhx-c7xc-m3w5, high, commit `fc5028f6`).
       Method: `npm audit` plus reachability, not `audit fix`.
