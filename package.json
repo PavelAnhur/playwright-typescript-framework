@@ -17,6 +17,7 @@
     "test:unit:run": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "test:all": "npm run test:unit:run && npm run test:api && npm run test:ui",
+    "test:orchestrator": "bash scripts/orchestrator-run.sh",
     "start": "node maison/server/dist/index.js",
     "start:dev": "cd maison/server && npm start",
     "build:server": "cd maison/server && npm run build",
